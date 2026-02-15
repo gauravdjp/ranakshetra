@@ -1,11 +1,13 @@
 #include <iostream>
 #include <string>
-int greet(string name){
-	std::cout<<"hello sir, "<< name << endl;
+using namespace std;
+void greet(string name)
+{
+	cout<<"hello sir, "<< name << endl;
 }
 
 int main(){
-	std::cout << "hello world!!" << endl;
+	cout << "hello world!!" << endl;
 	greet("odis");
 	return 0;
 }
