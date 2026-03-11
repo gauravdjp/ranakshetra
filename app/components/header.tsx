@@ -4,10 +4,9 @@ import NavLink from "./NavLink";
 import MobileMenu from "./Mobilemenu";
 
 const NAV_LINKS = [
-  { label: "Arena", href: "/arena" },
-  { label: "Warriors", href: "/warriors" },
+  { label: "Tournaments", href: "/tournaments" },
   { label: "Leaderboard", href: "/leaderboard" },
-  { label: "Chronicle", href: "/chronicle" },
+  { label: "Clubs", href: "/club" },
 ];
 
 export default function Header() {
@@ -101,7 +100,7 @@ export default function Header() {
       <header
         className="
           rk-header
-          fixed top-0 left-0 right-0 z-100
+          fixed top-5 left-0 right-0 z-100
           border-b border-transparent
           font-[Rajdhani,sans-serif]
         "
@@ -151,7 +150,7 @@ export default function Header() {
               <span
                 className="
                   font-[Cinzel,serif] text-[1.35rem] font-black tracking-[0.08em] uppercase
-                  bg-linear-to-br from-[#e8c96e] via-[#c9a84c] to-[#a07830]
+                  bg-gradient-to-br from-[#e8c96e] via-[#c9a84c] to-[#a07830]
                   bg-clip-text text-transparent
                 "
               >
@@ -210,7 +209,7 @@ export default function Header() {
                   px-[1.3rem] py-0.5rem
                   font-bold text-[0.88rem] tracking-[0.12em] uppercase
                   text-[#0a0806]
-                  bg-linear-to-br from-[#e8c96e] to-[#c9a84c]
+                  bg-gradient-to-br from-[#e8c96e] to-[#c9a84c]
                   hover:shadow-[0_0_20px_rgba(201,168,76,0.4)] hover:-translate-y-px
                   transition-all duration-300 no-underline
                 "
