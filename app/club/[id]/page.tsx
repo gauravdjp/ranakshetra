@@ -53,8 +53,8 @@ interface Club {
 ───────────────────────────────────────────────────────────── */
 const CLUBS: Record<string, Club> = {
   "c001": {
-    id: "c001", name: "Mystic Phoenix", tag: "MPX", game: "BGMI",
-    region: "South India", city: "Bangalore", founded: "2024", leader: "ShadowX",
+    id: "c001", name: "XIE CLUB", tag: "MPX", game: "Valorant",
+    region: "Central India", city: "Mumbai", founded: "2024", leader: "Odis",
     wins: 12, tournaments: 28, rank: "Semi-Pro", status: "recruiting",
     bio: "South India's most feared BGMI squad. Born from the ranked trenches of Bangalore, MPX has climbed from Amateur to Semi-Pro in under a year. We play disciplined, we play smart — and when it matters, we play to win.",
     achievements: ["RK South India Open — 1st Place", "BGMI Regional Qualifiers — Top 4", "City Cup Champion 2024", "12 Tournament Wins"],
