@@ -240,8 +240,8 @@ function ClubPanel({ club, index, onApply }: {
             <span className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.2em] uppercase px-1.5 py-0.5 border flex-shrink-0"
               style={{
                 color: RANK_COLOR[club.rank] ?? "#8b5cf6",
-                borderColor: `${RANK_COLOR[club.rank]}44` ?? "rgba(139,92,246,0.3)",
-                background: `${RANK_COLOR[club.rank]}11` ?? "rgba(139,92,246,0.06)",
+                borderColor: `${RANK_COLOR[club.rank] ?? "#8b5cf6"}44`,
+                background: `${RANK_COLOR[club.rank] ?? "#8b5cf6"}11`,
                 clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)"
               }}>
               {club.rank}
