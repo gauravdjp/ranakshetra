@@ -25,8 +25,8 @@ export default function NavLink({ href, label }: NavLinkProps) {
         font-semibold text-[0.95rem] tracking-widest uppercase
         no-underline transition-colors duration-300
         ${isActive
-          ? "text-[#c9a84c]"               // gold when on this page
-          : "text-white/55 hover:text-[#e8c96e]"  // dim white → gold on hover
+          ? "text-[#a78bfa]"               // violet when on this page
+          : "text-white/55 hover:text-[#a78bfa]"  // dim white → violet on hover
         }
       `}
     >
