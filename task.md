@@ -4,4 +4,4 @@
 4 create types(database modules)
 5 create the all routes
 6 component designs (overall website)
-7 start developing landing page
+7 start developing landing page  -- done
