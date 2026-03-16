@@ -6,9 +6,11 @@
 6 component designs (overall website) 
 7 start developing landing page  -- done
 8 tournament page   will change the exisiting tournament page   will use the idea of something command shell like 
-9 club page
+9 club page --done
 10 organiser page
 11 player page
 12 need to add brackets
+13 (main) folder setup
+
 
 

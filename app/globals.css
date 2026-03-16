@@ -3,6 +3,8 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-cinzel: "Cinzel", serif;
+  --font-rajdhani: "Rajdhani", sans-serif;
 }
 
 @theme inline {
@@ -23,4 +25,281 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ── HERO ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── CHAKRA ANIMATIONS */
+@keyframes chakraSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes chakraSpinReverse {
+  to { transform: rotate(-360deg); }
+}
+@keyframes glowPulse {
+  0%, 100% { filter: drop-shadow(0 0 12px rgba(139,92,246,0.5)); }
+  50%       { filter: drop-shadow(0 0 32px rgba(139,92,246,0.9)); }
+}
+
+/* ── BACKGROUND */
+@keyframes gridFade {
+  from { opacity: 0; }
+  to   { opacity: 0.04; }
+}
+
+/* ── PILLAR CARD ANIMATIONS */
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scrollPulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1; }
+}
+
+/* ── MARQUEE */
+@keyframes marqueeLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes marqueeRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+.marquee-track-left {
+  display: flex;
+  width: max-content;
+  animation: marqueeLeft 40s linear infinite;
+}
+.marquee-track-right {
+  display: flex;
+  width: max-content;
+  animation: marqueeRight 32s linear infinite;
+}
+.marquee-wrap:hover .marquee-track-left,
+.marquee-wrap:hover .marquee-track-right {
+  animation-play-state: paused;
+}
+.marquee-fade {
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+.game-tag:hover {
+  color: #a78bfa;
+  border-color: rgba(139,92,246,0.7);
+  background: rgba(139,92,246,0.08);
+  box-shadow: 0 0 14px rgba(139,92,246,0.25), inset 0 0 10px rgba(139,92,246,0.05);
+  text-shadow: 0 0 8px rgba(139,92,246,0.5);
+}
+
+/* ── BRACKET ANIMATIONS */
+@keyframes bracketReveal {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes connectorDraw {
+  from { stroke-dashoffset: 600; }
+  to   { stroke-dashoffset: 0; }
+}
+@keyframes championReveal {
+  0%   { opacity: 0; transform: scale(0.92); }
+  70%  { transform: scale(1.03); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes championGlow {
+  0%, 100% { box-shadow: 0 0 24px rgba(139,92,246,0.4), 0 0 48px rgba(139,92,246,0.1); }
+  50%       { box-shadow: 0 0 50px rgba(139,92,246,0.8), 0 0 96px rgba(139,92,246,0.25); }
+}
+.b-slot {
+  animation: bracketReveal 0.35s ease forwards;
+  animation-play-state: paused;
+  opacity: 0;
+}
+.bracket-active .b-slot { animation-play-state: running; }
+.b-conn-line {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: connectorDraw 0.5s ease forwards;
+  animation-play-state: paused;
+}
+.bracket-active .b-conn-line { animation-play-state: running; }
+.b-champion {
+  animation: championReveal 0.7s ease forwards;
+  animation-play-state: paused;
+  opacity: 0;
+}
+.bracket-active .b-champion { animation-play-state: running; }
+.b-champion-glow {
+  animation: championGlow 2.5s ease-in-out infinite;
+  animation-play-state: paused;
+}
+.bracket-active .b-champion-glow { animation-play-state: running; }
+
+/* ── ANIMATION UTILITY CLASSES */
+.anim-fade-up-1 { animation: fadeUp 1s ease forwards; animation-delay: 0.2s; opacity: 0; }
+.anim-fade-up-2 { animation: fadeUp 1s ease forwards; animation-delay: 0.4s; opacity: 0; }
+.anim-fade-up-3 { animation: fadeUp 1s ease forwards; animation-delay: 0.6s; opacity: 0; }
+.anim-fade-up-4 { animation: fadeUp 1s ease forwards; animation-delay: 0.8s; opacity: 0; }
+.anim-fade-in-5 { animation: fadeIn 1s ease forwards; animation-delay: 1.2s; opacity: 0; }
+.anim-slide-left  { animation: slideLeft  0.8s ease forwards; animation-delay: 0.3s; opacity: 0; }
+.anim-slide-right { animation: slideRight 0.8s ease forwards; animation-delay: 0.5s; opacity: 0; }
+.anim-slide-up    { animation: slideUp    0.8s ease forwards; animation-delay: 0.7s; opacity: 0; }
+.anim-grid  { animation: gridFade 2s ease forwards; }
+.anim-glow  { animation: glowPulse 3s ease-in-out infinite; }
+.anim-scroll { animation: scrollPulse 1.5s ease infinite; }
+
+/* ── CHAKRA SVG GROUP ANIMATIONS */
+.chakra-spokes {
+  animation: chakraSpin 20s linear infinite;
+  transform-origin: 50% 50%;
+}
+.chakra-outer {
+  animation: chakraSpinReverse 15s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+/* ── PSEUDO-ELEMENTS */
+.section-line::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
+}
+.section-line-bright::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 10%; right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+}
+.card-corners::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  border-top: 2px solid var(--primary);
+  border-left: 2px solid var(--primary);
+  transition: all 0.4s ease;
+}
+.card-corners::after {
+  content: '';
+  position: absolute;
+  bottom: 0; right: 0;
+  width: 36px; height: 36px;
+  border-bottom: 2px solid var(--primary);
+  border-right: 2px solid var(--primary);
+  transition: all 0.4s ease;
+}
+.card-corners:hover::before,
+.card-corners:hover::after {
+  width: 56px; height: 56px;
+}
+.stat-divider:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 20%; bottom: 20%;
+  width: 1px;
+  background: rgba(139,92,246,0.15);
+}
+
+/* ══════════════════════════════════════════════════════
+  TOURNAMENT TYPES SECTION ANIMATIONS
+  Cards fan in from opposite sides when scrolled into view.
+  TourneyReveal component adds .tourney-active to trigger them.
+══════════════════════════════════════════════════════ */
+
+/* Icon gently floats up/down when card is hovered */
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* Left card slides in from left with a slight tilt */
+@keyframes tourneyFanLeft {
+  from { opacity: 0; transform: translateX(-30px) rotate(-2deg); }
+  to   { opacity: 1; transform: translateX(0) rotate(0deg); }
+}
+
+/* Center card rises up from below */
+@keyframes tourneyFanCenter {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Right card slides in from right with a slight tilt */
+@keyframes tourneyFanRight {
+  from { opacity: 0; transform: translateX(30px) rotate(2deg); }
+  to   { opacity: 1; transform: translateX(0) rotate(0deg); }
+}
+
+/* "Most Popular" badge bounces in last for drama */
+@keyframes badgePop {
+  0%   { transform: scale(0.8); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+/* Light beam sweeps down the card on hover */
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(100%); }
+}
+
+/* Cards start paused — TourneyReveal adds .tourney-active on scroll */
+.t-card-left   { animation: tourneyFanLeft   0.6s ease forwards; animation-play-state: paused; opacity: 0; }
+.t-card-center { animation: tourneyFanCenter 0.6s ease forwards; animation-play-state: paused; opacity: 0; }
+.t-card-right  { animation: tourneyFanRight  0.6s ease forwards; animation-play-state: paused; opacity: 0; }
+
+/* Staggered delays: left first, then center, then right */
+.tourney-active .t-card-left   { animation-play-state: running; animation-delay: 0.1s; }
+.tourney-active .t-card-center { animation-play-state: running; animation-delay: 0.3s; }
+.tourney-active .t-card-right  { animation-play-state: running; animation-delay: 0.5s; }
+
+/* Badge pops in after all 3 cards have appeared */
+.t-badge { animation: badgePop 0.4s ease forwards; animation-play-state: paused; opacity: 0; }
+.tourney-active .t-badge { animation-play-state: running; animation-delay: 0.9s; }
+
+/* Icon floats continuously while card is hovered */
+.t-card:hover .t-icon { animation: iconFloat 2s ease-in-out infinite; }
+
+/* Scanline: a light sheen sweeps over the card on hover.
+  Uses ::after pseudo-element — positioned absolutely inside the card. */
+.t-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60%;
+  background: linear-gradient(180deg, rgba(139,92,246,0.04) 0%, transparent 100%);
+  transform: translateY(-100%);
+  pointer-events: none;
+}
+.t-card:hover::after {
+  animation: scanline 0.7s ease forwards;
+}
+
+/* Featured card (Public) has a brighter border by default */
+.t-card-featured {
+  border-color: rgba(139,92,246,0.55) !important;
+  background: rgba(139,92,246,0.06) !important;
+}
+.t-card-featured:hover {
+  border-color: rgba(139,92,246,0.9) !important;
+  box-shadow: 0 0 60px rgba(139,92,246,0.25), 0 24px 60px rgba(0,0,0,0.5) !important;
 }

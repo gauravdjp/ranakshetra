@@ -1,296 +1,8 @@
 import Link from "next/link";
-import BracketReveal from "./components/BracketReveal";
-import TourneyReveal from "./components/Tourneyreveal";
+import ScrollReveal from "./components/ScrollReveal";
 export default function Home() {
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap');
-
-        /* ── DESIGN TOKENS */
-        :root {
-          --primary: #8b5cf6;
-          --primary-light: #a78bfa;
-        }
-
-        /* ── HERO ANIMATIONS */
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(32px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to   { opacity: 1; }
-        }
-
-        /* ── CHAKRA ANIMATIONS */
-        @keyframes chakraSpin {
-          to { transform: rotate(360deg); }
-        }
-        @keyframes chakraSpinReverse {
-          to { transform: rotate(-360deg); }
-        }
-        @keyframes glowPulse {
-          0%, 100% { filter: drop-shadow(0 0 12px rgba(139,92,246,0.5)); }
-          50%       { filter: drop-shadow(0 0 32px rgba(139,92,246,0.9)); }
-        }
-
-        /* ── BACKGROUND */
-        @keyframes gridFade {
-          from { opacity: 0; }
-          to   { opacity: 0.04; }
-        }
-
-        /* ── PILLAR CARD ANIMATIONS */
-        @keyframes slideLeft {
-          from { opacity: 0; transform: translateX(-40px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideRight {
-          from { opacity: 0; transform: translateX(40px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(40px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes scrollPulse {
-          0%, 100% { opacity: 0.4; }
-          50%       { opacity: 1; }
-        }
-
-        /* ── MARQUEE */
-        @keyframes marqueeLeft {
-          from { transform: translateX(0); }
-          to   { transform: translateX(-50%); }
-        }
-        @keyframes marqueeRight {
-          from { transform: translateX(-50%); }
-          to   { transform: translateX(0); }
-        }
-        .marquee-track-left {
-          display: flex;
-          width: max-content;
-          animation: marqueeLeft 40s linear infinite;
-        }
-        .marquee-track-right {
-          display: flex;
-          width: max-content;
-          animation: marqueeRight 32s linear infinite;
-        }
-        .marquee-wrap:hover .marquee-track-left,
-        .marquee-wrap:hover .marquee-track-right {
-          animation-play-state: paused;
-        }
-        .marquee-fade {
-          -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
-          mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
-        }
-        .game-tag:hover {
-          color: #a78bfa;
-          border-color: rgba(139,92,246,0.7);
-          background: rgba(139,92,246,0.08);
-          box-shadow: 0 0 14px rgba(139,92,246,0.25), inset 0 0 10px rgba(139,92,246,0.05);
-          text-shadow: 0 0 8px rgba(139,92,246,0.5);
-        }
-
-        /* ── BRACKET ANIMATIONS */
-        @keyframes bracketReveal {
-          from { opacity: 0; transform: translateX(-8px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes connectorDraw {
-          from { stroke-dashoffset: 600; }
-          to   { stroke-dashoffset: 0; }
-        }
-        @keyframes championReveal {
-          0%   { opacity: 0; transform: scale(0.92); }
-          70%  { transform: scale(1.03); }
-          100% { opacity: 1; transform: scale(1); }
-        }
-        @keyframes championGlow {
-          0%, 100% { box-shadow: 0 0 24px rgba(139,92,246,0.4), 0 0 48px rgba(139,92,246,0.1); }
-          50%       { box-shadow: 0 0 50px rgba(139,92,246,0.8), 0 0 96px rgba(139,92,246,0.25); }
-        }
-        .b-slot {
-          animation: bracketReveal 0.35s ease forwards;
-          animation-play-state: paused;
-          opacity: 0;
-        }
-        .bracket-active .b-slot { animation-play-state: running; }
-        .b-conn-line {
-          stroke-dasharray: 600;
-          stroke-dashoffset: 600;
-          animation: connectorDraw 0.5s ease forwards;
-          animation-play-state: paused;
-        }
-        .bracket-active .b-conn-line { animation-play-state: running; }
-        .b-champion {
-          animation: championReveal 0.7s ease forwards;
-          animation-play-state: paused;
-          opacity: 0;
-        }
-        .bracket-active .b-champion { animation-play-state: running; }
-        .b-champion-glow {
-          animation: championGlow 2.5s ease-in-out infinite;
-          animation-play-state: paused;
-        }
-        .bracket-active .b-champion-glow { animation-play-state: running; }
-
-        /* ── ANIMATION UTILITY CLASSES */
-        .anim-fade-up-1 { animation: fadeUp 1s ease forwards; animation-delay: 0.2s; opacity: 0; }
-        .anim-fade-up-2 { animation: fadeUp 1s ease forwards; animation-delay: 0.4s; opacity: 0; }
-        .anim-fade-up-3 { animation: fadeUp 1s ease forwards; animation-delay: 0.6s; opacity: 0; }
-        .anim-fade-up-4 { animation: fadeUp 1s ease forwards; animation-delay: 0.8s; opacity: 0; }
-        .anim-fade-in-5 { animation: fadeIn 1s ease forwards; animation-delay: 1.2s; opacity: 0; }
-        .anim-slide-left  { animation: slideLeft  0.8s ease forwards; animation-delay: 0.3s; opacity: 0; }
-        .anim-slide-right { animation: slideRight 0.8s ease forwards; animation-delay: 0.5s; opacity: 0; }
-        .anim-slide-up    { animation: slideUp    0.8s ease forwards; animation-delay: 0.7s; opacity: 0; }
-        .anim-grid  { animation: gridFade 2s ease forwards; }
-        .anim-glow  { animation: glowPulse 3s ease-in-out infinite; }
-        .anim-scroll { animation: scrollPulse 1.5s ease infinite; }
-
-        /* ── CHAKRA SVG GROUP ANIMATIONS */
-        .chakra-spokes {
-          animation: chakraSpin 20s linear infinite;
-          transform-origin: 50% 50%;
-        }
-        .chakra-outer {
-          animation: chakraSpinReverse 15s linear infinite;
-          transform-origin: 50% 50%;
-        }
-
-        /* ── PSEUDO-ELEMENTS */
-        .section-line::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 10%; right: 10%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(139,92,246,0.3), transparent);
-        }
-        .section-line-bright::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 10%; right: 10%;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, var(--primary), transparent);
-        }
-        .card-corners::before {
-          content: '';
-          position: absolute;
-          top: 0; left: 0;
-          width: 36px; height: 36px;
-          border-top: 2px solid var(--primary);
-          border-left: 2px solid var(--primary);
-          transition: all 0.4s ease;
-        }
-        .card-corners::after {
-          content: '';
-          position: absolute;
-          bottom: 0; right: 0;
-          width: 36px; height: 36px;
-          border-bottom: 2px solid var(--primary);
-          border-right: 2px solid var(--primary);
-          transition: all 0.4s ease;
-        }
-        .card-corners:hover::before,
-        .card-corners:hover::after {
-          width: 56px; height: 56px;
-        }
-        .stat-divider:not(:last-child)::after {
-          content: '';
-          position: absolute;
-          right: 0; top: 20%; bottom: 20%;
-          width: 1px;
-          background: rgba(139,92,246,0.15);
-        }
-
-        /* ══════════════════════════════════════════════════════
-           TOURNAMENT TYPES SECTION ANIMATIONS
-           Cards fan in from opposite sides when scrolled into view.
-           TourneyReveal component adds .tourney-active to trigger them.
-        ══════════════════════════════════════════════════════ */
-
-        /* Icon gently floats up/down when card is hovered */
-        @keyframes iconFloat {
-          0%, 100% { transform: translateY(0px); }
-          50%       { transform: translateY(-4px); }
-        }
-
-        /* Left card slides in from left with a slight tilt */
-        @keyframes tourneyFanLeft {
-          from { opacity: 0; transform: translateX(-30px) rotate(-2deg); }
-          to   { opacity: 1; transform: translateX(0) rotate(0deg); }
-        }
-
-        /* Center card rises up from below */
-        @keyframes tourneyFanCenter {
-          from { opacity: 0; transform: translateY(20px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* Right card slides in from right with a slight tilt */
-        @keyframes tourneyFanRight {
-          from { opacity: 0; transform: translateX(30px) rotate(2deg); }
-          to   { opacity: 1; transform: translateX(0) rotate(0deg); }
-        }
-
-        /* "Most Popular" badge bounces in last for drama */
-        @keyframes badgePop {
-          0%   { transform: scale(0.8); opacity: 0; }
-          60%  { transform: scale(1.1); }
-          100% { transform: scale(1);   opacity: 1; }
-        }
-
-        /* Light beam sweeps down the card on hover */
-        @keyframes scanline {
-          from { transform: translateY(-100%); }
-          to   { transform: translateY(100%); }
-        }
-
-        /* Cards start paused — TourneyReveal adds .tourney-active on scroll */
-        .t-card-left   { animation: tourneyFanLeft   0.6s ease forwards; animation-play-state: paused; opacity: 0; }
-        .t-card-center { animation: tourneyFanCenter 0.6s ease forwards; animation-play-state: paused; opacity: 0; }
-        .t-card-right  { animation: tourneyFanRight  0.6s ease forwards; animation-play-state: paused; opacity: 0; }
-
-        /* Staggered delays: left first, then center, then right */
-        .tourney-active .t-card-left   { animation-play-state: running; animation-delay: 0.1s; }
-        .tourney-active .t-card-center { animation-play-state: running; animation-delay: 0.3s; }
-        .tourney-active .t-card-right  { animation-play-state: running; animation-delay: 0.5s; }
-
-        /* Badge pops in after all 3 cards have appeared */
-        .t-badge { animation: badgePop 0.4s ease forwards; animation-play-state: paused; opacity: 0; }
-        .tourney-active .t-badge { animation-play-state: running; animation-delay: 0.9s; }
-
-        /* Icon floats continuously while card is hovered */
-        .t-card:hover .t-icon { animation: iconFloat 2s ease-in-out infinite; }
-
-        /* Scanline: a light sheen sweeps over the card on hover.
-           Uses ::after pseudo-element — positioned absolutely inside the card. */
-        .t-card::after {
-          content: '';
-          position: absolute;
-          top: 0; left: 0; right: 0;
-          height: 60%;
-          background: linear-gradient(180deg, rgba(139,92,246,0.04) 0%, transparent 100%);
-          transform: translateY(-100%);
-          pointer-events: none;
-        }
-        .t-card:hover::after {
-          animation: scanline 0.7s ease forwards;
-        }
-
-        /* Featured card (Public) has a brighter border by default */
-        .t-card-featured {
-          border-color: rgba(139,92,246,0.55) !important;
-          background: rgba(139,92,246,0.06) !important;
-        }
-        .t-card-featured:hover {
-          border-color: rgba(139,92,246,0.9) !important;
-          box-shadow: 0 0 60px rgba(139,92,246,0.25), 0 24px 60px rgba(0,0,0,0.5) !important;
-        }
-      `}</style>
-
       {/* ══════════════════════════════════════════════════════
           SECTION 1 — HERO
       ══════════════════════════════════════════════════════ */}
@@ -392,7 +104,7 @@ export default function Home() {
         {/* Chakra emblem */}
         <div className="flex flex-col items-center mb-5">
           <div className="anim-glow w-[100px] h-[100px] md:w-[120px] md:h-[120px]">
-            <svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+            <svg viewBox="0 0 180 180" fill="none" className="w-full h-full">
               <g className="chakra-outer">
                 <circle cx="90" cy="90" r="86" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="4 6" opacity="0.4" />
                 <circle cx="90" cy="90" r="78" stroke="#8b5cf6" strokeWidth="0.3" strokeDasharray="2 8" opacity="0.3" />
@@ -559,16 +271,14 @@ export default function Home() {
         }} />
 
         <div className="text-center mb-14 px-8">
-          <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-3">Ranking System</p>
           <h2 className="font-[Cinzel,serif] font-bold text-white tracking-[0.05em]" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)" }}>
             Rise Through{" "}
-            <span style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>the Ranks</span>
+            <span style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>the Brackets</span>
           </h2>
-          <p className="font-[Rajdhani,sans-serif] text-[0.9rem] text-white/35 mt-3">Club · City · State · Country · Continent · Global</p>
         </div>
 
         <div className="overflow-x-auto">
-          <BracketReveal>
+          <ScrollReveal activeClass="bracket-active" className="relative mx-auto" style={{ width: "1060px", height: "460px" }}>
             <svg className="absolute inset-0" width="1000" height="460" viewBox="0 0 1000 460" fill="none" style={{ zIndex: 0 }}>
               <polyline className="b-conn-line" points="235,50 270,50 270,72 305,72" stroke="#8b5cf6" strokeWidth="1.5" opacity="0.9" style={{ animationDelay: "1.0s" }} />
               <polyline className="b-conn-line" points="235,94 270,94 270,72" stroke="rgba(139,92,246,0.35)" strokeWidth="1" opacity="0.6" style={{ animationDelay: "1.1s" }} />
@@ -588,50 +298,50 @@ export default function Home() {
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] opacity-70" style={{ left: "75px", top: "8px" }}>Club / College</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.5)] bg-[rgba(139,92,246,0.06)]" style={{ left:"75px",top:"32px",width:"160px",height:"36px",animationDelay:"0.2s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-[#8b5cf6] opacity-50 w-3">1</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate">MYSTIC FC</span>
+              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-[#8b5cf6] opacity-50 w-3">1</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate">TEAM A</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"76px",width:"160px",height:"36px",animationDelay:"0.3s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">8</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">NOVA GUILD</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">8</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM B</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"140px",width:"160px",height:"36px",animationDelay:"0.4s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">4</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">PIXEL CREW</span>
+              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">4</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM C</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"184px",width:"160px",height:"36px",animationDelay:"0.5s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">5</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">BYTE FORCE</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">5</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM D</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"248px",width:"160px",height:"36px",animationDelay:"0.6s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">3</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">STORM UNIT</span>
+              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">3</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM E</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"292px",width:"160px",height:"36px",animationDelay:"0.7s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">6</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">WIRED FC</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">6</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM F</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"356px",width:"160px",height:"36px",animationDelay:"0.8s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">2</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">APEX SQUAD</span>
+              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">2</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM G</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"75px",top:"400px",width:"160px",height:"36px",animationDelay:"0.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">7</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">ZERO HOUR</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/20 w-3">7</span><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM H</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] opacity-70" style={{ left:"305px",top:"8px" }}>City Level</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.5)] bg-[rgba(139,92,246,0.06)]" style={{ left:"305px",top:"54px",width:"160px",height:"36px",animationDelay:"1.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">BANGALORE</span><span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase text-[#8b5cf6] pr-2 opacity-70">↑</span>
+              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase text-[#8b5cf6] pr-2 opacity-70">↑</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"305px",top:"162px",width:"160px",height:"36px",animationDelay:"2.0s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">MUMBAI</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM C</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"305px",top:"270px",width:"160px",height:"36px",animationDelay:"2.1s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate ml-1">DELHI</span>
+              <div className="w-0.5 h-full bg-[rgba(139,92,246,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate ml-1">TEAM E</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"305px",top:"378px",width:"160px",height:"36px",animationDelay:"2.2s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">HYDERABAD</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM G</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] opacity-70" style={{ left:"535px",top:"8px" }}>National</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.5)] bg-[rgba(139,92,246,0.07)]" style={{ left:"535px",top:"108px",width:"160px",height:"36px",animationDelay:"2.8s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">SOUTH INDIA</span><span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase text-[#8b5cf6] pr-2 opacity-70">↑</span>
+              <div className="w-0.5 h-full bg-[#8b5cf6] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase text-[#8b5cf6] pr-2 opacity-70">↑</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(139,92,246,0.15)] bg-[rgba(255,255,255,0.02)]" style={{ left:"535px",top:"324px",width:"160px",height:"36px",animationDelay:"2.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">NORTH INDIA</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM E</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] opacity-70" style={{ left:"780px",top:"8px" }}>Global Rank</p>
@@ -644,29 +354,13 @@ export default function Home() {
                 </svg>
                 <span className="font-[Cinzel,serif] font-black text-[0.95rem] tracking-[0.12em] uppercase leading-none"
                   style={{ background:"linear-gradient(135deg, #a78bfa, #8b5cf6, #06b6d4)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
-                  INDIA #1
+                  TEAM A #1
                 </span>
-                <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.3em] uppercase text-[#8b5cf6] opacity-60 mt-0.5">◇ GLOBAL RANK ◇</span>
               </div>
             </div>
 
-          </BracketReveal>
+          </ScrollReveal>
         </div>
-
-        <div className="flex items-center justify-center gap-0 mt-10 px-8 flex-wrap">
-          {["CLUB","CITY","STATE","COUNTRY","CONTINENT","GLOBAL"].map((tier, i, arr) => (
-            <div key={tier} className="flex items-center">
-              <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.25em] uppercase"
-                style={{ color: i === arr.length - 1 ? "#a78bfa" : "rgba(255,255,255,0.2)" }}>
-                {tier}
-              </span>
-              {i < arr.length - 1 && <span className="mx-2 text-[0.6rem] text-[rgba(139,92,246,0.3)]">→</span>}
-            </div>
-          ))}
-        </div>
-        <p className="text-center font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-white/12 mt-3 px-8">
-          Scroll to see the bracket animate
-        </p>
 
       </section>
 
@@ -720,7 +414,7 @@ export default function Home() {
 
         {/* TourneyReveal adds .tourney-active when section scrolls into view,
             which starts the CSS fan-in animations on the 3 cards */}
-        <TourneyReveal>
+        <ScrollReveal activeClass="tourney-active" threshold={0.2}>
           <div className="max-w-[1100px] mx-auto px-8 grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch">
 
             {/* ── PUBLIC TOURNAMENT CARD
@@ -837,7 +531,7 @@ export default function Home() {
             </div>
 
           </div>
-        </TourneyReveal>
+        </ScrollReveal>
 
         {/* Bottom stat row — 3 quick numbers that reinforce the section message.
             stat-divider adds a faint vertical line between each item via ::after. */}

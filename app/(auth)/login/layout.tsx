@@ -1,7 +1,4 @@
-import type { Metadata } from "next";
 import { Cinzel, Rajdhani } from "next/font/google";
-import "./globals.css";
-import Header from "./components/header";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -17,12 +14,7 @@ const rajdhani = Rajdhani({
   weight : ["300", "400","500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "Ranakshetra",
-  description: "The Eternal Battlefield",
-};
-
-export default function RootLayout({
+export default function LoginLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -32,11 +24,7 @@ export default function RootLayout({
       <body
         className={`${cinzel.variable} ${rajdhani.variable} antialiased`}
       >
-        <Header />
-        <main className = "pt-72px">
-          {children}
-        </main>
-        
+        {children}
       </body>
     </html>
   );

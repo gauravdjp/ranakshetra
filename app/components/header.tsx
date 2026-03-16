@@ -1,4 +1,3 @@
-// Pure Server Component — no "use client", no hooks
 import Link from "next/link";
 import NavLink from "./NavLink";
 import MobileMenu from "./Mobilemenu";
