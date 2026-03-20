@@ -1,6 +1,18 @@
-export interface Admin{
+export interface Organiser{
     username : string;
     password : string;
-    role : 'admin';
-    createdAt : Date;
+    email : string;
+    arena_name : string;
+    country : string;
+    region : string;
+    role : 'organiser';
+    created_at : Date;
 }
+
+export interface participant{}
+
+export interface club{}
+
+export interface tournament{}
+
+
