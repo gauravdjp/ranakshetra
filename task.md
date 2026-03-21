@@ -1,16 +1,25 @@
-1 make nextjs project (ini)   --done
-2 create mongodb -- done
-3 connect mongo <-> nextjs web  --done
-4 create types(database modules)
-5 create the all routes
-6 component designs (overall website) 
-7 start developing landing page  -- done
-8 tournament page   will change the exisiting tournament page   will use the idea of something command shell like 
-9 club page --done
-10 organiser page
-11 player page
-12 need to add brackets
-13 (main) folder setup
+//initial work done
+part 1 -- we did everything in rush due to submission of project progress report
+Landing page --done
+tournament basic page --done
+club basic page --done
+basic signup and login page  --done
+[things will be changed]
+
+//development of project started
+part 2  deadline - [25 march]
+building an optimal structure (routing)
+complete database setup
+complete the login and signup pages and connection of database with respective pages
+we will update the landing page (in ui){
+    showing ranking system as stairs level ups from college/city to global
+}
+check for efficient use of components and remove unwanted components
+initialize the bracket system to the project
+
+
+
+
 
 
 
