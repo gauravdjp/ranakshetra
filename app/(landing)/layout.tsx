@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Rajdhani } from "next/font/google";
 import "./globals.css";
-import Header from "./components/header";
+import Header from "../../components/header";
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",

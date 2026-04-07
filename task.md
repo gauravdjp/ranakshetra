@@ -7,8 +7,8 @@ basic signup and login page  --done
 [things will be changed]
 
 //development of project started
-part 2  deadline - [25 march]
-building an optimal structure (routing)
+part 2
+building an optimal structure (routing)  --done
 complete database setup
 complete the login and signup pages and connection of database with respective pages
 we will update the landing page (in ui){
