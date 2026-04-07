@@ -69,3 +69,13 @@ export type Club_Roles = {
 export type Match = {
 
 }
+
+export enum games{
+    BGMI = "BGMI",
+    CODM = "CODM",
+    FREEFIRE = "FREEFIRE",  
+    VALORANT = "VALORANT",
+    LEAGUE_OF_LEGENDS = "LEAGUE_OF_LEGENDS",
+    DOTA2 = "DOTA2",
+    CS_GO = "CS_GO",
+}
