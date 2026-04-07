@@ -28,8 +28,44 @@ export type Organiser = Basic_Info & {
     arena_location : string,
     arena_description? : string,
     arena_image? : string,
-    is_verified : boolean,
-  
+    readonly is_verified : boolean, 
 }
 
+export type Player = Basic_Info & {
 
+}
+
+export type Club = {
+
+}
+
+export enum Tournament_Types{
+    SOLO = "solo",
+    TEAM = "team",
+    SQUAD = "squad",
+    DUO = "duo",
+    SINGLE_ELIMINATION = "single_elimination",
+    DOUBLE_ELIMINATION = "double_elimination",
+    ROUND_ROBIN = "round_robin",
+    SWISS_SYSTEM = "swiss_system",
+
+}
+export type Tournament = {
+
+}
+
+export type Arena = {
+
+}
+
+export type Arena_Roles = {
+
+}
+
+export type Club_Roles = {
+
+}
+
+export type Match = {
+
+}
