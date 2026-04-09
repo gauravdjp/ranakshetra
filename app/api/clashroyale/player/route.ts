@@ -1,0 +1,18 @@
+// app/api/clashroyale/player/route.ts
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(req: NextRequest) {
+  const tag = req.nextUrl.searchParams.get("tag");
+  if (!tag) return NextResponse.json({ error: "Tag required" }, { status: 400 });
+
+  const encodedTag = encodeURIComponent(tag);
+
+  const res = await fetch(`https://proxy.royaleapi.dev/v1/players/${encodedTag}`, {
+    headers: {
+      Authorization: `Bearer ${process.env.CLASH_ROYALE_API_KEY}`,
+    },
+  });
+
+  const data = await res.json();
+  return NextResponse.json(data, { status: res.status });
+}
