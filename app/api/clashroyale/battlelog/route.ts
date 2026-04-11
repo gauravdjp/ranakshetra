@@ -1,6 +1,6 @@
 // app/api/clashroyale/battlelog/route.ts
 import { NextRequest, NextResponse } from "next/server";
-
+import { parseBattleResult } from "./parsebattlelog";
 export async function GET(req: NextRequest) {
   const tag = req.nextUrl.searchParams.get("tag");
   if (!tag) return NextResponse.json({ error: "Tag required" }, { status: 400 });
@@ -14,5 +14,6 @@ export async function GET(req: NextRequest) {
   });
 
   const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
+  const parsedData = data.map(parseBattleResult);
+  return NextResponse.json(parsedData, { status: res.status });
 }
