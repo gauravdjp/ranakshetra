@@ -33,6 +33,15 @@ export enum Access_Level_ADMIN_Role{
 /*--------------------------------------------------------*/
 
 
+export type User = {
+    username : string,
+    email : string,
+    password : string,
+    role : Access_Level_USER_Role,
+}
+/*--------------------------------------------------------*/
+
+
 //organisers types and enums
 
 export type Organiser = Basic_Info & {
@@ -90,8 +99,42 @@ export enum Tournament_Types{
 
 }
 export type Tournament = {
+   
+    _id?: string;
+    title: string;
+    organizer_id: string;
+ 
+    start_date: Date;
+    end_date: Date;
+    registration_deadline: Date;
+    created_at: Date;
+    updated_at: Date;
 
-}
+    prize_pool: number;
+    entry_fee: number;
+    participants_limit: number;
+    registered_teams?: number;
+    registered_players?: number;
+
+    single_player: boolean;
+    team_based: boolean;
+    tournament_type: Tournament_Types;
+    region: string;
+    game_id: string;
+
+    status: 'draft' | 'upcoming' | 'registration_open' | 'ongoing' | 'completed' | 'cancelled';
+    visibility: 'public' | 'private';
+    brackets_generated: boolean;
+    results_declared: boolean;
+    progress: number; 
+
+    description?: string;
+    banner_url?: string;
+    sponsors?: string[];
+    participants_profile?: In_Game_Details[];
+    
+    format_rules: string;
+};
 
 export type Match = {
 
@@ -124,5 +167,29 @@ export type In_Game_Details = {
     level? : number,
 }
 
+export type ClashRoyaleDetails = In_Game_Details & {
+    player_tag: string;
+    player_name: string;
+    exp_level: number;
+
+    best_trophies: number;
+    current_trophies: number;
+    arena: string;
+
+    wins: number;
+    losses: number;
+    draws: number;
+    three_crown_wins: number;
+    challenge_max_wins?: number;
+    war_day_wins?: number;
+
+    clan_name?: string;
+    clan_tag?: string;
+    clan_role?: 'leader' | 'co_leader' | 'elder' | 'member';
+    total_donations: number;
+    
+    favorite_card?: string;
+    current_deck?: string[]; 
+};
 
 /*--------------------------------------------------------*/

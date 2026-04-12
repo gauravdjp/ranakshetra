@@ -90,7 +90,7 @@ export default function SignUpPage() {
 
   const onDetailsSubmit: SubmitHandler<Player> = async (data) => {
     console.log("Player Details:", data);
-    const finalPost = {...basicdata, ...data} as Player;
+    const finalPost=  {...basicdata, ...data, role : role} as Player;
     const response = await fetch("/api/auth/signup", {
       method: "POST",
       headers: {

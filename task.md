@@ -26,6 +26,10 @@ adding encrytion and hashing for password
 add clashroyale api and test it --done
 
 
+we are done with the login and whole auth setup, working perfectly
+now just need to manage role permissions we will do it later
+add profile icons to navigate login and log out easily
+handle guest
 
 
 

@@ -1,6 +1,8 @@
+"use client";
 import Link from "next/link";
 import NavLink from "./NavLink";
 import MobileMenu from "./Mobilemenu";
+import { signOut } from "next-auth/react";
 
 const NAV_LINKS = [
   { label: "Tournaments", href: "/tournaments" },
@@ -186,7 +188,7 @@ export default function Header() {
             <div className="hidden md:flex items-center gap-3 shrink-0">
               {/* Ghost button — transparent with angled clip-path corners */}
               <Link
-                href="/login"
+                href="/login" 
                 className="
                   px-[1.1rem] py-[0.45rem]
                   font-semibold text-[0.88rem] tracking-0.1em uppercase
@@ -199,6 +201,12 @@ export default function Header() {
               >
                 Login
               </Link>
+
+              <button className="cursor-pointer px-[1.1rem] py-[0.45rem] font-semibold text-[0.88rem] tracking-0.1em uppercase text-[#a78bfa] bg-transparent border border-[rgba(139,92,246,0.3)] hover:bg-[rgba(139,92,246,0.08)] hover:border-[#8b5cf6] hover:text-[#c4b5fd] transition-all duration-300 no-underline"
+              style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
+              onClick={() => signOut({ callbackUrl: "/" })}>
+                Logout
+              </button>
 
               {/* Primary button — solid gold with shimmer on hover */}
               <Link

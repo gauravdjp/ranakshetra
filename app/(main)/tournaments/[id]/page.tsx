@@ -2,6 +2,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import Bracket from "@/components/bracket"
+import Xarrow from "react-xarrows";
+
 
 /* ─────────────────────────────────────────────────────────────
    MOCK DATA — same shape as tournaments/page.tsx
@@ -453,53 +456,111 @@ function ParticipantsTab({ t }: { t: Tournament }) {
    BRACKETS TAB — placeholder
 ───────────────────────────────────────────────────────────── */
 function BracketsTab({ t }: { t: Tournament }) {
+  const CARD_W = 220;
+  const COL_GAP = 140;
+  const COL_W = CARD_W + COL_GAP;
+  const SLOT_H = 150;
+
+  const getPos = (round: number, index: number) => {
+    const x = round * COL_W;
+    const slotH = SLOT_H * Math.pow(2, round);
+    const y = index * slotH + (slotH / 2 - 95 / 2);
+    return { x, y };
+  };
+
+  const rounds = ["Quarter Finals", "Semi Finals", "Final"];
+
+  const matches: Array<{ round: number; index: number }> = [
+    { round: 0, index: 0 },
+    { round: 0, index: 1 },
+    { round: 0, index: 2 },
+    { round: 0, index: 3 },
+    { round: 1, index: 0 },
+    { round: 1, index: 1 },
+    { round: 2, index: 0 },
+  ];
+
+  const connections: Array<{ from: string; to: string }> = [
+    { from: "i-r0m0", to: "i-r1m0" },
+    { from: "i-r0m1", to: "i-r1m0" },
+    { from: "i-r0m2", to: "i-r1m1" },
+    { from: "i-r0m3", to: "i-r1m1" },
+    { from: "i-r1m0", to: "i-r2m0" },
+    { from: "i-r1m1", to: "i-r2m0" },
+  ];
+
+  const totalH = SLOT_H * 4 + 60;
+  const totalW = COL_W * 3 + 60;
+
   return (
-    <div className="tab-content flex flex-col items-center justify-center py-24 text-center">
-      {/* Animated bracket placeholder icon */}
-      <div className="relative w-16 h-16 mx-auto mb-6 bracket-float">
-        <svg viewBox="0 0 64 64" fill="none" className="w-full h-full">
-          <circle cx="32" cy="32" r="28" stroke="#8b5cf6" strokeWidth="0.8" strokeDasharray="4 6" opacity="0.4" style={{ animation: "spin 12s linear infinite", transformOrigin: "50% 50%" }} />
-          {/* Bracket lines */}
-          <rect x="8" y="20" width="14" height="8" rx="0" stroke="#8b5cf6" strokeWidth="1" opacity="0.5" />
-          <rect x="8" y="36" width="14" height="8" rx="0" stroke="#8b5cf6" strokeWidth="1" opacity="0.5" />
-          <line x1="22" y1="24" x2="30" y2="24" stroke="#8b5cf6" strokeWidth="1" opacity="0.4" />
-          <line x1="22" y1="40" x2="30" y2="40" stroke="#8b5cf6" strokeWidth="1" opacity="0.4" />
-          <line x1="30" y1="24" x2="30" y2="40" stroke="#8b5cf6" strokeWidth="1" opacity="0.4" />
-          <rect x="30" y="28" width="14" height="8" rx="0" stroke="#8b5cf6" strokeWidth="1.2" opacity="0.7" />
-          <line x1="44" y1="32" x2="52" y2="32" stroke="#a78bfa" strokeWidth="1.2" opacity="0.6" />
-          <rect x="52" y="28" width="4" height="8" rx="0" fill="rgba(139,92,246,0.3)" stroke="#8b5cf6" strokeWidth="1" />
-        </svg>
+    <div className="tab-content">
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-1">
+            Single Elimination · 8 Teams
+          </p>
+          <h3 className="font-[Cinzel,serif] text-xl font-bold text-white">Tournament Bracket</h3>
+        </div>
       </div>
 
-      <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-2">
-        Bracket Generation
-      </p>
-      <h3 className="font-[Cinzel,serif] text-xl font-bold text-white/60 mb-3">
-        Coming Soon
-      </h3>
-      <p className="font-[Rajdhani,sans-serif] text-[0.82rem] text-white/25 max-w-[360px] leading-relaxed">
-        {t.status === "upcoming"
-          ? "Brackets will be generated once registration closes and all slots are confirmed."
-          : "The bracket engine is being wired in. Check back shortly."}
-      </p>
+      <div style={{ overflowX: "auto", paddingBottom: 24 }}>
+        <div style={{ position: "relative", width: totalW, height: totalH, minWidth: 750 }}>
 
-      {/* Slot fill status */}
-      <div className="mt-8 border border-[rgba(139,92,246,0.15)] bg-[rgba(139,92,246,0.03)] px-6 py-4"
-        style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
-        <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase text-white/25 mb-2">
-          Slot status
-        </p>
-        <div className="h-1.5 w-48 bg-[rgba(255,255,255,0.05)] mb-2" style={{ clipPath: "polygon(2px 0%, 100% 0%, calc(100% - 2px) 100%, 0% 100%)" }}>
-          <div className="h-full" style={{ width: `${fillPct(t)}%`, background: "linear-gradient(90deg, #8b5cf6, #a78bfa)" }} />
+          {/* Round labels */}
+          {rounds.map((label, round) => {
+            const { x } = getPos(round, 0);
+            return (
+              <div key={label} style={{
+                position: "absolute",
+                left: x,
+                top: 0,
+                width: CARD_W,
+                textAlign: "center",
+                fontFamily: "Rajdhani, sans-serif",
+                fontSize: 9,
+                letterSpacing: "0.3em",
+                textTransform: "uppercase",
+                color: "rgba(139,92,246,0.5)",
+              }}>{label}</div>
+            );
+          })}
+
+          {/* Matches */}
+          {matches.map(({ round, index }) => {
+            const { x, y } = getPos(round, index);
+            const id = `r${round}m${index}`;
+            return (
+              <div key={id} style={{ position: "absolute", left: x, top: y + 24 }}>
+                <div id={`i-${id}`} style={{ display: "inline-block" }}>
+                  <Bracket id={`i-${id}-info`} />
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Xarrows */}
+          {connections.map(({ from, to }) => (
+            <Xarrow
+              key={`${from}-${to}`}
+              start={from}
+              end={to}
+              color="rgba(139,92,246,0.5)"
+              strokeWidth={1.5}
+              headSize={0}
+              path="grid"
+              gridBreak ="50%"
+              startAnchor={{ position: "right", offset: { x: 0, y: 20 } }}
+              endAnchor={{ position: "left", offset: { x: 30, y: 20 } }}
+            />
+          ))}
+
         </div>
-        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/35">
-          {t.filled} / {t.slots} registered · {t.slots - t.filled} slots remaining
-        </p>
       </div>
     </div>
   );
 }
-
 /* ─────────────────────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────────────────────── */
