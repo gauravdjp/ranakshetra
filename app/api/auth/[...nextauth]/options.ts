@@ -29,7 +29,13 @@ export const authOptions: NextAuthOptions = {
                 console.log("db password:", user.password); 
                 console.log("input password:", credentials.password);
                 if( user.password === credentials.password){
-                    return user
+                    return {
+                        id: user._id.toString(),  // ← THIS is what NextAuth needs
+                        username: user.username,
+                        email: user.email,
+                        role: user.role,
+                        player_tag: user.player_tag,
+                    };
                 } 
                 else {
                     throw new Error("Invalid password");
@@ -43,6 +49,8 @@ export const authOptions: NextAuthOptions = {
             if (user) {
                 token.username = user.username;
                 token.role = user.role;
+                token.email = user.email;
+                token.player_tag = user.player_tag;
             }
             return token;
         },
@@ -51,6 +59,8 @@ export const authOptions: NextAuthOptions = {
                 session.user.username = token.username;
                 session.user.email = token.email?? "";
                 session.user.role = token.role;
+                session.user.player_tag = token.player_tag;
+
             }
             return session;
         }

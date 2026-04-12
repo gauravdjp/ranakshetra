@@ -401,6 +401,18 @@ export default function SignUpPage() {
                 />
                 {errors.name && <p className="warn">{errors.name.message}</p>}
 
+                <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                  Username
+                </label>
+                <input
+                  {...register("username", { required: "PLEASE ENTER USERNAME" })}
+                  type="text"
+                  placeholder="enter username"
+                  className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                  style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                />
+                {errors.username && <p className="warn">{errors.username.message}</p>}
+
                 {/* EMAIL */}
                 <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
                   VALID EMAIL ADDRESS

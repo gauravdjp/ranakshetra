@@ -2,6 +2,7 @@
 export type Basic_Info = {
     readonly name : string,
     readonly email : string,
+    readonly username : string,
     readonly password : string,
     readonly phone? : number,
     readonly date_of_birth : Date,
@@ -46,7 +47,6 @@ export type User = {
 
 export type Organiser = Basic_Info & {
     _id? : string,
-    username : string,
     role : Access_Level_USER_Role.ORGANISER,
     arena_name : string,
     arena_location : string,
@@ -61,7 +61,6 @@ export type Organiser = Basic_Info & {
 
 export type Player = Basic_Info & {
     _id? : string,
-    username : string,
     role : Access_Level_USER_Role.PLAYER,
     games : Games.CLASH_ROYALE, //for now we are only supporting clash royale api 
     player_tag : string,
@@ -135,6 +134,14 @@ export type Tournament = {
     
     format_rules: string;
 };
+
+export type Tournament_Registration = {
+    _id?: string;
+    tournament_id: string;
+    player_tag: string;
+    player_username : string;
+    registered_at: Date;
+}
 
 export type Match = {
 
