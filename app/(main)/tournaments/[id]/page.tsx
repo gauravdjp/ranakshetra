@@ -490,6 +490,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
   const [generating, setGenerating] = useState(false);
   const [cooldownMs, setCooldownMs]  = useState(0);
   const [pollingStartTimes, setPollingStartTimes] = useState<Record<string, number>>({});
+  const [pollingEnabled, setPollingEnabled] = useState(true);
 
   // ── Auto-generate after deadline + 2 min
   useEffect(() => {
@@ -510,7 +511,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
 
   // ── Poll live matches every 5s (only for matches that have been started)
   useEffect(() => {
-    if (!bracket) return;
+    if (!bracket || !pollingEnabled) return;
     
     // Get currently live matches that should be polled (started 2+ min ago)
     const now = Date.now();
@@ -553,7 +554,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     }, 5000);
 
     return () => clearInterval(iv);
-  }, [bracket, pollingStartTimes]);
+  }, [bracket, pollingStartTimes, pollingEnabled]);
 
   const generate = async () => {
     setGenerating(true);
@@ -637,12 +638,25 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
           </p>
           <h3 className="font-[Cinzel,serif] text-xl font-bold text-white">Tournament Bracket</h3>
         </div>
-        {bracket.matches.some(m => m.status === "live") && (
-          <div className="flex items-center gap-2 text-[#22c55e] text-[0.65rem] tracking-widest font-[Rajdhani,sans-serif]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-            LIVE
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {bracket.matches.some(m => m.status === "live") && (
+            <>
+              <div className="flex items-center gap-2 text-[#22c55e] text-[0.65rem] tracking-widest font-[Rajdhani,sans-serif]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                LIVE
+              </div>
+              {pollingEnabled && (
+                <button
+                  onClick={() => setPollingEnabled(false)}
+                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.3)] text-[#f87171] hover:bg-[rgba(248,113,113,0.2)] transition-colors"
+                  style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}
+                >
+                  Stop Polling
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {bracket.type === "standard" ? (
