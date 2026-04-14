@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
 
     // 2. Fetch battle log from CR API (use player1's tag)
     const tag = encodeURIComponent(match.player1.tag);
+    console.log(tag)
     const crRes = await fetch(`https://proxy.royaleapi.dev/v1/players/${tag}/battlelog`, {
       headers: { Authorization: `Bearer ${process.env.CLASH_ROYALE_API_KEY}` },
     });
