@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
     });
     const raw = await crRes.json();
     const battles = (Array.isArray(raw) ? raw : []).map(parseBattleResult).filter(Boolean);
+    console.log("Parsed Battles:", JSON.stringify(battles, null, 2));
 
     // Find a battle AFTER started_at that involves player2
     const startedAt = new Date(match.started_at).getTime();
