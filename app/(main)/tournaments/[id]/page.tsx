@@ -489,6 +489,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
   const bracket: BracketDocument | null = data?.bracket ?? null;
   const [generating, setGenerating] = useState(false);
   const [cooldownMs, setCooldownMs]  = useState(0);
+  const [pollingStartTimes, setPollingStartTimes] = useState<Record<string, number>>({});
 
   // ── Auto-generate after deadline + 2 min
   useEffect(() => {
@@ -507,23 +508,52 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     }
   }, [bracket, data]);
 
-  // ── Poll live matches every 10s
+  // ── Poll live matches every 5s (only for matches that have been started)
   useEffect(() => {
     if (!bracket) return;
-    const liveMatches = bracket.matches.filter(m => m.status === "live");
-    if (liveMatches.length === 0) return;
+    
+    // Get currently live matches that should be polled (started 2+ min ago)
+    const now = Date.now();
+    const matchesToPoll = bracket.matches.filter(m => {
+      if (m.status !== "live") return false;
+      const startTime = pollingStartTimes[m.matchId];
+      return startTime && (now - startTime) >= 2 * 60 * 1000;
+    });
+
+    if (matchesToPoll.length === 0) return;
 
     const iv = setInterval(async () => {
-      await Promise.all(
-        liveMatches.map(m =>
-          fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
-        )
-      );
-      mutate();
-    }, 10000);
+      // Get fresh list of matches to poll each iteration (not stale closure)
+      const freshMatchesToPoll = bracket.matches.filter(m => {
+        if (m.status !== "live") return false;
+        const startTime = pollingStartTimes[m.matchId];
+        return startTime && (Date.now() - startTime) >= 2 * 60 * 1000;
+      });
+
+      if (freshMatchesToPoll.length === 0) return;
+
+      try {
+        const results = await Promise.all(
+          freshMatchesToPoll.map(m =>
+            fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
+              .then(res => ({ status: res.status, matchId: m.matchId }))
+              .catch(err => ({ status: 500, matchId: m.matchId, error: err }))
+          )
+        );
+
+        // Only mutate if ANY match was completed (status 200)
+        const hasCompletedMatch = results.some(r => r.status === 200);
+        if (hasCompletedMatch) {
+          console.log("[polling] Match result found, refetching bracket...", results);
+          mutate();
+        }
+      } catch (err) {
+        console.error("[polling] error:", err);
+      }
+    }, 5000);
 
     return () => clearInterval(iv);
-  }, [bracket]);
+  }, [bracket, pollingStartTimes]);
 
   const generate = async () => {
     setGenerating(true);
@@ -540,12 +570,23 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
   };
 
   const handleStart = async (matchId: string) => {
-    await fetch("/api/tournaments/brackets/start", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tournamentId: TOURNAMENT_META.id, matchId }),
-    });
-    mutate();
+    try {
+      await fetch("/api/tournaments/brackets/start", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId: TOURNAMENT_META.id, matchId }),
+      });
+      
+      // Record when this match was started (polling will start 2 min from now)
+      setPollingStartTimes(prev => ({
+        ...prev,
+        [matchId]: Date.now()
+      }));
+      
+      mutate();
+    } catch (err) {
+      console.error("[handleStart] error:", err);
+    }
   };
 
   // ── States

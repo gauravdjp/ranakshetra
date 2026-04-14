@@ -19,9 +19,14 @@ export async function GET(req: NextRequest) {
 
     const match = bracket.matches.find((m: any) => m.matchId === matchId);
     
+    if (!match) {
+      return NextResponse.json({ error: "Match not found" }, { status: 404 });
+    }
+    
     // 1. If already completed, stop polling immediately
     if (match.status === "completed") {
-      return NextResponse.json({ found: true, status: "completed" });
+      console.log(`[poll] Match ${matchId} already completed with winner ${match.winner_tag}`);
+      return NextResponse.json({ found: true, status: "completed", winner: match.winner_tag }, { status: 200 });
     }
 
     // 2. Fetch data from CR API
@@ -44,7 +49,8 @@ export async function GET(req: NextRequest) {
 
     // 3. If no new battle found yet, return 202 (Accepted - keep waiting)
     if (!result) {
-      return NextResponse.json({ found: false }, { status: 202 });
+      console.log(`[poll] No result yet for match ${matchId}, will retry...`);
+      return NextResponse.json({ found: false, matchId }, { status: 202 });
     }
 
     // 4. Update the DB
@@ -73,9 +79,13 @@ export async function GET(req: NextRequest) {
       { arrayFilters }
     );
 
-    return NextResponse.json({ found: true, winner });
+    console.log(`[poll] Match ${matchId} completed. Winner: ${winnerTag}`);
+    return NextResponse.json({ found: true, matchId, winner, result }, { status: 200 });
   } catch (err) {
     console.error("[poll] error:", err);
-    return NextResponse.json({ error: "Failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to poll match", details: err instanceof Error ? err.message : "Unknown error" }, 
+      { status: 500 }
+    );
   }
 }
