@@ -5,7 +5,8 @@ import { parseBattleResult } from "@/app/api/clashroyale/battlelog/parsebattlelo
 export async function GET(req: NextRequest) {
   try {
     const tournamentId = req.nextUrl.searchParams.get("tournamentId");
-    const matchId      = req.nextUrl.searchParams.get("matchId");
+    const matchId = req.nextUrl.searchParams.get("matchId");
+
     if (!tournamentId || !matchId) {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
@@ -17,44 +18,45 @@ export async function GET(req: NextRequest) {
     if (!bracket) return NextResponse.json({ error: "Bracket not found" }, { status: 404 });
 
     const match = bracket.matches.find((m: any) => m.matchId === matchId);
-    if (!match || match.status !== "live") {
-      return NextResponse.json({ found: false, reason: "Not live" });
+    
+    // 1. If already completed, stop polling immediately
+    if (match.status === "completed") {
+      return NextResponse.json({ found: true, status: "completed" });
     }
 
-    // Fetch player1's battlelog from CR
+    // 2. Fetch data from CR API
     const tag = encodeURIComponent(match.player1.tag);
     const crRes = await fetch(`https://proxy.royaleapi.dev/v1/players/${tag}/battlelog`, {
       headers: { Authorization: `Bearer ${process.env.CLASH_ROYALE_API_KEY}` },
     });
+    
+    if (!crRes.ok) throw new Error("CR API unreachable");
+    
     const raw = await crRes.json();
     const battles = (Array.isArray(raw) ? raw : []).map(parseBattleResult).filter(Boolean);
-    console.log("Parsed Battles:", JSON.stringify(battles, null, 2));
+    console.log(battles)
 
-    // Find a battle AFTER started_at that involves player2
     const startedAt = new Date(match.started_at).getTime();
     const result = battles.find((b: any) => {
       const battleTime = new Date(b.battleEndTime).getTime();
-      return (
-        battleTime > startedAt &&
-        (b.opponent_tag === match.player2.tag || b.team_tag === match.player2.tag)
-      );
+      return battleTime > startedAt && (b.opponent_tag === match.player2.tag || b.team_tag === match.player2.tag);
     });
 
-    if (!result) return NextResponse.json({ found: false });
+    // 3. If no new battle found yet, return 202 (Accepted - keep waiting)
+    if (!result) {
+      return NextResponse.json({ found: false }, { status: 202 });
+    }
 
-    // Determine winner player object
+    // 4. Update the DB
     const winnerTag = result.winner_tag;
     const winner = match.player1.tag === winnerTag ? match.player1 : match.player2;
 
-    // Mark match completed + advance winner to next round
     const nextMatchId = `r${match.round + 1}m${Math.floor(match.index / 2)}`;
-    const nextSlot    = match.index % 2 === 0 ? "player1" : "player2";
-
-    // Check if next match exists (won't exist for the final)
+    const nextSlot = match.index % 2 === 0 ? "player1" : "player2";
     const nextExists = bracket.matches.some((m: any) => m.matchId === nextMatchId);
 
     const updateOps: any = {
-      "matches.$[current].status":     "completed",
+      "matches.$[current].status": "completed",
       "matches.$[current].winner_tag": winnerTag,
       updated_at: new Date().toISOString(),
     };
