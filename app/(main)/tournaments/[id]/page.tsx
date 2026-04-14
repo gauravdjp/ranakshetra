@@ -55,7 +55,7 @@ const TOURNAMENT: Tournament = {
   progress: 0,
   prize_pool: 0,
   entry_fee: 0,
-  participants_limit: 0, // 0 = unlimited
+  participants_limit: 0,
   start_date: new Date("2026-04-13T10:30:00"),
   end_date: new Date("2026-04-13T11:30:00"),
   registration_deadline: new Date("2026-04-13T10:00:00"),
@@ -66,7 +66,6 @@ const TOURNAMENT: Tournament = {
   participants_profile: [],
 };
 
-// Extra fields not in the Tournament type but used in UI
 const TOURNAMENT_META = {
   id: "T-CR-2026-001",
   organiser_name: "Gaurav",
@@ -98,12 +97,12 @@ function fmtTime(date: Date | string) {
 }
 
 const STATUS_CFG = {
-  upcoming:          { label: "UPCOMING",          color: "#8b5cf6", bg: "rgba(139,92,246,0.08)",  border: "rgba(139,92,246,0.3)" },
-  registration_open: { label: "REG OPEN",          color: "#06b6d4", bg: "rgba(6,182,212,0.08)",   border: "rgba(6,182,212,0.3)" },
-  ongoing:           { label: "LIVE NOW",           color: "#22c55e", bg: "rgba(34,197,94,0.1)",    border: "rgba(34,197,94,0.4)" },
-  completed:         { label: "COMPLETED",          color: "#6b7280", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.3)" },
-  cancelled:         { label: "CANCELLED",          color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.3)" },
-  draft:             { label: "DRAFT",              color: "#6b7280", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.3)" },
+  upcoming:          { label: "UPCOMING",  color: "#8b5cf6", bg: "rgba(139,92,246,0.08)",  border: "rgba(139,92,246,0.3)" },
+  registration_open: { label: "REG OPEN",  color: "#06b6d4", bg: "rgba(6,182,212,0.08)",   border: "rgba(6,182,212,0.3)" },
+  ongoing:           { label: "LIVE NOW",  color: "#22c55e", bg: "rgba(34,197,94,0.1)",    border: "rgba(34,197,94,0.4)" },
+  completed:         { label: "COMPLETED", color: "#6b7280", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.3)" },
+  cancelled:         { label: "CANCELLED", color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.3)" },
+  draft:             { label: "DRAFT",     color: "#6b7280", bg: "rgba(107,114,128,0.08)", border: "rgba(107,114,128,0.3)" },
 };
 
 /* ─────────────────────────────────────────────────────────────
@@ -168,11 +167,8 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 tab-content">
-
-      {/* LEFT */}
       <div className="lg:col-span-2 space-y-6">
 
-        {/* Description */}
         {t.description && (
           <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
             style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
@@ -181,17 +177,16 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
           </div>
         )}
 
-        {/* Schedule */}
         <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Schedule</p>
           <div className="relative pl-5">
             <div className="absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-[#8b5cf6] via-[rgba(139,92,246,0.3)] to-transparent" />
             {[
-              { label: "Registration Opens",  date: t.created_at,              done: true },
-              { label: "Registration Closes", date: t.registration_deadline,   done: t.status !== "upcoming" && t.status !== "registration_open" },
-              { label: "Tournament Begins",   date: t.start_date,              done: t.status === "ongoing" || t.status === "completed" },
-              { label: "Tournament Ends",     date: t.end_date,                done: t.status === "completed" },
+              { label: "Registration Opens",  date: t.created_at,            done: true },
+              { label: "Registration Closes", date: t.registration_deadline, done: t.status !== "upcoming" && t.status !== "registration_open" },
+              { label: "Tournament Begins",   date: t.start_date,            done: t.status === "ongoing" || t.status === "completed" },
+              { label: "Tournament Ends",     date: t.end_date,              done: t.status === "completed" },
             ].map((item, i) => (
               <div key={i} className="relative mb-5 last:mb-0">
                 <div className="absolute -left-5 top-1 w-2 h-2 border"
@@ -209,7 +204,6 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
           )}
         </div>
 
-        {/* Rules */}
         <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-3">Rules & Format</p>
@@ -224,7 +218,6 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
           </ul>
         </div>
 
-        {/* Prize */}
         <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Prize Pool</p>
@@ -242,10 +235,7 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
         </div>
       </div>
 
-      {/* RIGHT */}
       <div className="space-y-6">
-
-        {/* Organiser */}
         <div className="border border-[rgba(139,92,246,0.15)] bg-[rgba(139,92,246,0.03)] p-5"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Organiser</p>
@@ -280,7 +270,6 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
           </div>
         </div>
 
-        {/* Slot meter */}
         <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-5"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <div className="flex justify-between items-center mb-3">
@@ -301,7 +290,6 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
           </p>
         </div>
 
-        {/* Updates */}
         <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-5"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <div className="flex items-center gap-2 mb-4">
@@ -325,7 +313,7 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
 }
 
 /* ─────────────────────────────────────────────────────────────
-   PARTICIPANTS TAB — uses Tournament_Registration type
+   PARTICIPANTS TAB
 ───────────────────────────────────────────────────────────── */
 function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: Tournament_Registration[] }) {
   const isUnlimited = t.participants_limit === 0;
@@ -338,7 +326,6 @@ function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: T
         </p>
       </div>
 
-      {/* Header */}
       <div className="grid items-center gap-4 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
         style={{ gridTemplateColumns: "40px 1fr 180px 140px" }}>
         {["#", "Player", "Tag", "Registered"].map(h => (
@@ -405,8 +392,6 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
   return (
     <div className="tab-content">
       <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-6">Final Rankings</p>
-
-      {/* Podium */}
       <div className="grid grid-cols-3 gap-3 mb-8 max-w-lg mx-auto">
         {[1, 0, 2].map((rankIdx) => (
           <div key={rankIdx}
@@ -422,7 +407,6 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
         ))}
       </div>
 
-      {/* Leaderboard */}
       <div className="grid items-center gap-4 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
         style={{ gridTemplateColumns: "50px 1fr 180px 100px" }}>
         {["Rank", "Player", "Tag", "Result"].map(h => (
@@ -488,13 +472,21 @@ function ResultsTab({ t }: { t: Tournament }) {
   );
 }
 
-
 /* ─────────────────────────────────────────────────────────────
    BRACKETS TAB
+   FIX SUMMARY:
+   1. Removed pollingStartTimes — the 2-min gate was preventing
+      the interval from ever firing.
+   2. Changed mutate() calls to use no arguments — this is the
+      correct SWR API to force a fresh network fetch.
+   3. Polling effect depends on bracket?.matches so it rebuilds
+      with fresh data after each revalidation, solving the stale
+      closure problem.
+   4. Used Promise.allSettled so one failed poll doesn't abort
+      the rest.
 ───────────────────────────────────────────────────────────── */
 function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?: string }) {
-  
-  // ── Fetch bracket from DB
+
   const { data, mutate } = useSWR(
     `/api/tournaments/brackets?id=${TOURNAMENT_META.id}`,
     fetcher,
@@ -506,133 +498,66 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
 
   const bracket: BracketDocument | null = data?.bracket ?? null;
   const [generating, setGenerating] = useState(false);
-  const [cooldownMs, setCooldownMs]  = useState(0);
-  const [pollingStartTimes, setPollingStartTimes] = useState<Record<string, number>>({});
+  const [cooldownMs, setCooldownMs] = useState(0);
   const [pollingEnabled, setPollingEnabled] = useState(true);
-  
-  // ── Debug bracket state changes
-  useEffect(() => {
-    if (bracket) {
-      console.log("[BracketsTab] bracket updated:", {
-        type: bracket.type,
-        totalMatches: bracket.matches?.length,
-        liveMatches: bracket.matches?.filter((m: any) => m.status === "live").length,
-        completedMatches: bracket.matches?.filter((m: any) => m.status === "completed").length,
-        firstMatch: bracket.matches?.[0],
-      });
-      
-      // Log detailed info about completed matches
-      const completed = bracket.matches?.filter((m: any) => m.status === "completed") ?? [];
-      if (completed.length > 0) {
-        console.log("[BracketsTab] COMPLETED MATCHES:", completed.map((m: any) => ({
-          matchId: m.matchId,
-          winner: m.winner_tag,
-          player1: m.player1?.tag,
-          player2: m.player2?.tag,
-        })));
-      }
-    }
-  }, [bracket]);
-  
-  useEffect(() => {
-    console.log("[BracketsTab] pollingEnabled:", pollingEnabled);
-  }, [pollingEnabled]);
-  
-  useEffect(() => {
-    console.log("[BracketsTab] data received:", {
-      hasData: !!data,
-      hasBracket: !!data?.bracket,
-      bracketId: data?.bracket?.tournament_id,
-      timestamp: new Date().toISOString(),
-    });
-  }, [data]);
 
-  // ── Auto-generate after deadline + 2 min
+  // ── Auto-generate after deadline
   useEffect(() => {
     if (bracket || generating || data === undefined) return;
 
     const deadline  = new Date(t.registration_deadline).getTime();
-    const readyAt   = deadline + 0; //just for now
-    const remaining = readyAt - Date.now();
+    const remaining = deadline - Date.now();
 
     if (remaining <= 0) {
       generate();
     } else {
       setCooldownMs(remaining);
-      const t1 = setTimeout(() => { setCooldownMs(0); generate(); }, remaining);
-      return () => clearTimeout(t1);
+      const timer = setTimeout(() => { setCooldownMs(0); generate(); }, remaining);
+      return () => clearTimeout(timer);
     }
   }, [bracket, data]);
 
-  // ── Poll live matches every 5s (only for matches that have been started)
+  // ── Poll live matches every 5 s
+  // Depends on bracket?.matches so the closure always sees fresh match statuses.
+  // No pollingStartTimes — start polling immediately when a match goes live.
   useEffect(() => {
-    console.log("[polling effect] bracket:", !!bracket, "pollingEnabled:", pollingEnabled);
-    if (!bracket || !pollingEnabled) {
-      console.log("[polling effect] stopping - returning early");
-      return;
-    }
-    
-    // Get currently live matches that should be polled (started 2+ min ago)
-    const now = Date.now();
-    const matchesToPoll = bracket.matches.filter(m => {
-      if (m.status !== "live") return false;
-      const startTime = pollingStartTimes[m.matchId];
-      return startTime && (now - startTime) >= 2 * 60 * 1000;
-    });
+    if (!bracket || !pollingEnabled) return;
 
-    console.log("[polling effect] matches to poll:", matchesToPoll.length);
-    if (matchesToPoll.length === 0) return;
+    const liveMatches = bracket.matches.filter((m: any) => m.status === "live");
+    if (liveMatches.length === 0) return;
+
+    console.log("[polling] starting interval for", liveMatches.length, "live matches");
 
     const iv = setInterval(async () => {
-      // Get fresh list of matches to poll each iteration (not stale closure)
-      const freshMatchesToPoll = bracket.matches.filter(m => {
-        if (m.status !== "live") return false;
-        const startTime = pollingStartTimes[m.matchId];
-        return startTime && (Date.now() - startTime) >= 2 * 60 * 1000;
-      });
+      console.log("[polling] tick — checking", liveMatches.length, "matches");
 
-      if (freshMatchesToPoll.length === 0) return;
+      const results = await Promise.allSettled(
+        liveMatches.map((m: any) =>
+          fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
+            .then(res => ({ status: res.status, matchId: m.matchId }))
+            .catch(err => { console.error(`[poll] ${m.matchId} error:`, err); return { status: 500, matchId: m.matchId }; })
+        )
+      );
 
-      console.log("[polling] checking", freshMatchesToPoll.length, "matches");
-      try {
-        const results = await Promise.all(
-          freshMatchesToPoll.map(m =>
-            fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
-              .then(res => {
-                console.log(`[poll] ${m.matchId}: status ${res.status}`);
-                return { status: res.status, matchId: m.matchId };
-              })
-              .catch(err => {
-                console.error(`[poll] ${m.matchId}: error`, err);
-                return { status: 500, matchId: m.matchId, error: err };
-              })
-          )
-        );
+      const anyCompleted = results.some(
+        r => r.status === "fulfilled" && (r.value as any).status === 200
+      );
 
-        // Only mutate if ANY match was completed (status 200)
-        const hasCompletedMatch = results.some(r => r.status === 200);
-        if (hasCompletedMatch) {
-          console.log("[polling] Match result found, revalidating...", results);
-          console.log("[polling] Current bracket before mutate:", {
-            matches: bracket.matches.length,
-            completedCount: bracket.matches.filter((m: any) => m.status === "completed").length,
-          });
-          mutate(undefined, { revalidate: true });
-          console.log("[polling] mutate() called with revalidate: true");
-        } else {
-          console.log("[polling] still waiting - no matches completed yet");
-        }
-      } catch (err) {
-        console.error("[polling] error:", err);
+      if (anyCompleted) {
+        console.log("[polling] winner found — revalidating bracket");
+        mutate(); // ← no args: tells SWR to re-run the fetcher immediately
+      } else {
+        console.log("[polling] no results yet — waiting");
       }
     }, 5000);
 
-    console.log("[polling effect] interval created");
     return () => {
-      console.log("[polling effect] cleanup - clearing interval");
+      console.log("[polling] clearing interval");
       clearInterval(iv);
     };
-  }, [bracket, pollingStartTimes, pollingEnabled, mutate]);
+  // bracket?.matches identity changes on every SWR revalidation, rebuilding
+  // the effect with fresh liveMatches — this kills the stale closure problem.
+  }, [bracket?.matches, pollingEnabled, mutate]);
 
   const generate = async () => {
     setGenerating(true);
@@ -642,7 +567,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: TOURNAMENT_META.id }),
       });
-      mutate();
+      mutate(); // re-fetch after generation
     } finally {
       setGenerating(false);
     }
@@ -655,20 +580,13 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: TOURNAMENT_META.id, matchId }),
       });
-      
-      // Record when this match was started (polling will start 2 min from now)
-      setPollingStartTimes(prev => ({
-        ...prev,
-        [matchId]: Date.now()
-      }));
-      
-      mutate();
+      mutate(); // re-fetch so match status flips to "live" immediately
     } catch (err) {
       console.error("[handleStart] error:", err);
     }
   };
 
-  // ── States
+  // ── Loading
   if (data === undefined) {
     return (
       <div className="tab-content py-20 text-center">
@@ -677,6 +595,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     );
   }
 
+  // ── Generating
   if (cooldownMs > 0 || generating) {
     return (
       <div className="tab-content py-20 text-center">
@@ -687,19 +606,20 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
           </svg>
         </div>
         <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">
-          {generating ? "Generating brackets..." : "Brackets generating in 2 minutes..."}
+          {generating ? "Generating brackets..." : "Brackets generating soon..."}
         </p>
       </div>
     );
   }
 
+  // ── Not yet ready
   if (!bracket) {
-    const readyAt = new Date(t.registration_deadline).getTime() + 2 * 60 * 1000;
+    const readyAt = new Date(t.registration_deadline).getTime();
     if (Date.now() < readyAt) {
       return (
         <div className="tab-content py-20 text-center">
           <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">
-            Brackets will be generated 2 minutes after registration closes
+            Brackets will be generated after registration closes
           </p>
         </div>
       );
@@ -707,21 +627,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     return null;
   }
 
-  // Log render with current bracket state
-  console.log("[BracketsTab] RENDERING bracket:", {
-    type: bracket.type,
-    totalMatches: bracket.matches?.length,
-    liveMatches: bracket.matches?.filter((m: any) => m.status === "live").length,
-    completedMatches: bracket.matches?.filter((m: any) => m.status === "completed").length,
-    matches: bracket.matches?.map((m: any) => ({
-      id: m.matchId,
-      status: m.status,
-      winner: m.winner_tag,
-      p1: m.player1?.tag,
-      p2: m.player2?.tag,
-    })),
-    timestamp: new Date().toISOString(),
-  });
+  const hasLive = bracket.matches.some((m: any) => m.status === "live");
 
   return (
     <div className="tab-content">
@@ -733,19 +639,25 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
           <h3 className="font-[Cinzel,serif] text-xl font-bold text-white">Tournament Bracket</h3>
         </div>
         <div className="flex items-center gap-4">
-          {bracket.matches.some(m => m.status === "live") && (
+          {hasLive && (
             <>
               <div className="flex items-center gap-2 text-[#22c55e] text-[0.65rem] tracking-widest font-[Rajdhani,sans-serif]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
                 LIVE
               </div>
-              {pollingEnabled && (
+              {pollingEnabled ? (
                 <button
                   onClick={() => setPollingEnabled(false)}
                   className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.3)] text-[#f87171] hover:bg-[rgba(248,113,113,0.2)] transition-colors"
-                  style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}
-                >
+                  style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
                   Stop Polling
+                </button>
+              ) : (
+                <button
+                  onClick={() => setPollingEnabled(true)}
+                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22c55e] hover:bg-[rgba(34,197,94,0.2)] transition-colors"
+                  style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                  Resume Polling
                 </button>
               )}
             </>
@@ -769,6 +681,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     </div>
   );
 }
+
 /* ─────────────────────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────────────────────── */
@@ -790,7 +703,6 @@ export default function TournamentDetailPage() {
   const isUnlimited = t.participants_limit === 0;
   const isFull = !isUnlimited && registrations.length >= t.participants_limit;
 
-  // Check join status + fetch registrations on load
   useEffect(() => {
     const init = async () => {
       const [checkRes, regsRes] = await Promise.all([
@@ -803,7 +715,6 @@ export default function TournamentDetailPage() {
       ]);
       const checkData = await checkRes.json();
       const regsData = await regsRes.json();
-      console.log("RAW REGISTRATIONS:", JSON.stringify(regsData.registrations?.[0]));
       setIsJoined(checkData.joined);
       setRegistrations(regsData.registrations ?? []);
       setCheckingJoin(false);
@@ -822,7 +733,6 @@ export default function TournamentDetailPage() {
       const data = await res.json();
       if (!res.ok) { alert(data.error || "Failed to join"); return; }
       setIsJoined(true);
-      // Refresh registrations
       const regsRes = await fetch(`/api/tournaments/registrations?id=${meta.id}`);
       const regsData = await regsRes.json();
       setRegistrations(regsData.registrations ?? []);
@@ -864,7 +774,6 @@ export default function TournamentDetailPage() {
 
         <div className="relative z-10 max-w-[1300px] mx-auto px-4 md:px-8 pt-28 pb-20">
 
-          {/* Back */}
           <div className="page-fade-1 mb-6">
             <Link href="/tournaments"
               className="inline-flex items-center gap-2 font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] uppercase text-white/30 hover:text-[#a78bfa] transition-colors duration-200 no-underline">
@@ -875,7 +784,6 @@ export default function TournamentDetailPage() {
             </Link>
           </div>
 
-          {/* Hero */}
           <div className="page-fade-2 mb-8">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
@@ -901,7 +809,6 @@ export default function TournamentDetailPage() {
                 </p>
               </div>
 
-              {/* Register button */}
               <div className="flex flex-col items-start md:items-end gap-2">
                 {checkingJoin ? (
                   <button disabled className="join-btn px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.88rem] tracking-[0.2em] uppercase text-white">...</button>
@@ -933,28 +840,26 @@ export default function TournamentDetailPage() {
             </div>
           </div>
 
-          {/* Stat strip */}
           <div className="page-fade-3 grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            <StatBox label="Prize Pool"  value={t.prize_pool > 0 ? `₹${t.prize_pool.toLocaleString()}` : meta.prize_label} accent />
-            <StatBox label="Players"     value={`${registrations.length}${!isUnlimited ? ` / ${t.participants_limit}` : ""}`} />
-            <StatBox label="Start"       value={fmtTime(t.start_date)} />
-            <StatBox label="End"         value={fmtTime(t.end_date)} />
+            <StatBox label="Prize Pool" value={t.prize_pool > 0 ? `₹${t.prize_pool.toLocaleString()}` : meta.prize_label} accent />
+            <StatBox label="Players"    value={`${registrations.length}${!isUnlimited ? ` / ${t.participants_limit}` : ""}`} />
+            <StatBox label="Start"      value={fmtTime(t.start_date)} />
+            <StatBox label="End"        value={fmtTime(t.end_date)} />
           </div>
 
           <div className="section-divide mb-6" />
 
-          {/* Tabs */}
           <div className="page-fade-4 flex items-end gap-6 md:gap-8 border-b border-[rgba(139,92,246,0.1)] mb-8 overflow-x-auto pb-px">
-            <Tab active={activeTab === "overview"}     label="Overview"                               onClick={() => setActiveTab("overview")} />
-            <Tab active={activeTab === "participants"} label={`Players (${registrations.length})`}    onClick={() => setActiveTab("participants")} />
-            <Tab active={activeTab === "brackets"}     label="Bracket"                                onClick={() => setActiveTab("brackets")} />
-            <Tab active={activeTab === "rankings"}     label="Rankings"                               onClick={() => setActiveTab("rankings")} />
-            <Tab active={activeTab === "results"}      label="Results"                                onClick={() => setActiveTab("results")} />
+            <Tab active={activeTab === "overview"}     label="Overview"                              onClick={() => setActiveTab("overview")} />
+            <Tab active={activeTab === "participants"} label={`Players (${registrations.length})`}   onClick={() => setActiveTab("participants")} />
+            <Tab active={activeTab === "brackets"}     label="Bracket"                               onClick={() => setActiveTab("brackets")} />
+            <Tab active={activeTab === "rankings"}     label="Rankings"                              onClick={() => setActiveTab("rankings")} />
+            <Tab active={activeTab === "results"}      label="Results"                               onClick={() => setActiveTab("results")} />
           </div>
 
           {activeTab === "overview"     && <OverviewTab     t={t} meta={meta} registrations={registrations} />}
           {activeTab === "participants" && <ParticipantsTab t={t} registrations={registrations} />}
-          {activeTab === "brackets"     && <BracketsTab     t={t} currentPlayerTag={currentPlayerTag}/>}
+          {activeTab === "brackets"     && <BracketsTab     t={t} currentPlayerTag={currentPlayerTag} />}
           {activeTab === "rankings"     && <RankingsTab     t={t} registrations={registrations} />}
           {activeTab === "results"      && <ResultsTab      t={t} />}
         </div>

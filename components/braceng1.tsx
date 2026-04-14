@@ -30,7 +30,7 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
     return { x, y };
   };
 
-  // Derive connections from matches
+  // Connections: each match feeds into the next round match
   const connections = matches
     .filter(m => m.round < totalRounds - 1)
     .map(m => ({
@@ -49,7 +49,12 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
         {Array.from({ length: totalRounds }, (_, round) => {
           const { x } = getPos(round, 0);
           return (
-            <div key={round} style={{ position: "absolute", left: x, top: 0, width: CARD_W, textAlign: "center", fontFamily: "Rajdhani, sans-serif", fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(139,92,246,0.5)" }}>
+            <div key={round} style={{
+              position: "absolute", left: x, top: 0, width: CARD_W,
+              textAlign: "center", fontFamily: "Rajdhani, sans-serif",
+              fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase",
+              color: "rgba(139,92,246,0.5)",
+            }}>
               {getRoundLabel(round)}
             </div>
           );
@@ -58,8 +63,11 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
         {/* Matches */}
         {matches.map((match) => {
           const { x, y } = getPos(match.round, match.index);
-          const isMyMatch = !!currentPlayerTag &&
-            (match.player1.tag === currentPlayerTag || match.player2?.tag === currentPlayerTag);
+          // Only show Start button to the players involved in this match
+          const isMyMatch = !!currentPlayerTag && (
+            match.player1.tag === currentPlayerTag ||
+            match.player2?.tag === currentPlayerTag
+          );
 
           return (
             <div key={match.matchId} style={{ position: "absolute", left: x, top: y + 24 }}>
@@ -71,9 +79,9 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
                   team2={match.player2?.name ?? "TBD"}
                   matchId={match.matchId}
                   status={match.status}
-                  winner_tag={match.winner_tag}        // ← ADD
-                  player1_tag={match.player1.tag}      // ← ADD
-                  player2_tag={match.player2?.tag} 
+                  winner_tag={match.winner_tag}
+                  player1_tag={match.player1.tag}
+                  player2_tag={match.player2?.tag}
                   onStart={isMyMatch && match.status === "pending" ? onStart : undefined}
                 />
               </div>
@@ -81,11 +89,17 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
           );
         })}
 
-        {/* Connections */}
+        {/* Connector arrows */}
         {connections.map(({ from, to }) => (
-          <Xarrow key={`${from}-${to}`} start={from} end={to}
-            color="rgba(139,92,246,0.5)" strokeWidth={1.5} headSize={0}
-            path="grid" gridBreak="50%"
+          <Xarrow
+            key={`${from}-${to}`}
+            start={from}
+            end={to}
+            color="rgba(139,92,246,0.5)"
+            strokeWidth={1.5}
+            headSize={0}
+            path="grid"
+            gridBreak="50%"
             startAnchor={{ position: "right", offset: { x: 0,  y: 20 } }}
             endAnchor={{   position: "left",  offset: { x: 30, y: 20 } }}
           />
