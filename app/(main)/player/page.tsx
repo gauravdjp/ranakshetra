@@ -297,7 +297,7 @@ function DashboardSection() {
 function LeaderboardSection() {
   return (
     <div className="content-in">
-      <SectionTitle eyebrow="Global Rankings" title="Leaderboard" />
+      
       <div className="relative border border-[rgba(139,92,246,0.15)] bg-white/[0.015] overflow-hidden">
         {/* Header */}
         <div className="grid grid-cols-12 px-5 py-3 border-b border-[rgba(139,92,246,0.1)]">

@@ -62,7 +62,7 @@ export type Organiser = Basic_Info & {
 export type Player = Basic_Info & {
     _id? : string,
     role : Access_Level_USER_Role.PLAYER,
-    games : Games.CLASH_ROYALE, //for now we are only supporting clash royale api 
+    games : Games[], //for now we are only supporting clash royale api 
     player_tag : string,
     skill_level : string,
     tourney_games : string[],
@@ -193,7 +193,7 @@ export enum Games{
 }
 
 export type In_Game_Details = {
-    game : Games,
+    game : Games[],
     username : string,
     rank? : number,
     trophies? : number,

@@ -26,12 +26,12 @@ export default function BracketEngine() {
         }}
       />
       <button onClick={handleGenerate}>Generate Bracket</button>
-
+{/*
       {generated && (
         isPowerOfTwo(count)
             ? <StandardBracket participants={count} />
             : <ByeBracket participants={count} />
-        )}
+        )}*/}
     </>
   );
 }

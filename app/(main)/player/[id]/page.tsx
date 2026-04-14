@@ -41,8 +41,8 @@ const MOCK_PLAYER = {
   device: "Mobile + PC",
   skill_level: "Semi-Pro",
   description: "Competitive BGMI & Valorant player. Grinding ranked since 2021. Looking for a serious squad for nationals.",
-  games: [Games.BGMI, Games.VALORANT, Games.CLASH_ROYALE],
-  fav_game: Games.BGMI,
+  games: [Games.CLASH_ROYALE],
+  fav_game: Games.CLASH_ROYALE,
   is_verified: true,
   joined: "March 2024",
   stats: {
