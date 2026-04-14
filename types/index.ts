@@ -139,12 +139,38 @@ export type Tournament_Registration = {
     _id?: string;
     tournament_id: string;
     player_tag: string;
-    player_username : string;
-    registered_at: Date;
+    username : string;
+    joinedAt: Date;
 }
 
 export type Match = {
 
+}
+
+export type BracketPlayer = {
+  tag: string;
+  name: string;
+};
+
+export type BracketMatch = {
+  matchId: string;           // "r0m0"
+  round: number;
+  index: number;
+  player1: { tag: string; name: string };
+  player2: { tag: string; name: string } | null;  // null = bye
+  winner_tag: string | null;
+  status: "pending" | "live" | "completed";
+  isBye: boolean;
+  started_at: string | null; // to filter only battles AFTER match started
+}
+
+export type BracketDocument = {
+  tournament_id: string;
+  type: "standard" | "bye";
+  total_rounds: number;
+  matches: BracketMatch[];
+  created_at: string;
+  updated_at: string;
 }
 /*--------------------------------------------------------*/
 

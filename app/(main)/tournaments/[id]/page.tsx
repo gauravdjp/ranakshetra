@@ -2,9 +2,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import Bracket from "@/components/bracket";
-import Xarrow from "react-xarrows";
-import { Tournament, Tournament_Registration, Access_Level_USER_Role } from "@/types/index";
+import { Tournament, Tournament_Registration } from "@/types/index";
+import StandardBracket from "@/components/braceng1";
+import ByeBracket from "@/components/braceng2";
+import useSWR from "swr";
+import { useSession } from "next-auth/react";
+import { BracketDocument } from "@/types/index";
+
+
+const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -336,7 +342,7 @@ function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: T
               <div className="flex items-center gap-2">
                 <div className="w-0.5 h-5 flex-shrink-0 bg-[#8b5cf6]" />
                 <span className="font-[Cinzel,serif] font-bold text-[0.82rem] group-hover:text-[#a78bfa] transition-colors text-white/85">
-                  {r.player_username}
+                  {r.username}
                 </span>
               </div>
               <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] text-[rgba(167,139,250,0.7)]"
@@ -344,7 +350,7 @@ function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: T
                 {r.player_tag}
               </span>
               <span className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/30">
-                {fmtTime(r.registered_at)}
+                {fmtTime(r.joinedAt)}
               </span>
             </div>
           ))}
@@ -411,7 +417,7 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
             style={{ color: i < 3 ? RANK_COLORS[i] : "rgba(255,255,255,0.25)" }}>
             {String(i + 1).padStart(2, "0")}
           </span>
-          <span className="font-[Cinzel,serif] font-bold text-[0.82rem] text-white/80">{r.player_username}</span>
+          <span className="font-[Cinzel,serif] font-bold text-[0.82rem] text-white/80">{r.username}</span>
           <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] text-[rgba(167,139,250,0.7)]"
             style={{ border: "1px solid rgba(139,92,246,0.25)", padding: "2px 8px", clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)", background: "rgba(139,92,246,0.06)", display: "inline-block" }}>
             {r.player_tag}
@@ -462,47 +468,123 @@ function ResultsTab({ t }: { t: Tournament }) {
   );
 }
 
+
 /* ─────────────────────────────────────────────────────────────
    BRACKETS TAB
 ───────────────────────────────────────────────────────────── */
-function BracketsTab({ t }: { t: Tournament }) {
-  const CARD_W = 220, COL_GAP = 140, COL_W = CARD_W + COL_GAP, SLOT_H = 150;
+function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?: string }) {
+  
+  // ── Fetch bracket from DB
+  const { data, mutate } = useSWR(
+    `/api/tournaments/brackets?id=${TOURNAMENT_META.id}`,
+    fetcher,
+    {
+      refreshInterval: (d) => {
+        const hasLive = d?.bracket?.matches?.some((m: any) => m.status === "live");
+        return hasLive ? 5000 : 15000;
+      },
+    }
+  );
 
-  const getPos = (round: number, index: number) => {
-    const x = round * COL_W;
-    const slotH = SLOT_H * Math.pow(2, round);
-    const y = index * slotH + (slotH / 2 - 95 / 2);
-    return { x, y };
+  const bracket: BracketDocument | null = data?.bracket ?? null;
+  const [generating, setGenerating] = useState(false);
+  const [cooldownMs, setCooldownMs]  = useState(0);
+
+  // ── Auto-generate after deadline + 2 min
+  useEffect(() => {
+    if (bracket || generating || data === undefined) return;
+
+    const deadline  = new Date(t.registration_deadline).getTime();
+    const readyAt   = deadline + 0; //just for now
+    const remaining = readyAt - Date.now();
+
+    if (remaining <= 0) {
+      generate();
+    } else {
+      setCooldownMs(remaining);
+      const t1 = setTimeout(() => { setCooldownMs(0); generate(); }, remaining);
+      return () => clearTimeout(t1);
+    }
+  }, [bracket, data]);
+
+  // ── Poll live matches every 10s
+  useEffect(() => {
+    if (!bracket) return;
+    const liveMatches = bracket.matches.filter(m => m.status === "live");
+    if (liveMatches.length === 0) return;
+
+    const iv = setInterval(async () => {
+      await Promise.all(
+        liveMatches.map(m =>
+          fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
+        )
+      );
+      mutate();
+    }, 10000);
+
+    return () => clearInterval(iv);
+  }, [bracket]);
+
+  const generate = async () => {
+    setGenerating(true);
+    try {
+      await fetch("/api/tournaments/brackets/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId: TOURNAMENT_META.id }),
+      });
+      mutate();
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  const rounds = ["Quarter Finals", "Semi Finals", "Final"];
-  const matches: Array<{ round: number; index: number }> = [
-    { round: 0, index: 0 }, { round: 0, index: 1 },
-    { round: 0, index: 2 }, { round: 0, index: 3 },
-    { round: 1, index: 0 }, { round: 1, index: 1 },
-    { round: 2, index: 0 },
-  ];
-  const connections: Array<{ from: string; to: string }> = [
-    { from: "i-r0m0", to: "i-r1m0" }, { from: "i-r0m1", to: "i-r1m0" },
-    { from: "i-r0m2", to: "i-r1m1" }, { from: "i-r0m3", to: "i-r1m1" },
-    { from: "i-r1m0", to: "i-r2m0" }, { from: "i-r1m1", to: "i-r2m0" },
-  ];
+  const handleStart = async (matchId: string) => {
+    await fetch("/api/tournaments/brackets/start", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tournamentId: TOURNAMENT_META.id, matchId }),
+    });
+    mutate();
+  };
 
-  const totalH = SLOT_H * 4 + 60;
-  const totalW = COL_W * 3 + 60;
-
-  if (!t.brackets_generated) {
+  // ── States
+  if (data === undefined) {
     return (
       <div className="tab-content py-20 text-center">
-        <div className="w-12 h-12 border border-[rgba(139,92,246,0.2)] mx-auto mb-4 flex items-center justify-center"
+        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">Loading bracket...</p>
+      </div>
+    );
+  }
+
+  if (cooldownMs > 0 || generating) {
+    return (
+      <div className="tab-content py-20 text-center">
+        <div className="w-12 h-12 border border-[rgba(139,92,246,0.2)] mx-auto mb-4 flex items-center justify-center animate-pulse"
           style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
           <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
             <path d="M3 6H21M3 12H15M3 18H9" stroke="#8b5cf6" strokeWidth="1.3" strokeLinecap="round" />
           </svg>
         </div>
-        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">Brackets will be generated once registration closes</p>
+        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">
+          {generating ? "Generating brackets..." : "Brackets generating in 2 minutes..."}
+        </p>
       </div>
     );
+  }
+
+  if (!bracket) {
+    const readyAt = new Date(t.registration_deadline).getTime() + 2 * 60 * 1000;
+    if (Date.now() < readyAt) {
+      return (
+        <div className="tab-content py-20 text-center">
+          <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">
+            Brackets will be generated 2 minutes after registration closes
+          </p>
+        </div>
+      );
+    }
+    return null;
   }
 
   return (
@@ -514,45 +596,37 @@ function BracketsTab({ t }: { t: Tournament }) {
           </p>
           <h3 className="font-[Cinzel,serif] text-xl font-bold text-white">Tournament Bracket</h3>
         </div>
+        {bracket.matches.some(m => m.status === "live") && (
+          <div className="flex items-center gap-2 text-[#22c55e] text-[0.65rem] tracking-widest font-[Rajdhani,sans-serif]">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+            LIVE
+          </div>
+        )}
       </div>
-      <div style={{ overflowX: "auto", paddingBottom: 24 }}>
-        <div style={{ position: "relative", width: totalW, height: totalH, minWidth: 750 }}>
-          {rounds.map((label, round) => {
-            const { x } = getPos(round, 0);
-            return (
-              <div key={label} style={{ position: "absolute", left: x, top: 0, width: CARD_W, textAlign: "center", fontFamily: "Rajdhani, sans-serif", fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase", color: "rgba(139,92,246,0.5)" }}>{label}</div>
-            );
-          })}
-          {matches.map(({ round, index }) => {
-            const { x, y } = getPos(round, index);
-            const id = `r${round}m${index}`;
-            return (
-              <div key={id} style={{ position: "absolute", left: x, top: y + 24 }}>
-                <div id={`i-${id}`} style={{ display: "inline-block" }}>
-                  <Bracket id={`i-${id}-info`} />
-                </div>
-              </div>
-            );
-          })}
-          {connections.map(({ from, to }) => (
-            <Xarrow key={`${from}-${to}`} start={from} end={to}
-              color="rgba(139,92,246,0.5)" strokeWidth={1.5} headSize={0}
-              path="grid" gridBreak="50%"
-              startAnchor={{ position: "right", offset: { x: 0, y: 20 } }}
-              endAnchor={{ position: "left", offset: { x: 30, y: 20 } }}
-            />
-          ))}
-        </div>
-      </div>
+
+      {bracket.type === "standard" ? (
+        <StandardBracket
+          matches={bracket.matches}
+          onStart={handleStart}
+          currentPlayerTag={currentPlayerTag}
+        />
+      ) : (
+        <ByeBracket
+          matches={bracket.matches}
+          onStart={handleStart}
+          currentPlayerTag={currentPlayerTag}
+        />
+      )}
     </div>
   );
 }
-
 /* ─────────────────────────────────────────────────────────────
    MAIN PAGE
 ───────────────────────────────────────────────────────────── */
 export default function TournamentDetailPage() {
   const params = useParams();
+  const { data: session } = useSession();
+  const currentPlayerTag = (session?.user as any)?.player_tag;
   const t = TOURNAMENT;
   const meta = TOURNAMENT_META;
 
@@ -580,6 +654,7 @@ export default function TournamentDetailPage() {
       ]);
       const checkData = await checkRes.json();
       const regsData = await regsRes.json();
+      console.log("RAW REGISTRATIONS:", JSON.stringify(regsData.registrations?.[0]));
       setIsJoined(checkData.joined);
       setRegistrations(regsData.registrations ?? []);
       setCheckingJoin(false);
@@ -730,7 +805,7 @@ export default function TournamentDetailPage() {
 
           {activeTab === "overview"     && <OverviewTab     t={t} meta={meta} registrations={registrations} />}
           {activeTab === "participants" && <ParticipantsTab t={t} registrations={registrations} />}
-          {activeTab === "brackets"     && <BracketsTab     t={t} />}
+          {activeTab === "brackets"     && <BracketsTab     t={t} currentPlayerTag={currentPlayerTag}/>}
           {activeTab === "rankings"     && <RankingsTab     t={t} registrations={registrations} />}
           {activeTab === "results"      && <ResultsTab      t={t} />}
         </div>

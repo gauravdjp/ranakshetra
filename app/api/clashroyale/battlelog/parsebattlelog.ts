@@ -1,5 +1,4 @@
 export function parseBattleResult(battle: any) {
-  // guard — if data not ready return null
   if (!battle || !battle.team || !battle.opponent) return null;
 
   const team = battle.team[0];
@@ -12,7 +11,11 @@ export function parseBattleResult(battle: any) {
   return {
     matchType: battle.gameMode?.name ?? "Unknown",
     winner: teamWon ? team.name : opponent.name,
+    winner_tag: teamWon ? team.tag : opponent.tag,   // ← NEW
     loser: teamWon ? opponent.name : team.name,
+    loser_tag: teamWon ? opponent.tag : team.tag,    // ← NEW
+    team_tag: team.tag,                               // ← NEW
+    opponent_tag: opponent.tag,                       // ← NEW
     score: `${team.crowns} - ${opponent.crowns}`,
     battleEndTime: battle.battleTime,
   };

@@ -5,7 +5,7 @@ const fetcher = (url: string) => fetch(url).then(r => r.json());
 
 export default function BattleLog() {
   const { data, error, isLoading } = useSWR(
-    "/api/clashroyale/battlelog?tag=%23220RULVURY",
+    "/api/clashroyale/battlelog?tag=%23VP920CGQQ",
     fetcher,
     { refreshInterval: 2000 }
   );
@@ -20,15 +20,17 @@ export default function BattleLog() {
 
   // safely check if it's an array
   const battles = Array.isArray(data) ? data : data?.items ?? data?.battles ?? [];
-
+  console.log("BATTLE[0] RAW:", JSON.stringify(battles[0], null, 2));
   return (
     <div>
       {battles.map((battle: any) => (
         <div key={battle.battleEndTime}>
+          <p>CURRENT</p>
           <p>🏆 Winner: {battle.winner}</p>
           <p>❌ Loser: {battle.loser}</p>
           <p>⚔️ Score: {battle.score}</p>
           <p>🎮 Mode: {battle.matchType}</p>
+          <p>---------------------------------</p>
         </div>
       ))}
     </div>
