@@ -10,7 +10,27 @@ import { useSession } from "next-auth/react";
 import { BracketDocument } from "@/types/index";
 
 
-const fetcher = (url: string) => fetch(url).then(r => r.json());
+const fetcher = (url: string) => {
+  console.log("[fetcher] fetching:", url);
+  return fetch(url)
+    .then(r => {
+      console.log("[fetcher] response status:", r.status);
+      return r.json();
+    })
+    .then(data => {
+      console.log("[fetcher] response data:", {
+        hasBracket: !!data?.bracket,
+        bracketMatches: data?.bracket?.matches?.length,
+        completedMatches: data?.bracket?.matches?.filter((m: any) => m.status === "completed").length,
+        rawData: data,
+      });
+      return data;
+    })
+    .catch(err => {
+      console.error("[fetcher] error:", err);
+      throw err;
+    });
+};
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -479,10 +499,8 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     `/api/tournaments/brackets?id=${TOURNAMENT_META.id}`,
     fetcher,
     {
-      refreshInterval: (d) => {
-        const hasLive = d?.bracket?.matches?.some((m: any) => m.status === "live");
-        return hasLive ? 5000 : 15000;
-      },
+      refreshInterval: 0,
+      revalidateOnFocus: false,
     }
   );
 
@@ -491,6 +509,43 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
   const [cooldownMs, setCooldownMs]  = useState(0);
   const [pollingStartTimes, setPollingStartTimes] = useState<Record<string, number>>({});
   const [pollingEnabled, setPollingEnabled] = useState(true);
+  
+  // ── Debug bracket state changes
+  useEffect(() => {
+    if (bracket) {
+      console.log("[BracketsTab] bracket updated:", {
+        type: bracket.type,
+        totalMatches: bracket.matches?.length,
+        liveMatches: bracket.matches?.filter((m: any) => m.status === "live").length,
+        completedMatches: bracket.matches?.filter((m: any) => m.status === "completed").length,
+        firstMatch: bracket.matches?.[0],
+      });
+      
+      // Log detailed info about completed matches
+      const completed = bracket.matches?.filter((m: any) => m.status === "completed") ?? [];
+      if (completed.length > 0) {
+        console.log("[BracketsTab] COMPLETED MATCHES:", completed.map((m: any) => ({
+          matchId: m.matchId,
+          winner: m.winner_tag,
+          player1: m.player1?.tag,
+          player2: m.player2?.tag,
+        })));
+      }
+    }
+  }, [bracket]);
+  
+  useEffect(() => {
+    console.log("[BracketsTab] pollingEnabled:", pollingEnabled);
+  }, [pollingEnabled]);
+  
+  useEffect(() => {
+    console.log("[BracketsTab] data received:", {
+      hasData: !!data,
+      hasBracket: !!data?.bracket,
+      bracketId: data?.bracket?.tournament_id,
+      timestamp: new Date().toISOString(),
+    });
+  }, [data]);
 
   // ── Auto-generate after deadline + 2 min
   useEffect(() => {
@@ -511,7 +566,11 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
 
   // ── Poll live matches every 5s (only for matches that have been started)
   useEffect(() => {
-    if (!bracket || !pollingEnabled) return;
+    console.log("[polling effect] bracket:", !!bracket, "pollingEnabled:", pollingEnabled);
+    if (!bracket || !pollingEnabled) {
+      console.log("[polling effect] stopping - returning early");
+      return;
+    }
     
     // Get currently live matches that should be polled (started 2+ min ago)
     const now = Date.now();
@@ -521,6 +580,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
       return startTime && (now - startTime) >= 2 * 60 * 1000;
     });
 
+    console.log("[polling effect] matches to poll:", matchesToPoll.length);
     if (matchesToPoll.length === 0) return;
 
     const iv = setInterval(async () => {
@@ -533,28 +593,46 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
 
       if (freshMatchesToPoll.length === 0) return;
 
+      console.log("[polling] checking", freshMatchesToPoll.length, "matches");
       try {
         const results = await Promise.all(
           freshMatchesToPoll.map(m =>
             fetch(`/api/tournaments/brackets/poll?tournamentId=${TOURNAMENT_META.id}&matchId=${m.matchId}`)
-              .then(res => ({ status: res.status, matchId: m.matchId }))
-              .catch(err => ({ status: 500, matchId: m.matchId, error: err }))
+              .then(res => {
+                console.log(`[poll] ${m.matchId}: status ${res.status}`);
+                return { status: res.status, matchId: m.matchId };
+              })
+              .catch(err => {
+                console.error(`[poll] ${m.matchId}: error`, err);
+                return { status: 500, matchId: m.matchId, error: err };
+              })
           )
         );
 
         // Only mutate if ANY match was completed (status 200)
         const hasCompletedMatch = results.some(r => r.status === 200);
         if (hasCompletedMatch) {
-          console.log("[polling] Match result found, refetching bracket...", results);
-          mutate();
+          console.log("[polling] Match result found, revalidating...", results);
+          console.log("[polling] Current bracket before mutate:", {
+            matches: bracket.matches.length,
+            completedCount: bracket.matches.filter((m: any) => m.status === "completed").length,
+          });
+          mutate(undefined, { revalidate: true });
+          console.log("[polling] mutate() called with revalidate: true");
+        } else {
+          console.log("[polling] still waiting - no matches completed yet");
         }
       } catch (err) {
         console.error("[polling] error:", err);
       }
     }, 5000);
 
-    return () => clearInterval(iv);
-  }, [bracket, pollingStartTimes, pollingEnabled]);
+    console.log("[polling effect] interval created");
+    return () => {
+      console.log("[polling effect] cleanup - clearing interval");
+      clearInterval(iv);
+    };
+  }, [bracket, pollingStartTimes, pollingEnabled, mutate]);
 
   const generate = async () => {
     setGenerating(true);
@@ -628,6 +706,22 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
     }
     return null;
   }
+
+  // Log render with current bracket state
+  console.log("[BracketsTab] RENDERING bracket:", {
+    type: bracket.type,
+    totalMatches: bracket.matches?.length,
+    liveMatches: bracket.matches?.filter((m: any) => m.status === "live").length,
+    completedMatches: bracket.matches?.filter((m: any) => m.status === "completed").length,
+    matches: bracket.matches?.map((m: any) => ({
+      id: m.matchId,
+      status: m.status,
+      winner: m.winner_tag,
+      p1: m.player1?.tag,
+      p2: m.player2?.tag,
+    })),
+    timestamp: new Date().toISOString(),
+  });
 
   return (
     <div className="tab-content">
