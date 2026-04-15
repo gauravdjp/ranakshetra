@@ -22,6 +22,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Match not found" }, { status: 404 });
     }
 
+    console.log("[poll] p1 tag from DB:", JSON.stringify(match.player1.tag));
+    console.log("[poll] p2 tag from DB:", JSON.stringify(match.player2.tag));
+    console.log("[poll] encoded p1 tag:", encodeURIComponent(match.player1.tag));
+
     // 1. Already completed — stop polling immediately
     if (match.status === "completed") {
       console.log(`[poll] Match ${matchId} already completed, winner: ${match.winner_tag}`);
@@ -54,7 +58,7 @@ export async function GET(req: NextRequest) {
     const startedAt = match.started_at instanceof Date
       ? match.started_at.getTime()
       : new Date(match.started_at).getTime();
-
+    
     const result = battles.find((b: any) => {
       const battleTime = new Date(b.battleEndTime).getTime();
       const isAfterStart = battleTime > startedAt;
@@ -65,12 +69,15 @@ export async function GET(req: NextRequest) {
       return isAfterStart && isCorrectOpponent;
     });
 
+    console.log("[poll] first battle sample:", JSON.stringify(battles[0], null, 2));
+    console.log("[poll] looking for opponent tag:", match.player2.tag);
+    console.log("[poll] startedAt:", new Date(startedAt).toISOString());
     // 3. No result yet — tell client to keep waiting
     if (!result) {
       console.log(`[poll] No result yet for match ${matchId}, startedAt: ${new Date(startedAt).toISOString()}`);
       return NextResponse.json({ found: false, matchId }, { status: 202 });
     }
-
+    
     // 4. Determine winner & loser
     const winnerTag = result.winner_tag;
     const winner = match.player1.tag === winnerTag ? match.player1 : match.player2;
