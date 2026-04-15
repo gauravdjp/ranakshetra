@@ -9,7 +9,6 @@ import useSWR from "swr";
 import { useSession } from "next-auth/react";
 import { BracketDocument } from "@/types/index";
 
-
 const fetcher = (url: string) => {
   console.log("[fetcher] fetching:", url);
   return fetch(url)
@@ -38,7 +37,7 @@ const fetcher = (url: string) => {
 type TabId = "overview" | "participants" | "brackets" | "rankings" | "results";
 
 /* ─────────────────────────────────────────────────────────────
-   REAL TOURNAMENT DATA — matches your Tournament type exactly
+   REAL TOURNAMENT DATA
 ───────────────────────────────────────────────────────────── */
 const TOURNAMENT: Tournament = {
   title: "Clash Royale Champion Trophy",
@@ -370,10 +369,46 @@ function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: T
 /* ─────────────────────────────────────────────────────────────
    RANKINGS TAB
 ───────────────────────────────────────────────────────────── */
-function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tournament_Registration[] }) {
+function RankingsTab({ t, registrations, bracket }: { 
+  t: Tournament; 
+  registrations: Tournament_Registration[];
+  bracket?: BracketDocument | null;
+}) {
   const RANK_COLORS = ["#f59e0b", "#9ca3af", "#cd7c2f"];
   const RANK_LABELS = ["1ST", "2ND", "3RD"];
   const isLocked = t.status === "upcoming" || t.status === "registration_open" || t.status === "draft";
+
+  // Derive ranking from bracket results
+  const getRankedPlayers = (): Tournament_Registration[] => {
+    if (!bracket || bracket.matches.length === 0) return registrations;
+
+    // Final match winner = 1st, loser = 2nd
+    // Semi-final losers share 3rd
+    const completedMatches = bracket.matches.filter(m => m.status === "completed");
+    const byRound = [...bracket.matches].sort((a, b) => b.round - a.round);
+    const finalMatch = byRound.find(m => m.status === "completed" && !m.isBye);
+
+    if (!finalMatch) return registrations;
+
+    const winner1st = registrations.find(r => r.player_tag === finalMatch.winner_tag);
+    const loserTag = finalMatch.player1.tag === finalMatch.winner_tag
+      ? finalMatch.player2?.tag
+      : finalMatch.player1.tag;
+    const winner2nd = registrations.find(r => r.player_tag === loserTag);
+
+    // Semi-finalists who lost
+    const semis = bracket.matches.filter(m => m.round === bracket.total_rounds - 2 && m.status === "completed" && !m.isBye);
+    const semiLosers = semis
+      .map(m => m.player1.tag === m.winner_tag ? m.player2?.tag : m.player1.tag)
+      .filter(Boolean)
+      .map(tag => registrations.find(r => r.player_tag === tag))
+      .filter(Boolean) as Tournament_Registration[];
+
+    const ranked = [winner1st, winner2nd, ...semiLosers].filter(Boolean) as Tournament_Registration[];
+    const rankedTags = new Set(ranked.map(r => r.player_tag));
+    const rest = registrations.filter(r => !rankedTags.has(r.player_tag));
+    return [...ranked, ...rest];
+  };
 
   if (isLocked) {
     return (
@@ -389,31 +424,47 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
     );
   }
 
+  const ranked = getRankedPlayers();
+  const podium = ranked.slice(0, 3);
+
   return (
     <div className="tab-content">
       <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-6">Final Rankings</p>
-      <div className="grid grid-cols-3 gap-3 mb-8 max-w-lg mx-auto">
-        {[1, 0, 2].map((rankIdx) => (
-          <div key={rankIdx}
-            className="flex flex-col items-center gap-2 p-4 border bg-[rgba(139,92,246,0.02)]"
-            style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)", borderColor: `${RANK_COLORS[rankIdx]}22` }}>
-            <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.3em]" style={{ color: RANK_COLORS[rankIdx] }}>{RANK_LABELS[rankIdx]}</span>
-            <div className="w-8 h-8 rounded-full border flex items-center justify-center"
-              style={{ borderColor: `${RANK_COLORS[rankIdx]}55`, background: `${RANK_COLORS[rankIdx]}11` }}>
-              <span className="font-[Cinzel,serif] text-[0.7rem] font-bold" style={{ color: RANK_COLORS[rankIdx] }}>—</span>
+
+      {/* Podium */}
+      <div className="flex items-end justify-center gap-3 mb-10 max-w-md mx-auto">
+        {[1, 0, 2].map((rankIdx) => {
+          const player = podium[rankIdx];
+          const heights = ["h-28", "h-36", "h-20"];
+          return (
+            <div key={rankIdx} className="flex flex-col items-center gap-2 flex-1">
+              <span className="font-[Cinzel,serif] text-[0.72rem] font-bold text-center truncate w-full text-center"
+                style={{ color: player ? RANK_COLORS[rankIdx] : "rgba(255,255,255,0.2)" }}>
+                {player?.username ?? "—"}
+              </span>
+              <div className={`w-full ${heights[rankIdx]} flex flex-col items-center justify-end pb-3 border-t-2`}
+                style={{
+                  background: player ? `${RANK_COLORS[rankIdx]}11` : "rgba(255,255,255,0.02)",
+                  borderColor: player ? `${RANK_COLORS[rankIdx]}55` : "rgba(255,255,255,0.08)",
+                  clipPath: "polygon(4px 0%, 100% 0%, 100% 100%, 0% 100%)"
+                }}>
+                <span className="font-[Cinzel,serif] font-black text-2xl" style={{ color: RANK_COLORS[rankIdx] }}>
+                  {RANK_LABELS[rankIdx]}
+                </span>
+              </div>
             </div>
-            <span className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/30 text-center">TBD</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
+      {/* Table */}
       <div className="grid items-center gap-4 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
         style={{ gridTemplateColumns: "50px 1fr 180px 100px" }}>
         {["Rank", "Player", "Tag", "Result"].map(h => (
           <span key={h} className="font-[Rajdhani,sans-serif] text-[0.56rem] tracking-[0.25em] uppercase text-white/20">{h}</span>
         ))}
       </div>
-      {registrations.map((r, i) => (
+      {ranked.map((r, i) => (
         <div key={r.player_tag}
           className="grid items-center gap-4 px-4 py-3 border-b border-[rgba(139,92,246,0.06)] hover:bg-[rgba(139,92,246,0.04)] transition-colors"
           style={{ gridTemplateColumns: "50px 1fr 180px 100px" }}>
@@ -426,7 +477,10 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
             style={{ border: "1px solid rgba(139,92,246,0.25)", padding: "2px 8px", clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)", background: "rgba(139,92,246,0.06)", display: "inline-block" }}>
             {r.player_tag}
           </span>
-          <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase text-white/25">—</span>
+          <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase"
+            style={{ color: i === 0 ? "#f59e0b" : i === 1 ? "#9ca3af" : i === 2 ? "#cd7c2f" : "rgba(255,255,255,0.2)" }}>
+            {i === 0 ? "Champion" : i === 1 ? "Runner-up" : i === 2 ? "3rd Place" : "—"}
+          </span>
         </div>
       ))}
     </div>
@@ -436,8 +490,34 @@ function RankingsTab({ t, registrations }: { t: Tournament; registrations: Tourn
 /* ─────────────────────────────────────────────────────────────
    RESULTS TAB
 ───────────────────────────────────────────────────────────── */
-function ResultsTab({ t }: { t: Tournament }) {
+function ResultsTab({ t, registrations, bracket, meta }: { 
+  t: Tournament; 
+  registrations: Tournament_Registration[];
+  bracket?: BracketDocument | null;
+  meta: typeof TOURNAMENT_META;
+}) {
   const isLocked = t.status !== "completed";
+
+  const getWinners = () => {
+    if (!bracket) return { first: null, second: null, third: null };
+
+    const byRound = [...bracket.matches].sort((a, b) => b.round - a.round);
+    const finalMatch = byRound.find(m => m.status === "completed" && !m.isBye);
+    if (!finalMatch) return { first: null, second: null, third: null };
+
+    const first = registrations.find(r => r.player_tag === finalMatch.winner_tag) ?? null;
+    const loserTag = finalMatch.player1.tag === finalMatch.winner_tag
+      ? finalMatch.player2?.tag : finalMatch.player1.tag;
+    const second = registrations.find(r => r.player_tag === loserTag) ?? null;
+
+    const semis = bracket.matches.filter(m => m.round === bracket.total_rounds - 2 && m.status === "completed" && !m.isBye);
+    const thirdLoserTag = semis[0]
+      ? (semis[0].player1.tag === semis[0].winner_tag ? semis[0].player2?.tag : semis[0].player1.tag)
+      : undefined;
+    const third = thirdLoserTag ? registrations.find(r => r.player_tag === thirdLoserTag) ?? null : null;
+
+    return { first, second, third };
+  };
 
   if (isLocked) {
     return (
@@ -461,42 +541,192 @@ function ResultsTab({ t }: { t: Tournament }) {
     );
   }
 
+  const { first, second, third } = getWinners();
+  const hasPrize = meta.prize_breakdown.length > 0;
+
+  const WinnerCard = ({
+    player, rank, color, prize, icon
+  }: {
+    player: Tournament_Registration | null;
+    rank: string;
+    color: string;
+    prize: string;
+    icon: React.ReactNode;
+  }) => (
+    <div className="relative p-6 border flex flex-col items-center gap-3 text-center"
+      style={{
+        clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)",
+        borderColor: `${color}33`,
+        background: `${color}07`,
+      }}>
+      {/* Rank badge */}
+      <div className="w-10 h-10 flex items-center justify-center border mb-1"
+        style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)", borderColor: `${color}55`, background: `${color}15` }}>
+        {icon}
+      </div>
+      <span className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase" style={{ color }}>
+        {rank}
+      </span>
+      {player ? (
+        <>
+          <p className="font-[Cinzel,serif] font-black text-white text-[1.05rem] leading-tight">{player.username}</p>
+          <span className="font-[Rajdhani,sans-serif] text-[0.63rem] tracking-[0.15em] px-2 py-0.5"
+            style={{ color: `${color}cc`, border: `1px solid ${color}33`, background: `${color}0a`, clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>
+            {player.player_tag}
+          </span>
+          <div className="mt-1 pt-3 border-t w-full" style={{ borderColor: `${color}22` }}>
+            <p className="font-[Rajdhani,sans-serif] text-[0.72rem] font-bold" style={{ color }}>{prize}</p>
+          </div>
+        </>
+      ) : (
+        <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/20">TBD</p>
+      )}
+    </div>
+  );
+
   return (
     <div className="tab-content">
-      <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-6">Match Results</p>
-      <div className="py-10 text-center border border-[rgba(139,92,246,0.08)]"
-        style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] uppercase text-white/15">Match results will appear here</p>
+      {/* Header */}
+      <div className="text-center mb-10">
+        <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-2">Tournament Complete</p>
+        <h2 className="font-[Cinzel,serif] font-black text-white text-2xl mb-1">{t.title}</h2>
+        <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/30">{fmt(t.end_date)} · {meta.arena}</p>
       </div>
+
+      {/* Congratulations banner for champion */}
+      {first && (
+        <div className="relative mb-8 px-6 py-5 border border-[rgba(245,158,11,0.25)] bg-[rgba(245,158,11,0.05)] overflow-hidden"
+          style={{ clipPath: "polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%)" }}>
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: "radial-gradient(ellipse 60% 80% at 10% 50%, rgba(245,158,11,0.08), transparent)" }} />
+          <div className="relative flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 border-2 border-[rgba(245,158,11,0.5)] bg-[rgba(245,158,11,0.1)] flex items-center justify-center flex-shrink-0"
+                style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+                <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+                  <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="rgba(245,158,11,0.4)" stroke="#f59e0b" strokeWidth="1.2" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.3em] uppercase text-[#f59e0b]/70 mb-0.5">Champion</p>
+                <p className="font-[Cinzel,serif] font-black text-[#f59e0b] text-xl leading-none">{first.username}</p>
+              </div>
+            </div>
+            <div className="md:ml-auto">
+              <p className="font-[Rajdhani,sans-serif] text-[0.85rem] text-white/50">
+                Congratulations on winning the <span className="text-[#f59e0b]/80 font-bold">{t.title}</span>!
+              </p>
+              <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 mt-0.5">
+                Your victory has been recorded. Well played.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Top 3 Winner Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <WinnerCard
+          player={first}
+          rank="1st Place — Champion"
+          color="#f59e0b"
+          prize={meta.prize_breakdown[0] ?? "—"}
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+              <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="rgba(245,158,11,0.4)" stroke="#f59e0b" strokeWidth="1.2" />
+            </svg>
+          }
+        />
+        <WinnerCard
+          player={second}
+          rank="2nd Place — Runner-up"
+          color="#9ca3af"
+          prize={meta.prize_breakdown[1] ?? "—"}
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+              <circle cx="12" cy="10" r="6" stroke="#9ca3af" strokeWidth="1.3" />
+              <path d="M8 16L6 22H18L16 16" stroke="#9ca3af" strokeWidth="1.3" strokeLinejoin="round" />
+            </svg>
+          }
+        />
+        <WinnerCard
+          player={third}
+          rank="3rd Place"
+          color="#cd7c2f"
+          prize={meta.prize_breakdown[2] ?? "—"}
+          icon={
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+              <circle cx="12" cy="10" r="6" stroke="#cd7c2f" strokeWidth="1.3" />
+              <path d="M8 16L6 22H18L16 16" stroke="#cd7c2f" strokeWidth="1.3" strokeLinejoin="round" />
+            </svg>
+          }
+        />
+      </div>
+
+      {/* Match results table */}
+      {bracket && (
+        <>
+          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Match Results</p>
+          <div className="grid items-center gap-3 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
+            style={{ gridTemplateColumns: "60px 1fr auto 1fr 80px" }}>
+            {["Round", "Player 1", "", "Player 2", "Winner"].map((h, i) => (
+              <span key={i} className={`font-[Rajdhani,sans-serif] text-[0.56rem] tracking-[0.25em] uppercase text-white/20 ${i === 2 || i === 3 ? "text-right" : ""}`}>{h}</span>
+            ))}
+          </div>
+          <div className="space-y-px">
+            {bracket.matches
+              .filter(m => !m.isBye && m.status === "completed")
+              .sort((a, b) => a.round - b.round || a.index - b.index)
+              .map(m => {
+                const p1Won = m.winner_tag === m.player1.tag;
+                const p2Won = m.winner_tag === m.player2?.tag;
+                return (
+                  <div key={m.matchId}
+                    className="grid items-center gap-3 px-4 py-3 border-b border-[rgba(139,92,246,0.06)] hover:bg-[rgba(139,92,246,0.04)] transition-colors"
+                    style={{ gridTemplateColumns: "60px 1fr auto 1fr 80px" }}>
+                    <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.15em] uppercase text-white/20">
+                      R{m.round + 1}·M{m.index + 1}
+                    </span>
+                    <span className="font-[Cinzel,serif] text-[0.8rem]"
+                      style={{ color: p1Won ? "#a78bfa" : "rgba(255,255,255,0.35)" }}>
+                      {m.player1.name}{p1Won && " ✓"}
+                    </span>
+                    <span className="font-[Rajdhani,sans-serif] text-[0.6rem] text-white/20">vs</span>
+                    <span className="font-[Cinzel,serif] text-[0.8rem] text-right"
+                      style={{ color: p2Won ? "#a78bfa" : "rgba(255,255,255,0.35)" }}>
+                      {p2Won && "✓ "}{m.player2?.name ?? "—"}
+                    </span>
+                    <span className="font-[Rajdhani,sans-serif] text-[0.62rem] tracking-[0.1em] text-[rgba(167,139,250,0.7)]">
+                      {bracket.matches.find(x => x.matchId === m.matchId)?.winner_tag
+                        ? (m.winner_tag === m.player1.tag ? m.player1.name : m.player2?.name)
+                        : "—"}
+                    </span>
+                  </div>
+                );
+              })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
 /* ─────────────────────────────────────────────────────────────
    BRACKETS TAB
-   FIX SUMMARY:
-   1. Removed pollingStartTimes — the 2-min gate was preventing
-      the interval from ever firing.
-   2. Changed mutate() calls to use no arguments — this is the
-      correct SWR API to force a fresh network fetch.
-   3. Polling effect depends on bracket?.matches so it rebuilds
-      with fresh data after each revalidation, solving the stale
-      closure problem.
-   4. Used Promise.allSettled so one failed poll doesn't abort
-      the rest.
 ───────────────────────────────────────────────────────────── */
-function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?: string }) {
-
-  const { data, mutate } = useSWR(
-    `/api/tournaments/brackets?id=${TOURNAMENT_META.id}`,
-    fetcher,
-    {
-      refreshInterval: 0,
-      revalidateOnFocus: false,
-    }
-  );
-
-  const bracket: BracketDocument | null = data?.bracket ?? null;
+function BracketsTab({ 
+  t, 
+  currentPlayerTag, 
+  bracket, 
+  data, 
+  mutate 
+}: { 
+  t: Tournament; 
+  currentPlayerTag?: string;
+  bracket: BracketDocument | null;
+  data: any;
+  mutate: any;
+}) {
   const [generating, setGenerating] = useState(false);
   const [cooldownMs, setCooldownMs] = useState(0);
   const [pollingEnabled, setPollingEnabled] = useState(true);
@@ -518,8 +748,6 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
   }, [bracket, data]);
 
   // ── Poll live matches every 5 s
-  // Depends on bracket?.matches so the closure always sees fresh match statuses.
-  // No pollingStartTimes — start polling immediately when a match goes live.
   useEffect(() => {
     if (!bracket || !pollingEnabled) return;
 
@@ -545,7 +773,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
 
       if (anyCompleted) {
         console.log("[polling] winner found — revalidating bracket");
-        mutate(); // ← no args: tells SWR to re-run the fetcher immediately
+        mutate();
       } else {
         console.log("[polling] no results yet — waiting");
       }
@@ -555,8 +783,6 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
       console.log("[polling] clearing interval");
       clearInterval(iv);
     };
-  // bracket?.matches identity changes on every SWR revalidation, rebuilding
-  // the effect with fresh liveMatches — this kills the stale closure problem.
   }, [bracket?.matches, pollingEnabled, mutate]);
 
   const generate = async () => {
@@ -567,7 +793,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: TOURNAMENT_META.id }),
       });
-      mutate(); // re-fetch after generation
+      mutate();
     } finally {
       setGenerating(false);
     }
@@ -580,7 +806,7 @@ function BracketsTab({ t, currentPlayerTag }: { t: Tournament; currentPlayerTag?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tournamentId: TOURNAMENT_META.id, matchId }),
       });
-      mutate(); // re-fetch so match status flips to "live" immediately
+      mutate();
     } catch (err) {
       console.error("[handleStart] error:", err);
     }
@@ -698,6 +924,17 @@ export default function TournamentDetailPage() {
   const [joining, setJoining] = useState(false);
   const [checkingJoin, setCheckingJoin] = useState(true);
 
+  // LIFTABLE SWR FETCH
+  const { data: bracketData, mutate: mutateBracket } = useSWR(
+    `/api/tournaments/brackets?id=${meta.id}`,
+    fetcher,
+    {
+      refreshInterval: 0,
+      revalidateOnFocus: false,
+    }
+  );
+  const bracket: BracketDocument | null = bracketData?.bracket ?? null;
+
   const sk = (t.status in STATUS_CFG ? t.status : "upcoming") as keyof typeof STATUS_CFG;
   const st = STATUS_CFG[sk];
   const isUnlimited = t.participants_limit === 0;
@@ -720,7 +957,7 @@ export default function TournamentDetailPage() {
       setCheckingJoin(false);
     };
     init();
-  }, []);
+  }, [meta.id]);
 
   const handleJoin = async () => {
     setJoining(true);
@@ -859,9 +1096,9 @@ export default function TournamentDetailPage() {
 
           {activeTab === "overview"     && <OverviewTab     t={t} meta={meta} registrations={registrations} />}
           {activeTab === "participants" && <ParticipantsTab t={t} registrations={registrations} />}
-          {activeTab === "brackets"     && <BracketsTab     t={t} currentPlayerTag={currentPlayerTag} />}
-          {activeTab === "rankings"     && <RankingsTab     t={t} registrations={registrations} />}
-          {activeTab === "results"      && <ResultsTab      t={t} />}
+          {activeTab === "brackets"     && <BracketsTab     t={t} currentPlayerTag={currentPlayerTag} bracket={bracket} data={bracketData} mutate={mutateBracket} />}
+          {activeTab === "rankings"     && <RankingsTab     t={t} registrations={registrations} bracket={bracket} />}
+          {activeTab === "results"      && <ResultsTab      t={t} registrations={registrations} bracket={bracket} meta={meta} />}
         </div>
       </div>
     </>
