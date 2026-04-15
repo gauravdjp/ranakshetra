@@ -32,19 +32,23 @@ function calcByeRounds(count: number) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { tournamentId } = await req.json();
+    const { tournamentId, force = false } = await req.json();
     const client = await clientPromise;
     const db = client.db("RKS");
 
-    // Bail if already generated
-    const existing = await db.collection("brackets").findOne({ tournament_id: tournamentId });
-    if (existing) return NextResponse.json({ error: "Already generated" }, { status: 400 });
+    // Bug 1 Fix: Allow force regeneration and add logging
+    if (!force) {
+      const existing = await db.collection("brackets").findOne({ tournament_id: tournamentId });
+      if (existing) {
+        console.log(`[generate] Rejection: Bracket already exists for ${tournamentId}`);
+        return NextResponse.json({ error: "Already generated" }, { status: 400 });
+      }
+    } else {
+      await db.collection("brackets").deleteOne({ tournament_id: tournamentId });
+    }
 
-    // Fetch tournament + players array
     const tournament = await db.collection("tournaments").findOne({ tournamentId: tournamentId });
-    console.log("[generate] tournament found:", !!tournament);
-    console.log("[generate] players:", tournament?.players?.length);
-
+    
     if (!tournament || !tournament.players || tournament.players.length < 2) {
       return NextResponse.json({ error: "Not enough players" }, { status: 400 });
     }
@@ -57,10 +61,12 @@ export async function POST(req: NextRequest) {
     const count = players.length;
     const isStandard = isPowerOfTwo(count);
     const matches: BracketMatch[] = [];
+    let finalTotalRounds = 0;
 
     if (isStandard) {
-      const totalRounds = Math.log2(count);
-      for (let round = 0; round < totalRounds; round++) {
+      // Bug 2 Fix: Ensure totalRounds is an integer
+      finalTotalRounds = Math.log2(count) | 0;
+      for (let round = 0; round < finalTotalRounds; round++) {
         const matchCount = count / Math.pow(2, round + 1);
         for (let index = 0; index < matchCount; index++) {
           matches.push({
@@ -77,8 +83,11 @@ export async function POST(req: NextRequest) {
         }
       }
     } else {
-      const rounds = calcByeRounds(count);
-      rounds.forEach((round, roundIndex) => {
+      // Bug 3 Fix: Store rounds result to avoid double calculation
+      const roundsData = calcByeRounds(count);
+      finalTotalRounds = roundsData.length;
+
+      roundsData.forEach((round, roundIndex) => {
         for (let i = 0; i < round.matches; i++) {
           matches.push({
             matchId: `r${roundIndex}m${i}`,
@@ -92,14 +101,19 @@ export async function POST(req: NextRequest) {
             started_at: null,
           });
         }
+
         if (round.byes > 0) {
-          const byePlayer = players[players.length - 1];
+          // Bug 4 Fix: Handle Bye progression logic
+          // Only the first round bye gets an immediate player assignment
+          const byePlayer = roundIndex === 0 ? players[players.length - 1] : { tag: "TBD", name: "TBD" };
+          
           matches.push({
             matchId: `r${roundIndex}m${round.matches}`,
             round: roundIndex,
             index: round.matches,
-            player1: roundIndex === 0 ? byePlayer : { tag: "TBD", name: "TBD" },
+            player1: byePlayer,
             player2: null,
+            // If it's round 0, we know the winner. If later, it stays null until advanced.
             winner_tag: roundIndex === 0 ? byePlayer.tag : null,
             status: roundIndex === 0 ? "completed" : "pending",
             isBye: true,
@@ -112,7 +126,7 @@ export async function POST(req: NextRequest) {
     const doc: BracketDocument = {
       tournament_id: tournamentId,
       type: isStandard ? "standard" : "bye",
-      total_rounds: isStandard ? Math.log2(count) : calcByeRounds(count).length,
+      total_rounds: finalTotalRounds,
       matches,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
