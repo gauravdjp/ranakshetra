@@ -47,7 +47,7 @@ const TOURNAMENT: Tournament = {
   single_player: true,
   team_based: false,
   tournament_type: "single_elimination" as any,
-  status: "upcoming",
+  status: "completed",
   visibility: "public",
   brackets_generated: false,
   results_declared: false,
