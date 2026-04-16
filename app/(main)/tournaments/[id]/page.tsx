@@ -58,7 +58,7 @@ const TOURNAMENT: Tournament = {
   start_date: new Date("2026-04-16T10:30:00"),
   end_date: new Date("2026-04-16T11:00:00"),
   registration_deadline: new Date("2026-04-16T10:00:00"),
-  created_at: new Date("2026-04-15  T00:00:00"),
+  created_at: new Date("2026-04-15T00:00:00"),
   updated_at: new Date("2026-04-16T00:00:00"),
   format_rules: "Single Elimination · 1v1",
   description: "Official Clash Royale tournament hosted at Xaviers Institute of Engineering.",
