@@ -55,11 +55,11 @@ const TOURNAMENT: Tournament = {
   prize_pool: 0,
   entry_fee: 0,
   participants_limit: 0,
-  start_date: new Date("2026-04-13T10:30:00"),
-  end_date: new Date("2026-04-13T11:30:00"),
-  registration_deadline: new Date("2026-04-13T10:00:00"),
-  created_at: new Date("2026-04-13T00:00:00"),
-  updated_at: new Date("2026-04-13T00:00:00"),
+  start_date: new Date("2026-04-16T10:30:00"),
+  end_date: new Date("2026-04-16T11:30:00"),
+  registration_deadline: new Date("2026-04-16T10:00:00"),
+  created_at: new Date("2026-04-16T00:00:00"),
+  updated_at: new Date("2026-04-16T00:00:00"),
   format_rules: "Single Elimination · 1v1",
   description: "Official Clash Royale tournament hosted at Xaviers Institute of Engineering.",
   participants_profile: [],
@@ -81,7 +81,7 @@ const TOURNAMENT_META = {
     "Organisers' decision is final on all disputes.",
   ],
   updates: [
-    { time: "2026-04-13 · 00:00", text: "Registration is now open. Welcome to the Clash Royale Champion Trophy!" },
+    { time: "2026-04-16 · 00:00", text: "Registration is now open. Welcome to the Clash Royale Champion Trophy!" },
   ],
 };
 
