@@ -1,4 +1,4 @@
-// basic information that can be resued in types
+// basic information that can be reused in types
 export type Basic_Info = {
     readonly name : string,
     readonly email : string,
@@ -63,7 +63,7 @@ export type Organiser = Basic_Info & {
 export type Player = Basic_Info & {
     _id? : string,
     role : Access_Level_USER_Role.PLAYER,
-    games : Games[], //for now we are only supporting clash royale api 
+    games : Games[],
     player_tag : string,
     skill_level : string,
     tourney_games : string[],
@@ -76,11 +76,24 @@ export type Player = Basic_Info & {
 
 
 //clubs types and enums
-export type Club = {
 
+export type Club = Basic_Info & {
+    _id? : string,
+    role : Access_Level_USER_Role.CLUB,
+    club_name : string,
+    club_tag : string,            // short identifier e.g. #SHDW
+    club_description? : string,
+    club_image? : string,
+    supported_games : Games[],
+    members? : string[],          // array of player _id or usernames
+    readonly is_verified : boolean,
 }
-export type Club_Roles = {
 
+export type Club_Roles = {
+    LEADER : "leader",
+    CO_LEADER : "co_leader",
+    ELDER : "elder",
+    MEMBER : "member",
 }
 /*--------------------------------------------------------*/
 
@@ -162,7 +175,7 @@ export type BracketMatch = {
   winner_tag: string | null;
   status: "pending" | "live" | "completed";
   isBye: boolean;
-  started_at: string | null; // to filter only battles AFTER match started
+  started_at: string | null;
 }
 
 export type BracketDocument = {

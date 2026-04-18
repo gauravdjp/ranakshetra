@@ -1,19 +1,19 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Access_Level_USER_Role, Basic_Info, Games, Player} from "../../../types/index";
+import { Access_Level_USER_Role, Basic_Info, Games, Player, Organiser, Club } from "../../../types/index";
 import { SubmitHandler, useForm, Controller } from "react-hook-form";
 
 
 type Step = "role" | "basic" | "details" | "done";
 
 // ── Step progress bar
-function StepBar({ step }: { step: Step }) {
+function StepBar({ step, roleLabel }: { step: Step; roleLabel: string }) {
   const steps: Step[] = ["role", "basic", "details", "done"];
   const idx = steps.indexOf(step);
   return (
     <div className="flex items-center gap-2 mb-8">
-      {[Access_Level_USER_Role.PLAYER, "Basic Info", "Details"].map((label, i) => (
+      {[roleLabel, "Basic Info", "Details"].map((label, i) => (
         <div key={label} className="flex items-center gap-2 flex-1">
           <div className="flex flex-col items-center gap-1">
             <div
@@ -64,12 +64,25 @@ export default function SignUpPage() {
   // ── Player Details form
   const {
     control,
-    register: registerDetails,
-    handleSubmit: handleDetailsSubmit,
-    formState: { errors: detailsErrors },
+    register: registerPlayer,
+    handleSubmit: handlePlayerSubmit,
+    formState: { errors: playerErrors },
   } = useForm<Player>();
 
- 
+  // ── Organiser Details form
+  const {
+    register: registerOrganiser,
+    handleSubmit: handleOrganiserSubmit,
+    formState: { errors: organiserErrors },
+  } = useForm<Organiser>();
+
+  // ── Club Details form
+  const {
+    register: registerClub,
+    handleSubmit: handleClubSubmit,
+    formState: { errors: clubErrors },
+    control : clubControl,
+  } = useForm<Club>();
 
   // ── Step navigation
   const goNext = () => {
@@ -83,25 +96,60 @@ export default function SignUpPage() {
   };
 
   const onBasicSubmit: SubmitHandler<Basic_Info> = (data) => {
-    console.log("Basic Info:", data);
     setBasicData(data);
     goNext();
   };
 
-  const onDetailsSubmit: SubmitHandler<Player> = async (data) => {
-    console.log("Player Details:", data);
-    const finalPost=  {...basicdata, ...data, role : role} as Player;
+  const postSignup = async (payload: object) => {
     const response = await fetch("/api/auth/signup", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(finalPost),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     });
-    if(response.ok) goNext();
+    if (response.ok) goNext();
     else console.error("Signup failed");
-    
   };
+
+  const onPlayerSubmit: SubmitHandler<Player> = async (data) => {
+    await postSignup({ ...basicdata, ...data, role });
+  };
+
+  const onOrganiserSubmit: SubmitHandler<Organiser> = async (data) => {
+    await postSignup({ ...basicdata, ...data, role });
+  };
+
+  const onClubSubmit: SubmitHandler<Club> = async (data) => {
+    await postSignup({ ...basicdata, ...data, role });
+  };
+
+  // ── Derived labels
+  const roleLabel =
+    role === Access_Level_USER_Role.ORGANISER
+      ? "Organiser"
+      : role === Access_Level_USER_Role.CLUB
+      ? "Club Leader"
+      : "Player";
+
+  const successHeading =
+    role === Access_Level_USER_Role.ORGANISER
+      ? "Arena Registered"
+      : role === Access_Level_USER_Role.CLUB
+      ? "Club Founded"
+      : "Welcome";
+
+  const successBody =
+    role === Access_Level_USER_Role.ORGANISER
+      ? "Your arena is live. Start hosting tournaments and crown champions."
+      : role === Access_Level_USER_Role.CLUB
+      ? "Your club is ready. Recruit members and dominate the leaderboards."
+      : "Your warrior profile is ready. Find a tournament and start climbing the ranks.";
+
+  const profileHref =
+    role === Access_Level_USER_Role.ORGANISER
+      ? "/organiser_profile/1"
+      : role === Access_Level_USER_Role.CLUB
+      ? "/club_profile/1"
+      : "/player_profile/1";
 
   return (
     <>
@@ -232,7 +280,7 @@ export default function SignUpPage() {
             STEP 1 — ROLE SELECTION
         ════════════════════════════════════════════ */}
         {step === "role" && (
-          <div className="w-full max-w-[680px] su-fade">
+          <div className="w-full max-w-[720px] su-fade">
 
             <div className="text-center mb-10">
               <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-2">
@@ -257,7 +305,7 @@ export default function SignUpPage() {
               {/* ── PLAYER */}
               <div
                 onClick={() => setRole(Access_Level_USER_Role.PLAYER)}
-                className={`role-card relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02] ${role === "player" ? "selected" : ""}`}
+                className={`role-card relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02] ${role === Access_Level_USER_Role.PLAYER ? "selected" : ""}`}
                 style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
               >
                 <div
@@ -276,16 +324,17 @@ export default function SignUpPage() {
                 <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/35 leading-relaxed">
                   Compete in tournaments, earn rankings, build your legacy.
                 </p>
-                {role === "player" && (
+                {role === Access_Level_USER_Role.PLAYER && (
                   <div className="absolute top-2 right-3 font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-[#8b5cf6]">
                     ✓ Selected
                   </div>
                 )}
               </div>
 
-              {/* ── ORGANISER — Under Development */}
+              {/* ── ORGANISER */}
               <div
-                className="role-card disabled relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02]"
+                onClick={() => setRole(Access_Level_USER_Role.ORGANISER)}
+                className={`role-card relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02] ${role === Access_Level_USER_Role.ORGANISER ? "selected" : ""}`}
                 style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
               >
                 <div
@@ -302,17 +351,17 @@ export default function SignUpPage() {
                 <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/35 leading-relaxed">
                   Host tournaments, set rules, crown champions.
                 </p>
-                <div
-                  className="absolute top-2 right-3 font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase"
-                  style={{ color: "#f59e0b" }}
-                >
-                  ⚒ Coming Soon
-                </div>
+                {role === Access_Level_USER_Role.ORGANISER && (
+                  <div className="absolute top-2 right-3 font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-[#8b5cf6]">
+                    ✓ Selected
+                  </div>
+                )}
               </div>
 
-              {/* ── CLUB — Under Development */}
+              {/* ── CLUB LEADER */}
               <div
-                className="role-card disabled relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02]"
+                onClick={() => setRole(Access_Level_USER_Role.CLUB)}
+                className={`role-card relative p-6 border border-[rgba(139,92,246,0.2)] bg-white/[0.02] ${role === Access_Level_USER_Role.CLUB ? "selected" : ""}`}
                 style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
               >
                 <div
@@ -327,31 +376,24 @@ export default function SignUpPage() {
                 <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-1">For the</p>
                 <h3 className="font-[Cinzel,serif] text-lg font-bold text-white mb-2">Club Leader</h3>
                 <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/35 leading-relaxed">
-                  Form a guild, recruit warriors, dominate together.
+                  Build a squad, manage a club, rise as a faction.
                 </p>
-                <div
-                  className="absolute top-2 right-3 font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase"
-                  style={{ color: "#f59e0b" }}
-                >
-                  ⚒ Coming Soon
-                </div>
+                {role === Access_Level_USER_Role.CLUB && (
+                  <div className="absolute top-2 right-3 font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-[#8b5cf6]">
+                    ✓ Selected
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Guest option */}
-            <Link
-              href="/"
-              className="w-full py-3 border border-[rgba(139,92,246,0.15)] bg-white/[0.01] flex items-center justify-center gap-3 hover:bg-[rgba(139,92,246,0.05)] hover:border-[rgba(139,92,246,0.3)] transition-all duration-300 no-underline"
-              style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
-            >
-              <svg viewBox="0 0 20 14" fill="none" className="w-4 h-4 opacity-40">
-                <path d="M1 7C1 7 4 1 10 1C16 1 19 7 19 7C19 7 16 13 10 13C4 13 1 7 1 7Z" stroke="white" strokeWidth="1.5" />
-                <circle cx="10" cy="7" r="2.5" stroke="white" strokeWidth="1.5" />
-              </svg>
-              <span className="font-[Rajdhani,sans-serif] text-[0.8rem] tracking-[0.2em] uppercase text-white/30">
+            <div className="text-center mb-6">
+              <Link
+                href="/"
+                className="font-[Rajdhani,sans-serif] text-[0.72rem] tracking-[0.15em] uppercase text-white/20 hover:text-[#8b5cf6] transition-colors no-underline"
+              >
                 Just Exploring — Enter as Guest
-              </span>
-            </Link>
+              </Link>
+            </div>
 
             <div className="mt-6 flex justify-between items-center">
               <Link
@@ -362,7 +404,7 @@ export default function SignUpPage() {
               </Link>
               <button
                 onClick={goNext}
-                disabled={role !== "player"}
+                disabled={!role}
                 className="rk-btn-primary px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.2em] uppercase text-white"
               >
                 Continue ⟶
@@ -372,16 +414,16 @@ export default function SignUpPage() {
         )}
 
         {/* ════════════════════════════════════════════
-            STEP 2 — BASIC INFO
+            STEP 2 — BASIC INFO  (shared for all roles)
         ════════════════════════════════════════════ */}
         {step === "basic" && (
           <div className="rk-card relative w-full max-w-[500px] bg-[rgba(255,255,255,0.02)] border border-[rgba(139,92,246,0.2)] p-8 step-in">
 
-            <StepBar step={step} />
+            <StepBar step={step} roleLabel={roleLabel} />
 
             <div className="mb-6">
               <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-1">
-                Step 1 of 2 · Warrior
+                Step 1 of 2 · {roleLabel}
               </p>
               <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Basic Information</h2>
             </div>
@@ -402,7 +444,7 @@ export default function SignUpPage() {
                 {errors.name && <p className="warn">{errors.name.message}</p>}
 
                 <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
-                  Username
+                  USERNAME
                 </label>
                 <input
                   {...register("username", { required: "PLEASE ENTER USERNAME" })}
@@ -533,92 +575,312 @@ export default function SignUpPage() {
         )}
 
         {/* ════════════════════════════════════════════
-            STEP 3 — PLAYER DETAILS
+            STEP 3 — DETAILS  (role-specific)
         ════════════════════════════════════════════ */}
         {step === "details" && (
           <div className="rk-card relative w-full max-w-[560px] bg-[rgba(255,255,255,0.02)] border border-[rgba(139,92,246,0.2)] p-8 step-in">
 
-            <StepBar step={step} />
+            <StepBar step={step} roleLabel={roleLabel} />
 
-            <div className="mb-5">
-              <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-1">
-                Step 2 of 2 · Warrior
-              </p>
-              <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Battle Profile</h2>
-            </div>
+            {/* ── PLAYER DETAILS ── */}
+            {role === Access_Level_USER_Role.PLAYER && (
+              <>
+                <div className="mb-5">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-1">
+                    Step 2 of 2 · Warrior
+                  </p>
+                  <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Battle Profile</h2>
+                </div>
 
-            <form onSubmit={handleDetailsSubmit(onDetailsSubmit)}>
-              <div className="scroll-form">
+                <form onSubmit={handlePlayerSubmit(onPlayerSubmit)}>
+                  <div className="scroll-form">
 
-                {/* PLAYER TAG */}
-                <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
-                  PLAYER TAG / IGN
-                </label>
-                <input
-                  {...registerDetails("player_tag", {
-                    required: "PLEASE ENTER YOUR PLAYER TAG / IGN",
-                  })}
-                  type="text"
-                  placeholder="e.g. ShadowStrike#1337"
-                  className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
-                  style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
-                />
-                {detailsErrors.player_tag && <p className="warn">{detailsErrors.player_tag.message}</p>}
+                    {/* PLAYER TAG */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      PLAYER TAG / IGN
+                    </label>
+                    <input
+                      {...registerPlayer("player_tag", { required: "PLEASE ENTER YOUR PLAYER TAG / IGN" })}
+                      type="text"
+                      placeholder="e.g. ShadowStrike#1337"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {playerErrors.player_tag && <p className="warn">{playerErrors.player_tag.message}</p>}
 
-                {/* TOURNEY GAMES — Controller with chip toggle */}
-                <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
-                  GAMES I&apos;LL COMPETE IN
-                </label>
-                <Controller
-                  name="tourney_games"
-                  control={control}
-                  rules={{ validate: (v) => (v && v.length > 0) || "SELECT AT LEAST ONE GAME TO COMPETE IN" }}
-                  render={({ field }) => (
-                    <div className="flex flex-wrap gap-2 mb-1">
-                      {Object.values(Games).map((game) => (
-                        <button
-                          key={game}
-                          type="button"
-                          onClick={() => {
-                            const current = field.value ?? [];
-                            const updated = current.includes(game)
-                              ? current.filter((g) => g !== game)
-                              : [...current, game];
-                            field.onChange(updated);
-                          }}
-                          className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.1em] uppercase px-3 py-1.5 border transition-all duration-200"
-                          style={{
-                            clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
-                            borderColor: field.value?.includes(game) ? "rgba(139,92,246,0.8)" : "rgba(139,92,246,0.2)",
-                            background: field.value?.includes(game) ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.03)",
-                            color: field.value?.includes(game) ? "#a78bfa" : "rgba(255,255,255,0.35)",
-                          }}
-                        >
-                          {game}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                />
-                {detailsErrors.tourney_games && <p className="warn">{detailsErrors.tourney_games.message}</p>}
-              </div>
+                    {/* DEVICE */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      PRIMARY DEVICE
+                    </label>
+                    <input
+                      {...registerPlayer("device", { required: "PLEASE ENTER YOUR PRIMARY DEVICE" })}
+                      type="text"
+                      placeholder="e.g. Android, iOS, PC"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {playerErrors.device && <p className="warn">{playerErrors.device.message}</p>}
 
-              <div className="flex justify-between mt-6">
-                <button
-                  type="button"
-                  onClick={goBack}
-                  className="rk-btn-ghost px-6 py-3 font-[Rajdhani,sans-serif] font-semibold text-[0.85rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)]"
-                >
-                  ← Back
-                </button>
-                <button
-                  type="submit"
-                  className="rk-btn-primary px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.2em] uppercase text-white"
-                >
-                  Forge Legend ⟶
-                </button>
-              </div>
-            </form>
+                    {/* SKILL LEVEL */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      SKILL LEVEL
+                    </label>
+                    <Controller
+                      name="skill_level"
+                      control={control}
+                      rules={{ required: "SELECT YOUR SKILL LEVEL" }}
+                      render={({ field }) => (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                          {["Beginner", "Intermediate", "Advanced", "Pro"].map((level) => (
+                            <button
+                              key={level}
+                              type="button"
+                              onClick={() => field.onChange(level)}
+                              className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.1em] uppercase px-3 py-1.5 border transition-all duration-200"
+                              style={{
+                                clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                                borderColor: field.value === level ? "rgba(139,92,246,0.8)" : "rgba(139,92,246,0.2)",
+                                background: field.value === level ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.03)",
+                                color: field.value === level ? "#a78bfa" : "rgba(255,255,255,0.35)",
+                              }}
+                            >
+                              {level}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    />
+                    {playerErrors.skill_level && <p className="warn">{playerErrors.skill_level.message}</p>}
+
+                    {/* TOURNEY GAMES */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      GAMES I&apos;LL COMPETE IN
+                    </label>
+                    <Controller
+                      name="tourney_games"
+                      control={control}
+                      rules={{ validate: (v) => (v && v.length > 0) || "SELECT AT LEAST ONE GAME" }}
+                      render={({ field }) => (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                          {Object.values(Games).map((game) => (
+                            <button
+                              key={game}
+                              type="button"
+                              onClick={() => {
+                                const current = field.value ?? [];
+                                const updated = current.includes(game)
+                                  ? current.filter((g) => g !== game)
+                                  : [...current, game];
+                                field.onChange(updated);
+                              }}
+                              className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.1em] uppercase px-3 py-1.5 border transition-all duration-200"
+                              style={{
+                                clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                                borderColor: field.value?.includes(game) ? "rgba(139,92,246,0.8)" : "rgba(139,92,246,0.2)",
+                                background: field.value?.includes(game) ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.03)",
+                                color: field.value?.includes(game) ? "#a78bfa" : "rgba(255,255,255,0.35)",
+                              }}
+                            >
+                              {game}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    />
+                    {playerErrors.tourney_games && <p className="warn">{playerErrors.tourney_games.message}</p>}
+
+                    {/* BIO */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      BIO <span className="text-white/30 normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <textarea
+                      {...registerPlayer("description")}
+                      rows={3}
+                      placeholder="Tell rivals who you are..."
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300 resize-none"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between mt-6">
+                    <button type="button" onClick={goBack} className="rk-btn-ghost px-6 py-3 font-[Rajdhani,sans-serif] font-semibold text-[0.85rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)]">
+                      ← Back
+                    </button>
+                    <button type="submit" className="rk-btn-primary px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.2em] uppercase text-white">
+                      Forge Legend ⟶
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* ── ORGANISER DETAILS ── */}
+            {role === Access_Level_USER_Role.ORGANISER && (
+              <>
+                <div className="mb-5">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-1">
+                    Step 2 of 2 · Organiser
+                  </p>
+                  <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Arena Details</h2>
+                </div>
+
+                <form onSubmit={handleOrganiserSubmit(onOrganiserSubmit)}>
+                  <div className="scroll-form">
+
+                    {/* ARENA NAME */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      ARENA NAME
+                    </label>
+                    <input
+                      {...registerOrganiser("arena_name", { required: "PLEASE ENTER YOUR ARENA NAME" })}
+                      type="text"
+                      placeholder="e.g. The Iron Coliseum"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {organiserErrors.arena_name && <p className="warn">{organiserErrors.arena_name.message}</p>}
+
+                    {/* ARENA LOCATION */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      ARENA LOCATION
+                    </label>
+                    <input
+                      {...registerOrganiser("arena_location", { required: "PLEASE ENTER YOUR ARENA LOCATION" })}
+                      type="text"
+                      placeholder="e.g. Mumbai, India / Online"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {organiserErrors.arena_location && <p className="warn">{organiserErrors.arena_location.message}</p>}
+
+                    {/* ARENA DESCRIPTION */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      ARENA DESCRIPTION <span className="text-white/30 normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <textarea
+                      {...registerOrganiser("arena_description")}
+                      rows={4}
+                      placeholder="Describe the arena, its history, and the kind of tournaments it hosts..."
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300 resize-none"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between mt-6">
+                    <button type="button" onClick={goBack} className="rk-btn-ghost px-6 py-3 font-[Rajdhani,sans-serif] font-semibold text-[0.85rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)]">
+                      ← Back
+                    </button>
+                    <button type="submit" className="rk-btn-primary px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.2em] uppercase text-white">
+                      Open the Arena ⟶
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+
+            {/* ── CLUB LEADER DETAILS ── */}
+            {role === Access_Level_USER_Role.CLUB && (
+              <>
+                <div className="mb-5">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-1">
+                    Step 2 of 2 · Club Leader
+                  </p>
+                  <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Club Details</h2>
+                </div>
+
+                <form onSubmit={handleClubSubmit(onClubSubmit)}>
+                  <div className="scroll-form">
+
+                    {/* CLUB NAME */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      CLUB NAME
+                    </label>
+                    <input
+                      {...registerClub("club_name", { required: "PLEASE ENTER YOUR CLUB NAME" })}
+                      type="text"
+                      placeholder="e.g. Shadow Syndicate"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {clubErrors.club_name && <p className="warn">{clubErrors.club_name.message}</p>}
+
+                    {/* CLUB TAG */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      CLUB TAG <span className="text-white/30 normal-case tracking-normal">(short identifier, e.g. #SHDW)</span>
+                    </label>
+                    <input
+                      {...registerClub("club_tag", {
+                        required: "PLEASE ENTER A CLUB TAG",
+                        pattern: { value: /^#[A-Z0-9]{2,8}$/, message: "FORMAT: #LETTERS (2–8 chars, uppercase)" },
+                      })}
+                      type="text"
+                      placeholder="#SHDW"
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                    {clubErrors.club_tag && <p className="warn">{clubErrors.club_tag.message}</p>}
+
+                    {/* SUPPORTED GAMES */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      GAMES THIS CLUB SUPPORTS
+                    </label>
+                    <Controller
+                      name="supported_games"
+                      control={clubControl}
+                      rules={{ validate: (v) => (v && v.length > 0) || "SELECT AT LEAST ONE GAME" }}
+                      render={({ field }) => (
+                        <div className="flex flex-wrap gap-2 mb-1">
+                          {Object.values(Games).map((game) => (
+                            <button
+                              key={game}
+                              type="button"
+                              onClick={() => {
+                                const current :Games[] = (field.value as Games[]) ?? [];
+                                const updated = current.includes(game)
+                                  ? current.filter((g: string) => g !== game)
+                                  : [...current, game];
+                                field.onChange(updated);
+                              }}
+                              className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.1em] uppercase px-3 py-1.5 border transition-all duration-200"
+                              style={{
+                                clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                                borderColor: (field.value as Games[])?.includes(game) ? "rgba(139,92,246,0.8)" : "rgba(139,92,246,0.2)",
+                                background: (field.value as Games[])?.includes(game) ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.03)",
+                                color: (field.value as Games[])?.includes(game) ? "#a78bfa" : "rgba(255,255,255,0.35)",
+                              }}
+                            >
+                              {game}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    />
+                    {clubErrors.supported_games && <p className="warn">{clubErrors.supported_games.message}</p>}
+
+                    {/* CLUB DESCRIPTION */}
+                    <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
+                      CLUB DESCRIPTION <span className="text-white/30 normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <textarea
+                      {...registerClub("club_description")}
+                      rows={4}
+                      placeholder="What's your club about? Recruiting style, goals, ethos..."
+                      className="mb-1 rk-input w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.2)] text-white/80 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 placeholder:text-white/20 transition-all duration-300 resize-none"
+                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
+                    />
+                  </div>
+
+                  <div className="flex justify-between mt-6">
+                    <button type="button" onClick={goBack} className="rk-btn-ghost px-6 py-3 font-[Rajdhani,sans-serif] font-semibold text-[0.85rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)]">
+                      ← Back
+                    </button>
+                    <button type="submit" className="rk-btn-primary px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.2em] uppercase text-white">
+                      Found the Club ⟶
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
           </div>
         )}
 
@@ -649,14 +911,14 @@ export default function SignUpPage() {
             <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.4em] uppercase text-[#8b5cf6] mb-2">
               Account Created
             </p>
-            <h2 className="font-[Cinzel,serif] text-2xl font-black text-white mb-3">Welcome</h2>
+            <h2 className="font-[Cinzel,serif] text-2xl font-black text-white mb-3">{successHeading}</h2>
             <p className="font-[Rajdhani,sans-serif] text-[0.85rem] text-white/40 leading-relaxed mb-8">
-              Your warrior profile is ready. Find a tournament and start climbing the ranks.
+              {successBody}
             </p>
 
             <div className="space-y-3">
               <Link
-                href="/player_profile/1"
+                href={profileHref}
                 className="rk-btn-primary w-full py-3 font-[Rajdhani,sans-serif] font-bold text-[0.9rem] tracking-[0.2em] uppercase text-white flex items-center justify-center no-underline"
               >
                 CHECKOUT YOUR PROFILE PAGE ⟶
