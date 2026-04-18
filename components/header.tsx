@@ -208,22 +208,7 @@ export default function Header() {
                 Logout
               </button>
 
-              {/* Primary button — solid gold with shimmer on hover */}
-              <Link
-                href="/enter"
-                className="
-                  relative overflow-hidden
-                  px-[1.3rem] py-0.5rem
-                  font-bold text-[0.88rem] tracking-[0.12em] uppercase
-                  text-white
-                  bg-gradient-to-br from-[#a78bfa] to-[#8b5cf6]
-                  hover:shadow-[0_0_20px_rgba(139,92,246,0.5)] hover:-translate-y-px
-                  transition-all duration-300 no-underline
-                "
-                style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
-              >
-                Enter Battle
-              </Link>
+              
             </div>
 
             {/* MobileMenu — client component, handles hamburger + dropdown */}

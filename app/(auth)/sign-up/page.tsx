@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Access_Level_USER_Role, Basic_Info, Games, Player} from "../../../types/index";
-import { SubmitHandler, useForm, Controller, set } from "react-hook-form";
+import { SubmitHandler, useForm, Controller } from "react-hook-form";
 
 
 type Step = "role" | "basic" | "details" | "done";
@@ -601,53 +601,6 @@ export default function SignUpPage() {
                   )}
                 />
                 {detailsErrors.tourney_games && <p className="warn">{detailsErrors.tourney_games.message}</p>}
-
-                {/* PRIMARY DEVICE — Controller */}
-                <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
-                  PRIMARY DEVICE
-                </label>
-                <Controller
-                  name="device"
-                  control={control}
-                  rules={{ required: "PLEASE SELECT YOUR PRIMARY DEVICE" }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="mb-1 rk-input w-full bg-[#0a0a1a] border border-[rgba(139,92,246,0.2)] text-white/70 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 transition-all duration-300 appearance-none cursor-pointer"
-                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
-                    >
-                      <option value="" disabled className="text-white/30">Select...</option>
-                      {["Mobile", "PC", "Console", "Mobile + PC"].map((d) => (
-                        <option key={d} value={d} className="bg-[#0a0a1a]">{d}</option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {detailsErrors.device && <p className="warn">{detailsErrors.device.message}</p>}
-
-                {/* SKILL LEVEL — Controller */}
-                <label className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">
-                  SKILL LEVEL
-                </label>
-                <Controller
-                  name="skill_level"
-                  control={control}
-                  rules={{ required: "PLEASE SELECT YOUR SKILL LEVEL" }}
-                  render={({ field }) => (
-                    <select
-                      {...field}
-                      className="mb-1 rk-input w-full bg-[#0a0a1a] border border-[rgba(139,92,246,0.2)] text-white/70 font-[Rajdhani,sans-serif] text-[0.9rem] px-4 py-3 transition-all duration-300 appearance-none cursor-pointer"
-                      style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
-                    >
-                      <option value="" disabled className="text-white/30">Select...</option>
-                      {["Beginner", "Amateur", "Intermediate", "Semi-Pro", "Pro"].map((s) => (
-                        <option key={s} value={s} className="bg-[#0a0a1a]">{s}</option>
-                      ))}
-                    </select>
-                  )}
-                />
-                {detailsErrors.skill_level && <p className="warn">{detailsErrors.skill_level.message}</p>}
-
               </div>
 
               <div className="flex justify-between mt-6">

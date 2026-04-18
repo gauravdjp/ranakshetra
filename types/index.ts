@@ -11,6 +11,7 @@ export type Basic_Info = {
     readonly country : string,
     readonly created_at : Date,
     readonly updated_at : Date,
+    readonly access_role : Access_Level.USER,
 }
 /*--------------------------------------------------------*/
 
