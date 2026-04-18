@@ -171,14 +171,28 @@ export default function Header() {
               >
                 Login
               </Link>
+              <Link
+                href="/sign-up"
+                className="
+                  px-[1.1rem] py-[0.45rem]
+                  font-semibold text-[0.9rem] tracking-0.1em uppercase
+                  text-[#FFB596] bg-transparent
+                  border border-[rgba(232,108,47,0.3)]
+                  hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596]
+                  transition-all duration-300 no-underline
+                "
+                style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
+              >
+                SIGNUP
+              </Link>
 
-              <button
+              {/*<button
                 className="cursor-pointer px-[1.1rem] py-[0.45rem] font-semibold text-[0.9rem] tracking-0.1em uppercase text-[#FFB596] bg-transparent border border-[rgba(232,108,47,0.3)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596] transition-all duration-300"
                 style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
                 onClick={() => signOut({ callbackUrl: "/" })}
               >
                 Logout
-              </button>
+              </button>*/}
             </div>
 
             <MobileMenu />
