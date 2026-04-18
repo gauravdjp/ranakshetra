@@ -5,4 +5,4 @@ export default function ArenaIDPage() {
       <p>Welcome to the ArenaIDPage! Here you can battle against other players and climb the ranks.</p>
     </div>
   );
-}   ``
+}
