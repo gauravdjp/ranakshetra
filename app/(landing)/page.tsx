@@ -8,29 +8,53 @@ export default function Home() {
       ══════════════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 pt-32 pb-16 overflow-hidden bg-[#17151F]">
 
-        {/* Background grid — fades in at 4% opacity */}
+        {/* Game art background image */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: "url('/images/unnamed.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center 30%",
+            backgroundRepeat: "no-repeat",
+            opacity: 0.35,
+          }}
+        />
+
+        {/* Deep colour-grade overlay — pulls image into the dark purple palette */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "linear-gradient(160deg, rgba(15,14,20,0.55) 0%, rgba(23,10,5,0.4) 50%, rgba(15,14,20,0.7) 100%)", mixBlendMode: "multiply" }}
+        />
+
+        {/* Radial vignette — crushes edges, keeps center luminous */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{ background: "radial-gradient(ellipse 75% 65% at 50% 45%, transparent 0%, rgba(15,14,20,0.82) 70%, #17151F 100%)" }}
+        />
+
+        {/* Orange warmth bloom — ties image fire tones to the accent palette */}
+        <div
+          className="absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] pointer-events-none"
+          style={{ background: "radial-gradient(ellipse, rgba(232,108,47,0.18) 0%, transparent 65%)" }}
+        />
+
+        {/* Cyan headline glow */}
+        <div
+          className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[220px] pointer-events-none"
+          style={{ background: "radial-gradient(ellipse, rgba(116,209,255,0.1) 0%, transparent 70%)" }}
+        />
+
+        {/* Background grid — very subtle over the image */}
         <div
           className="anim-grid absolute inset-0 pointer-events-none"
           style={{
-            backgroundImage: "linear-gradient(rgba(232,108,47,0.12) 1px, transparent 1px), linear-gradient(90deg, rgba(232,108,47,0.12) 1px, transparent 1px)",
+            backgroundImage: "linear-gradient(rgba(232,108,47,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(232,108,47,0.07) 1px, transparent 1px)",
             backgroundSize: "60px 60px"
           }}
         />
 
-        {/* Radial vignette — keeps focus on center */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, #17151F 70%)" }}
-        />
-
-        {/* Cyan glow behind headline */}
-        <div
-          className="absolute top-[40%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] pointer-events-none"
-          style={{ background: "radial-gradient(ellipse, rgba(116,209,255,0.15) 0%, transparent 70%)" }}
-        />
-
         {/* Bottom fade into next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#17151F] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-b from-transparent to-[#17151F] pointer-events-none" />
 
         {/* Eyebrow tag */}
         <p className="anim-fade-up-1 relative z-10 text-[1.05rem] font-semibold tracking-[0.4em] uppercase text-[#E86C2F] border border-[rgba(232,108,47,0.3)] px-5 py-2 mb-8">
