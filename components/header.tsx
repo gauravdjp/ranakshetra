@@ -180,7 +180,7 @@ export default function Header() {
                   border border-[rgba(232,108,47,0.3)]
                   hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596]
                   transition-all duration-300 no-underline
-                "
+                 "
                 style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
               >
                 SIGNUP
