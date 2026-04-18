@@ -6,7 +6,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 1 — HERO
       ══════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 pt-32 pb-16 overflow-hidden bg-[#E8C9A8]">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 pt-32 pb-16 overflow-hidden bg-[#2C2A35]">
 
         {/* Background grid — fades in at 4% opacity */}
         <div
@@ -20,7 +20,7 @@ export default function Home() {
         {/* Radial vignette — keeps focus on center */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, #E8C9A8 70%)" }}
+          style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, #2C2A35 70%)" }}
         />
 
         {/* Cyan glow behind headline */}
@@ -30,7 +30,7 @@ export default function Home() {
         />
 
         {/* Bottom fade into next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#E8C9A8] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#2C2A35] pointer-events-none" />
 
         {/* Eyebrow tag */}
         <p className="anim-fade-up-1 relative z-10 text-[1.05rem] font-semibold tracking-[0.4em] uppercase text-[#E86C2F] border border-[rgba(232,108,47,0.3)] px-5 py-2 mb-8">
@@ -43,18 +43,18 @@ export default function Home() {
           style={{ fontSize: "clamp(3rem, 10vw, 7.5rem)" }}
         >
           <span className="block" style={{
-            background: "linear-gradient(135deg, #1A0800 0%, #E86C2F 40%, #FFB596 70%, #74D1FF 100%)",
+            background: "linear-gradient(135deg, #fff 0%, #FFB596 30%, #E86C2F 60%, #74D1FF 100%)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
           }}>Rana</span>
           <span className="block" style={{
-            background: "linear-gradient(135deg, #1A0800 0%, #E86C2F 40%, #FFB596 70%, #74D1FF 100%)",
+            background: "linear-gradient(135deg, #fff 0%, #FFB596 30%, #E86C2F 60%, #74D1FF 100%)",
             WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
           }}>kshetra</span>
         </h1>
 
         {/* Subtitle */}
         <p
-          className="anim-fade-up-3 relative z-10 font-[Rajdhani,sans-serif] font-normal text-[#3D1F00]/55 max-w-[520px] leading-relaxed mt-6"
+          className="anim-fade-up-3 relative z-10 font-[Rajdhani,sans-serif] font-normal text-white/45 max-w-[520px] leading-relaxed mt-6"
           style={{ fontSize: "clamp(1rem, 2.5vw, 1.25rem)" }}
         >
           India's premier tournament organising platform. Host battles, forge legacies, and let the worthy rise.
@@ -71,7 +71,7 @@ export default function Home() {
           </Link>
           <Link
             href="/register"
-            className="px-9 py-3 font-[Rajdhani,sans-serif] font-semibold text-[1.1rem] tracking-[0.15em] uppercase text-[#E86C2F] bg-transparent border border-[rgba(232,108,47,0.4)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] transition-all duration-300 no-underline"
+            className="px-9 py-3 font-[Rajdhani,sans-serif] font-semibold text-[1.1rem] tracking-[0.15em] uppercase text-[#FFB596] bg-transparent border border-[rgba(232,108,47,0.4)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] transition-all duration-300 no-underline"
             style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
           >
             Join the Club
@@ -83,14 +83,14 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 2 — THREE PILLARS
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative px-8 py-24 bg-[#DEB88A] overflow-hidden">
+      <section className="section-line relative px-8 py-24 bg-[#232130] overflow-hidden">
 
         <div className="text-center mb-5">
           <p className="font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.4em] uppercase text-[#E86C2F] mb-4">
             The Three Forces
           </p>
           <h2
-            className="font-[Cinzel,serif] font-bold text-[#1A0800] tracking-[0.05em]"
+            className="font-[Cinzel,serif] font-bold text-white tracking-[0.05em]"
             style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)" }}
           >
             Who Enters the{" "}
@@ -120,7 +120,7 @@ export default function Home() {
                 <circle cx="90" cy="90" r="28" stroke="#E86C2F" strokeWidth="1" opacity="0.5" />
               </g>
               <circle cx="90" cy="90" r="12" fill="#E86C2F" opacity="0.9" />
-              <circle cx="90" cy="90" r="6" fill="#E8C9A8" />
+              <circle cx="90" cy="90" r="6" fill="#2C2A35" />
               <circle cx="90" cy="90" r="2" fill="#FFB596" />
             </svg>
           </div>
@@ -140,8 +140,8 @@ export default function Home() {
               </svg>
             </div>
             <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-2">For the Commander</p>
-            <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Organiser</h3>
-            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5">
+            <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Organiser</h3>
+            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5">
               Create and manage tournaments with full control. Set brackets, rules, prizes, and watch your event unfold on the battlefield.
             </p>
             <Link href="/organise" className="inline-flex items-center gap-2 text-[0.95rem] font-semibold tracking-[0.2em] uppercase text-[#E86C2F] no-underline hover:gap-4 transition-all duration-300">
@@ -161,8 +161,8 @@ export default function Home() {
               </svg>
             </div>
             <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-2">For the Warrior</p>
-            <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Player</h3>
-            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5">
+            <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Player</h3>
+            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5">
               Register for tournaments, track your rank, and prove your worth. Every match is a step toward glory on the leaderboard.
             </p>
             <Link href="/tournaments" className="inline-flex items-center gap-2 text-[0.95rem] font-semibold tracking-[0.2em] uppercase text-[#E86C2F] no-underline hover:gap-4 transition-all duration-300">
@@ -180,8 +180,8 @@ export default function Home() {
               </svg>
             </div>
             <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-2">For the Brotherhood</p>
-            <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Clubs</h3>
-            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5">
+            <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Clubs</h3>
+            <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5">
               Unite under one banner. Form or join a club, compete as a team, and build a legacy that echoes across every arena.
             </p>
             <Link href="/clubs" className="inline-flex items-center gap-2 text-[0.95rem] font-semibold tracking-[0.2em] uppercase text-[#E86C2F] no-underline hover:gap-4 transition-all duration-300">
@@ -195,17 +195,17 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 3 — SUPPORTED GAMES (MARQUEE)
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-20 bg-[#E3C09B] overflow-hidden">
+      <section className="section-line relative py-20 bg-[#282633] overflow-hidden">
 
         <div className="text-center px-8 mb-12">
           <p className="font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.4em] uppercase text-[#E86C2F] mb-3">Battlegrounds</p>
-          <h2 className="font-[Cinzel,serif] font-bold text-[#1A0800] tracking-[0.05em] mb-3" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)" }}>
+          <h2 className="font-[Cinzel,serif] font-bold text-white tracking-[0.05em] mb-3" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)" }}>
             20 Games.{" "}
             <span style={{ background: "linear-gradient(135deg, #C84E10, #E86C2F)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               One Arena.
             </span>
           </h2>
-          <p className="font-[Rajdhani,sans-serif] text-[1.1rem] text-[#3D1F00]/50 max-w-[480px] mx-auto leading-relaxed">
+          <p className="font-[Rajdhani,sans-serif] text-[1.1rem] text-white/40 max-w-[480px] mx-auto leading-relaxed">
             From mobile battlegrounds to PC esports — if you play it, we host it.
           </p>
         </div>
@@ -225,7 +225,7 @@ export default function Home() {
                   <div key={name} className="game-tag flex-shrink-0 flex items-center gap-3 px-5 py-3 border border-[rgba(232,108,47,0.2)] bg-[rgba(232,108,47,0.04)] cursor-default transition-all duration-300"
                     style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-[#E86C2F] opacity-60 flex-shrink-0" />
-                    <span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.1em] uppercase text-[#3D1F00]/75 whitespace-nowrap">{name}</span>
+                    <span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.1em] uppercase text-white/70 whitespace-nowrap">{name}</span>
                     <span className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.2em] uppercase text-[rgba(232,108,47,0.5)] whitespace-nowrap">{genre}</span>
                   </div>
                 ))}
@@ -247,7 +247,7 @@ export default function Home() {
                   <div key={name} className="game-tag flex-shrink-0 flex items-center gap-3 px-5 py-3 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.03)] cursor-default transition-all duration-300"
                     style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
                     <span className="w-1.5 h-1.5 rounded-full bg-[#E86C2F] opacity-40 flex-shrink-0" />
-                    <span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.1em] uppercase text-[#3D1F00]/65 whitespace-nowrap">{name}</span>
+                    <span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.1em] uppercase text-white/60 whitespace-nowrap">{name}</span>
                     <span className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.2em] uppercase text-[rgba(232,108,47,0.4)] whitespace-nowrap">{genre}</span>
                   </div>
                 ))}
@@ -256,7 +256,7 @@ export default function Home() {
           </div>
         </div>
 
-        <p className="text-center font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.35em] uppercase text-[#3D1F00]/30 mt-10">
+        <p className="text-center font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.35em] uppercase text-white/25 mt-10">
           Hover to pause · More games coming
         </p>
       </section>
@@ -264,14 +264,14 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 4 — ANIMATED RANKING BRACKET
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-24 bg-[#E0BB94] overflow-hidden">
+      <section className="section-line relative py-24 bg-[#272533] overflow-hidden">
 
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(232,108,47,0.07) 0%, transparent 70%)"
         }} />
 
         <div className="text-center mb-14 px-8">
-          <h2 className="font-[Cinzel,serif] font-bold text-[#1A0800] tracking-[0.05em]" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)" }}>
+          <h2 className="font-[Cinzel,serif] font-bold text-white tracking-[0.05em]" style={{ fontSize: "clamp(1.6rem, 4vw, 2.5rem)" }}>
             Rise Through{" "}
             <span style={{ background: "linear-gradient(135deg, #C84E10, #E86C2F)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>the Brackets</span>
           </h2>
@@ -298,50 +298,50 @@ export default function Home() {
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.9rem] tracking-[0.3em] uppercase text-[#E86C2F] opacity-70" style={{ left: "75px", top: "8px" }}>Club / College</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.5)] bg-[rgba(232,108,47,0.06)]" style={{ left:"75px",top:"32px",width:"160px",height:"36px",animationDelay:"0.2s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#E86C2F] opacity-50 w-3">1</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#1A0800]/90 flex-1 truncate">TEAM A</span>
+              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#E86C2F] opacity-50 w-3">1</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate">TEAM A</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"76px",width:"160px",height:"36px",animationDelay:"0.3s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">8</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate">TEAM B</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">8</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM B</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"140px",width:"160px",height:"36px",animationDelay:"0.4s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">4</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/60 flex-1 truncate">TEAM C</span>
+              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">4</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM C</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"184px",width:"160px",height:"36px",animationDelay:"0.5s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">5</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate">TEAM D</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">5</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM D</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"248px",width:"160px",height:"36px",animationDelay:"0.6s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">3</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/60 flex-1 truncate">TEAM E</span>
+              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">3</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM E</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"292px",width:"160px",height:"36px",animationDelay:"0.7s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">6</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate">TEAM F</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">6</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM F</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"356px",width:"160px",height:"36px",animationDelay:"0.8s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">2</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/60 flex-1 truncate">TEAM G</span>
+              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">2</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate">TEAM G</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"75px",top:"400px",width:"160px",height:"36px",animationDelay:"0.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-[#3D1F00]/30 w-3">7</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate">TEAM H</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 w-3">7</span><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate">TEAM H</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.9rem] tracking-[0.3em] uppercase text-[#E86C2F] opacity-70" style={{ left:"305px",top:"8px" }}>City Level</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.5)] bg-[rgba(232,108,47,0.06)]" style={{ left:"305px",top:"54px",width:"160px",height:"36px",animationDelay:"1.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#1A0800]/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase text-[#E86C2F] pr-2 opacity-70">↑</span>
+              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase text-[#E86C2F] pr-2 opacity-70">↑</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"305px",top:"162px",width:"160px",height:"36px",animationDelay:"2.0s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate ml-1">TEAM C</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM C</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"305px",top:"270px",width:"160px",height:"36px",animationDelay:"2.1s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/60 flex-1 truncate ml-1">TEAM E</span>
+              <div className="w-0.5 h-full bg-[rgba(232,108,47,0.4)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/55 flex-1 truncate ml-1">TEAM E</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"305px",top:"378px",width:"160px",height:"36px",animationDelay:"2.2s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate ml-1">TEAM G</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM G</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.9rem] tracking-[0.3em] uppercase text-[#E86C2F] opacity-70" style={{ left:"535px",top:"8px" }}>National</p>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.5)] bg-[rgba(232,108,47,0.07)]" style={{ left:"535px",top:"108px",width:"160px",height:"36px",animationDelay:"2.8s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#1A0800]/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase text-[#E86C2F] pr-2 opacity-70">↑</span>
+              <div className="w-0.5 h-full bg-[#E86C2F] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/90 flex-1 truncate ml-1">TEAM A</span><span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase text-[#E86C2F] pr-2 opacity-70">↑</span>
             </div>
             <div className="b-slot absolute flex items-center gap-2 border border-[rgba(232,108,47,0.15)] bg-[rgba(232,108,47,0.04)]" style={{ left:"535px",top:"324px",width:"160px",height:"36px",animationDelay:"2.9s",clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-[#3D1F00]/32 flex-1 truncate ml-1">TEAM E</span>
+              <div className="w-0.5 h-full bg-[rgba(139,26,26,0.5)] flex-shrink-0" /><span className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] tracking-[0.06em] uppercase text-white/25 flex-1 truncate ml-1">TEAM E</span>
             </div>
 
             <p className="absolute font-[Rajdhani,sans-serif] text-[0.9rem] tracking-[0.3em] uppercase text-[#E86C2F] opacity-70" style={{ left:"780px",top:"8px" }}>Global Rank</p>
@@ -353,7 +353,7 @@ export default function Home() {
                   <line x1="1" y1="13.5" x2="19" y2="13.5" stroke="#E86C2F" strokeWidth="1.2" />
                 </svg>
                 <span className="font-[Cinzel,serif] font-black text-[1.1rem] tracking-[0.12em] uppercase leading-none"
-                  style={{ background:"linear-gradient(135deg, #1A0800, #E86C2F, #74D1FF)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
+                  style={{ background:"linear-gradient(135deg, #FFB596, #E86C2F, #74D1FF)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
                   TEAM A #1
                 </span>
               </div>
@@ -371,7 +371,7 @@ export default function Home() {
           Each card: angled clip-path, floating icon on hover,
           scanline sweep effect, feature tags, CTA link.
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-24 bg-[#DBB58D] overflow-hidden">
+      <section className="section-line relative py-24 bg-[#211F2E] overflow-hidden">
 
         {/* Faint background grid — same style as hero but much dimmer */}
         <div
@@ -393,7 +393,7 @@ export default function Home() {
             Choose Your Battle Format
           </p>
           <h2
-            className="font-[Cinzel,serif] font-bold text-[#1A0800] tracking-[0.05em]"
+            className="font-[Cinzel,serif] font-bold text-white tracking-[0.05em]"
             style={{ fontSize: "clamp(1.8rem, 5vw, 3rem)" }}
           >
             Three Ways to{" "}
@@ -441,8 +441,8 @@ export default function Home() {
               </div>
 
               <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-1">Open Arena</p>
-              <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Public</h3>
-              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5 flex-1">
+              <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Public</h3>
+              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5 flex-1">
                 Anyone can enter. Open to all players across the platform. Perfect for building reputation and climbing the global leaderboard from zero.
               </p>
 
@@ -477,8 +477,8 @@ export default function Home() {
               </div>
 
               <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-1">Invite Only</p>
-              <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Private</h3>
-              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5 flex-1">
+              <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Private</h3>
+              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5 flex-1">
                 Locked behind a code or invitation. Run exclusive scrims, internal leagues, or secret showdowns with handpicked rivals only.
               </p>
 
@@ -512,8 +512,8 @@ export default function Home() {
               </div>
 
               <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.35em] uppercase text-[#E86C2F] mb-1">Members Only</p>
-              <h3 className="font-[Cinzel,serif] text-xl font-bold text-[#1A0800] tracking-[0.05em] mb-3">Club</h3>
-              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 leading-relaxed mb-5 flex-1">
+              <h3 className="font-[Cinzel,serif] text-xl font-bold text-white tracking-[0.05em] mb-3">Club</h3>
+              <p className="font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 leading-relaxed mb-5 flex-1">
                 Run tournaments exclusively within your club. Perfect for internal rankings, tryouts, and forging your team's hierarchy before the big stage.
               </p>
 
@@ -543,16 +543,16 @@ export default function Home() {
           ].map(({ value, label }) => (
             <div key={label} className="stat-divider relative text-center px-6">
               <p
-                className="font-[Cinzel,serif] font-black text-[#1A0800] leading-none"
+                className="font-[Cinzel,serif] font-black text-white leading-none"
                 style={{
                   fontSize: "clamp(1.6rem, 4vw, 2.2rem)",
-                  background: "linear-gradient(135deg, #1A0800 0%, #E86C2F 60%)",
+                  background: "linear-gradient(135deg, #fff 0%, #FFB596 60%)",
                   WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text"
                 }}
               >
                 {value}
               </p>
-              <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.25em] uppercase text-[#3D1F00]/40 mt-1">{label}</p>
+              <p className="font-[Rajdhani,sans-serif] text-[0.95rem] tracking-[0.25em] uppercase text-white/35 mt-1">{label}</p>
             </div>
           ))}
         </div>
@@ -562,7 +562,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 6 — FINAL CTA
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line-bright relative px-8 py-32 bg-[#DEB88A] text-center overflow-hidden">
+      <section className="section-line-bright relative px-8 py-32 bg-[#232130] text-center overflow-hidden">
 
         {/* Giant watermark — 3% opacity, purely decorative */}
         <p
@@ -576,12 +576,12 @@ export default function Home() {
           Your Legend Begins Here
         </p>
         <h2
-          className="relative z-10 font-[Cinzel,serif] font-black text-[#1A0800] tracking-[0.05em] mb-5"
+          className="relative z-10 font-[Cinzel,serif] font-black text-white tracking-[0.05em] mb-5"
           style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)" }}
         >
           Ready for Battle?
         </h2>
-        <p className="relative z-10 font-[Rajdhani,sans-serif] text-[1.15rem] text-[#3D1F00]/55 max-w-[440px] mx-auto leading-relaxed mb-10">
+        <p className="relative z-10 font-[Rajdhani,sans-serif] text-[1.15rem] text-white/45 max-w-[440px] mx-auto leading-relaxed mb-10">
           Whether you organise, compete, or lead a club — the Ranakshetra is waiting for you.
         </p>
 
@@ -595,7 +595,7 @@ export default function Home() {
           </Link>
           <Link
             href="/tournaments"
-            className="px-9 py-3 font-[Rajdhani,sans-serif] font-semibold text-[1.1rem] tracking-[0.15em] uppercase text-[#E86C2F] bg-transparent border border-[rgba(232,108,47,0.4)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] transition-all duration-300 no-underline"
+            className="px-9 py-3 font-[Rajdhani,sans-serif] font-semibold text-[1.1rem] tracking-[0.15em] uppercase text-[#FFB596] bg-transparent border border-[rgba(232,108,47,0.4)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] transition-all duration-300 no-underline"
             style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}
           >
             Browse Tournaments
