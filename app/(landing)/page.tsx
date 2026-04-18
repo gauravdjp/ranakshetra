@@ -6,7 +6,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 1 — HERO
       ══════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 pt-32 pb-16 overflow-hidden bg-[#FFF8F2]">
+      <section className="relative min-h-screen flex flex-col items-center justify-center text-center px-8 pt-32 pb-16 overflow-hidden bg-[#E8C9A8]">
 
         {/* Background grid — fades in at 4% opacity */}
         <div
@@ -20,7 +20,7 @@ export default function Home() {
         {/* Radial vignette — keeps focus on center */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, #FFF8F2 70%)" }}
+          style={{ background: "radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, #E8C9A8 70%)" }}
         />
 
         {/* Cyan glow behind headline */}
@@ -30,7 +30,7 @@ export default function Home() {
         />
 
         {/* Bottom fade into next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#FFF8F2] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-[#E8C9A8] pointer-events-none" />
 
         {/* Eyebrow tag */}
         <p className="anim-fade-up-1 relative z-10 text-[1.05rem] font-semibold tracking-[0.4em] uppercase text-[#E86C2F] border border-[rgba(232,108,47,0.3)] px-5 py-2 mb-8">
@@ -83,7 +83,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 2 — THREE PILLARS
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative px-8 py-24 bg-[#FFF3EB] overflow-hidden">
+      <section className="section-line relative px-8 py-24 bg-[#DEB88A] overflow-hidden">
 
         <div className="text-center mb-5">
           <p className="font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.4em] uppercase text-[#E86C2F] mb-4">
@@ -120,7 +120,7 @@ export default function Home() {
                 <circle cx="90" cy="90" r="28" stroke="#E86C2F" strokeWidth="1" opacity="0.5" />
               </g>
               <circle cx="90" cy="90" r="12" fill="#E86C2F" opacity="0.9" />
-              <circle cx="90" cy="90" r="6" fill="#FFF8F2" />
+              <circle cx="90" cy="90" r="6" fill="#E8C9A8" />
               <circle cx="90" cy="90" r="2" fill="#FFB596" />
             </svg>
           </div>
@@ -195,7 +195,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 3 — SUPPORTED GAMES (MARQUEE)
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-20 bg-[#FFF6EE] overflow-hidden">
+      <section className="section-line relative py-20 bg-[#E3C09B] overflow-hidden">
 
         <div className="text-center px-8 mb-12">
           <p className="font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.4em] uppercase text-[#E86C2F] mb-3">Battlegrounds</p>
@@ -264,7 +264,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 4 — ANIMATED RANKING BRACKET
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-24 bg-[#FFF4ED] overflow-hidden">
+      <section className="section-line relative py-24 bg-[#E0BB94] overflow-hidden">
 
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(232,108,47,0.07) 0%, transparent 70%)"
@@ -371,7 +371,7 @@ export default function Home() {
           Each card: angled clip-path, floating icon on hover,
           scanline sweep effect, feature tags, CTA link.
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line relative py-24 bg-[#FFF1E8] overflow-hidden">
+      <section className="section-line relative py-24 bg-[#DBB58D] overflow-hidden">
 
         {/* Faint background grid — same style as hero but much dimmer */}
         <div
@@ -562,7 +562,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           SECTION 6 — FINAL CTA
       ══════════════════════════════════════════════════════ */}
-      <section className="section-line-bright relative px-8 py-32 bg-[#FFF3EB] text-center overflow-hidden">
+      <section className="section-line-bright relative px-8 py-32 bg-[#DEB88A] text-center overflow-hidden">
 
         {/* Giant watermark — 3% opacity, purely decorative */}
         <p
