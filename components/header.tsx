@@ -13,17 +13,9 @@ const NAV_LINKS = [
 export default function Header() {
   return (
     <>
-      {/* ── MINIMAL <style> BLOCK
-          Only for things Tailwind genuinely cannot do:
-          1. scroll-driven animation (animation-timeline is not in Tailwind)
-          2. ::before pseudo-element for nav underline
-          3. ::before pseudo-element for mobile arrow
-          4. nth-child selectors for hamburger → X animation
-          Everything else is Tailwind classes below. */}
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600&display=swap');
 
-        /* 1. Scroll-driven animation — header fades from transparent to glass */
         @keyframes header-fill {
           from {
             background: transparent;
@@ -32,8 +24,8 @@ export default function Header() {
             backdrop-filter: blur(0px);
           }
           to {
-            background: rgba(5, 5, 16, 0.92);
-            border-bottom-color: rgba(139, 92, 246, 0.25);
+            background: rgba(15, 14, 20, 0.92);
+            border-bottom-color: rgba(232, 108, 47, 0.2);
             box-shadow: 0 4px 40px rgba(0,0,0,0.7);
             backdrop-filter: blur(18px) saturate(180%);
           }
@@ -41,43 +33,39 @@ export default function Header() {
 
         .rk-header {
           animation: header-fill linear both;
-          animation-timeline: scroll(root);  /* tied to page scroll */
-          animation-range: 0px 80px;         /* completes within first 80px */
+          animation-timeline: scroll(root);
+          animation-range: 0px 80px;
         }
 
-        /* Fallback: always show glass for browsers without scroll-driven animation support */
         @supports not (animation-timeline: scroll()) {
           .rk-header {
-            background: rgba(5, 5, 16, 0.92);
-            border-bottom-color: rgba(139, 92, 246, 0.25) !important;
+            background: rgba(15, 14, 20, 0.92);
+            border-bottom-color: rgba(232, 108, 47, 0.2) !important;
             backdrop-filter: blur(18px) saturate(180%);
           }
         }
 
-        /* 2. Nav link underline — slides in on hover/active
-           Tailwind has no ::before support */
         .rk-nav-link::before {
           content: '';
           position: absolute;
           bottom: 4px;
           left: 50%;
-          transform: translateX(-50%) scaleX(0); /* invisible by default */
+          transform: translateX(-50%) scaleX(0);
           width: calc(100% - 2rem);
           height: 1px;
-          background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+          background: linear-gradient(90deg, transparent, #E86C2F, transparent);
           transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .rk-nav-link:hover::before,
         .rk-nav-link.active::before {
-          transform: translateX(-50%) scaleX(1); /* slides in */
+          transform: translateX(-50%) scaleX(1);
         }
 
-        /* 3. Mobile link arrow — slides in from left on hover */
         .rk-mobile-link::before {
           content: '⟶';
           font-size: 0.8rem;
-          color: #8b5cf6;
+          color: #E86C2F;
           opacity: 0;
           transform: translateX(-8px);
           transition: all 0.2s ease;
@@ -88,16 +76,11 @@ export default function Header() {
           transform: translateX(0);
         }
 
-        /* 4. Hamburger bars → X animation using nth-child
-           Tailwind has no nth-child support */
         .rk-hamburger.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
         .rk-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
         .rk-hamburger.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
       `}</style>
 
-      {/* ── HEADER WRAPPER
-          rk-header = scroll-driven animation class (from <style> above)
-          Everything else is Tailwind */}
       <header
         className="
           rk-header
@@ -106,95 +89,82 @@ export default function Header() {
           font-[Rajdhani,sans-serif]
         "
       >
-        {/* Decorative crimson→gold→crimson gradient line at top of header */}
+        {/* Decorative gradient line — now orange to cyan */}
         <div
           className="absolute top-0 left-0 right-0 h-2px"
           style={{
-            background: "linear-gradient(90deg, transparent 0%, #4c1d95 15%, #8b5cf6 40%, #a78bfa 50%, #8b5cf6 60%, #06b6d4 85%, transparent 100%)"
+            background: "linear-gradient(90deg, transparent 0%, #C84E10 15%, #E86C2F 40%, #FFB596 50%, #E86C2F 60%, #74D1FF 85%, transparent 100%)"
           }}
         />
 
-        {/* ── INNER CONTAINER — max width + centered */}
         <div className="max-w-1280px mx-auto px-8 h-72px flex items-center justify-between gap-8">
 
-          {/* ── LOGO
-              Server-rendered plain Link — no JS needed */}
+          {/* LOGO */}
           <Link href="/" className="flex items-center gap-3 no-underline shrink-0 group">
 
-            {/* Dharma Chakra SVG emblem */}
             <div className="w-10 h-10 shrink-0">
               <svg
                 viewBox="0 0 40 40"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
-                className="w-full h-full drop-shadow-[0_0_6px_rgba(139,92,246,0.6)] group-hover:drop-shadow-[0_0_14px_rgba(139,92,246,1)] transition-all duration-300"
+                className="w-full h-full drop-shadow-[0_0_6px_rgba(232,108,47,0.6)] group-hover:drop-shadow-[0_0_14px_rgba(232,108,47,1)] transition-all duration-300"
               >
-                <circle cx="20" cy="20" r="18" stroke="#8b5cf6" strokeWidth="1" />
-                <circle cx="20" cy="20" r="12" stroke="#8b5cf6" strokeWidth="0.5" strokeDasharray="2 3" />
-                {/* 8 spokes drawn with trig — inner r=7, outer r=17 */}
+                <circle cx="20" cy="20" r="18" stroke="#E86C2F" strokeWidth="1" />
+                <circle cx="20" cy="20" r="12" stroke="#E86C2F" strokeWidth="0.5" strokeDasharray="2 3" />
                 {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, i) => {
                   const rad = (angle * Math.PI) / 180;
                   const x1 = 20 + 7 * Math.cos(rad);
                   const y1 = 20 + 7 * Math.sin(rad);
                   const x2 = 20 + 17 * Math.cos(rad);
                   const y2 = 20 + 17 * Math.sin(rad);
-                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#8b5cf6" strokeWidth="1.2" />;
+                  return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#E86C2F" strokeWidth="1.2" />;
                 })}
-                <circle cx="20" cy="20" r="4" fill="#8b5cf6" />
-                <circle cx="20" cy="20" r="2" fill="#050510" />
+                <circle cx="20" cy="20" r="4" fill="#E86C2F" />
+                <circle cx="20" cy="20" r="2" fill="#0F0E14" />
               </svg>
             </div>
 
-            {/* Logo text */}
             <div className="flex flex-col leading-none">
-              {/* "RANAKSHETRA" — Cinzel font with gold gradient */}
               <span
                 className="
                   font-[Cinzel,serif] text-[1.35rem] font-black tracking-[0.08em] uppercase
-                  bg-gradient-to-br from-[#a78bfa] via-[#8b5cf6] to-[#06b6d4]
+                  bg-gradient-to-br from-[#FFB596] via-[#E86C2F] to-[#74D1FF]
                   bg-clip-text text-transparent
                 "
               >
                 Ranakshetra
               </span>
-              {/* "The Eternal Battlefield" subtitle */}
-              <span className="text-[0.6rem] font-medium tracking-[0.35em] uppercase text-[rgba(139,92,246,0.5)] mt-2px">
+              <span className="text-[0.65rem] font-medium tracking-[0.35em] uppercase text-[rgba(232,108,47,0.5)] mt-2px">
                 The Eternal Battlefield
               </span>
             </div>
           </Link>
 
-          {/* ── DESKTOP NAV
-              NavLink is client-side for usePathname() active detection.
-              Hidden on mobile (hidden md:flex). */}
+          {/* DESKTOP NAV */}
           <nav className="hidden md:block">
             <ul className="flex items-center gap-1 list-none m-0 p-0">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  {/* NavLink adds .active class when pathname matches href */}
                   <NavLink href={href} label={label} />
                 </li>
               ))}
             </ul>
           </nav>
 
-          {/* ── RIGHT SIDE: divider + CTA + hamburger */}
+          {/* RIGHT SIDE */}
           <div className="flex items-center gap-4">
 
-            {/* Thin vertical violet divider — hidden on mobile */}
-            <div className="hidden md:block w-px h-6 bg-[rgba(139,92,246,0.3)] shrink-0" />
+            <div className="hidden md:block w-px h-6 bg-[rgba(232,108,47,0.25)] shrink-0" />
 
-            {/* Desktop CTA buttons — hidden on mobile */}
             <div className="hidden md:flex items-center gap-3 shrink-0">
-              {/* Ghost button — transparent with angled clip-path corners */}
               <Link
-                href="/login" 
+                href="/login"
                 className="
                   px-[1.1rem] py-[0.45rem]
-                  font-semibold text-[0.88rem] tracking-0.1em uppercase
-                  text-[#a78bfa] bg-transparent
-                  border border-[rgba(139,92,246,0.3)]
-                  hover:bg-[rgba(139,92,246,0.08)] hover:border-[#8b5cf6] hover:text-[#c4b5fd]
+                  font-semibold text-[0.9rem] tracking-0.1em uppercase
+                  text-[#FFB596] bg-transparent
+                  border border-[rgba(232,108,47,0.3)]
+                  hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596]
                   transition-all duration-300 no-underline
                 "
                 style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
@@ -202,16 +172,15 @@ export default function Header() {
                 Login
               </Link>
 
-              <button className="cursor-pointer px-[1.1rem] py-[0.45rem] font-semibold text-[0.88rem] tracking-0.1em uppercase text-[#a78bfa] bg-transparent border border-[rgba(139,92,246,0.3)] hover:bg-[rgba(139,92,246,0.08)] hover:border-[#8b5cf6] hover:text-[#c4b5fd] transition-all duration-300 no-underline"
-              style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
-              onClick={() => signOut({ callbackUrl: "/" })}>
+              <button
+                className="cursor-pointer px-[1.1rem] py-[0.45rem] font-semibold text-[0.9rem] tracking-0.1em uppercase text-[#FFB596] bg-transparent border border-[rgba(232,108,47,0.3)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596] transition-all duration-300"
+                style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
+                onClick={() => signOut({ callbackUrl: "/" })}
+              >
                 Logout
               </button>
-
-              
             </div>
 
-            {/* MobileMenu — client component, handles hamburger + dropdown */}
             <MobileMenu />
           </div>
 
