@@ -192,7 +192,20 @@ export type BracketDocument = {
 //arena types and enums
 
 export type Arena = {
-
+    _id?: string;
+    arena_name: string;
+    arena_location: string;
+    arena_city: string;
+    arena_state: string;
+    arena_description?: string;
+    arena_image?: string;
+    organizer_id: string;
+    organizer_name?: string;
+    supported_games?: string[];
+    capacity?: number;
+    is_verified: boolean;
+    created_at?: Date;
+    updated_at?: Date;
 }
 
 export type Arena_Roles = {
