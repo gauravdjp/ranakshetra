@@ -1,21 +1,55 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Games, Access_Level_USER_Role } from "../../../../types/index";
 
 /* ─────────────────────────────────────────────────────────────
-   MOCK DATA — replace with real API calls later
+   TYPES
 ───────────────────────────────────────────────────────────── */
-type TournamentRecord = {
-  id: string;
+type PlayerProfile = {
+  _id: string;
   name: string;
-  game: string;
-  date: string;
-  placement: number;
-  totalTeams: number;
-  prize: string | null;
-  result: "win" | "top3" | "top8" | "eliminated";
+  username: string;
+  player_tag?: string;
+  role: Access_Level_USER_Role;
+  email: string;
+  city: string;
+  state: string;
+  country: string;
+  region?: string;
+  device?: string;
+  skill_level?: string;
+  description?: string;
+  games?: Games[];
+  fav_game?: Games;
+  is_verified?: boolean;
+  created_at?: string;
+};
+
+type CRData = {
+  tag: string;
+  name: string;
+  expLevel: number;
+  trophies: number;
+  bestTrophies: number;
+  wins: number;
+  losses: number;
+  threeCrownWins: number;
+  challengeMaxWins?: number;
+  warDayWins?: number;
+  donations: number;
+  donationsReceived: number;
+  arena?: { name: string };
+  clan?: { name: string; tag: string; badgeId: number };
+  role?: string;
+  leagueStatistics?: {
+    currentSeason?: { trophies?: number; bestTrophies?: number };
+    previousSeason?: { trophies?: number; bestTrophies?: number };
+  };
+  currentFavouriteCard?: { name: string };
 };
 
 type PlayerEditForm = {
@@ -27,46 +61,15 @@ type PlayerEditForm = {
   skill_level: string;
 };
 
-const MOCK_PLAYER = {
-  _id: "p_01",
-  name: "Arjun Mehta",
-  username: "ShadowStrike",
-  player_tag: "ShadowStrike#1337",
-  role: Access_Level_USER_Role.PLAYER,
-  email: "arjun@example.com",
-  city: "Mumbai",
-  state: "Maharashtra",
-  country: "India",
-  region: "West India",
-  device: "Mobile + PC",
-  skill_level: "Semi-Pro",
-  description: "Competitive BGMI & Valorant player. Grinding ranked since 2021. Looking for a serious squad for nationals.",
-  games: [Games.CLASH_ROYALE],
-  fav_game: Games.CLASH_ROYALE,
-  is_verified: true,
-  joined: "March 2024",
-  stats: {
-    tournaments_played: 24,
-    wins: 6,
-    top3: 11,
-    total_kills: 312,
-    win_rate: 25,
-    avg_placement: 3.2,
-    rank_points: 4870,
-  },
+type InGameForm = {
+  player_tag: string;
+  skill_level: string;
+  device: string;
 };
 
-const MOCK_TOURNAMENTS: TournamentRecord[] = [
-  { id: "t1", name: "West India BGMI Open", game: "BGMI", date: "12 Mar 2025", placement: 1, totalTeams: 64, prize: "₹15,000", result: "win" },
-  { id: "t2", name: "Arena Masters S3", game: "Valorant", date: "28 Feb 2025", placement: 3, totalTeams: 32, prize: "₹3,000", result: "top3" },
-  { id: "t3", name: "Clash Cup Weekly #18", game: "Clash Royale", date: "14 Feb 2025", placement: 2, totalTeams: 48, prize: "₹1,500", result: "top3" },
-  { id: "t4", name: "BGMI Ranked Invitational", game: "BGMI", date: "01 Feb 2025", placement: 7, totalTeams: 20, prize: null, result: "top8" },
-  { id: "t5", name: "National Qualifier — Valorant", game: "Valorant", date: "18 Jan 2025", placement: 14, totalTeams: 128, prize: null, result: "eliminated" },
-  { id: "t6", name: "West India BGMI Open", game: "BGMI", date: "05 Jan 2025", placement: 1, totalTeams: 64, prize: "₹15,000", result: "win" },
-  { id: "t7", name: "RK Monthly Cup #4", game: "BGMI", date: "22 Dec 2024", placement: 4, totalTeams: 32, prize: "₹500", result: "top8" },
-  { id: "t8", name: "Clash Cup Weekly #9", game: "Clash Royale", date: "08 Dec 2024", placement: 1, totalTeams: 40, prize: "₹1,000", result: "win" },
-];
-
+/* ─────────────────────────────────────────────────────────────
+   CONSTANTS
+───────────────────────────────────────────────────────────── */
 const REGIONS = ["North India", "South India", "East India", "West India", "Central India", "Global"];
 const SKILL_LEVELS = ["Beginner", "Amateur", "Intermediate", "Semi-Pro", "Pro"];
 const DEVICES = ["Mobile", "PC", "Console", "Mobile + PC"];
@@ -74,24 +77,6 @@ const DEVICES = ["Mobile", "PC", "Console", "Mobile + PC"];
 /* ─────────────────────────────────────────────────────────────
    SMALL SHARED COMPONENTS
 ───────────────────────────────────────────────────────────── */
-const resultConfig = {
-  win:       { label: "WINNER",   color: "#fbbf24", bg: "rgba(251,191,36,0.08)",  border: "rgba(251,191,36,0.4)" },
-  top3:      { label: "TOP 3",    color: "#a78bfa", bg: "rgba(139,92,246,0.10)", border: "rgba(139,92,246,0.4)" },
-  top8:      { label: "TOP 8",    color: "#60a5fa", bg: "rgba(96,165,250,0.08)",  border: "rgba(96,165,250,0.3)" },
-  eliminated:{ label: "ELIM",     color: "rgba(255,255,255,0.25)", bg: "rgba(255,255,255,0.03)", border: "rgba(255,255,255,0.1)" },
-};
-
-function Badge({ result }: { result: TournamentRecord["result"] }) {
-  const cfg = resultConfig[result];
-  return (
-    <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.2em] px-2 py-0.5 border"
-      style={{ color: cfg.color, background: cfg.bg, borderColor: cfg.border,
-        clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
-      {cfg.label}
-    </span>
-  );
-}
-
 function StatBox({ label, value, accent = false }: { label: string; value: string | number; accent?: boolean }) {
   return (
     <div className="relative p-4 border border-[rgba(139,92,246,0.15)] bg-white/[0.02]"
@@ -135,22 +120,42 @@ function RkSelect({ label, options, error, ...props }: { label: string; options:
   );
 }
 
+function Spinner() {
+  return (
+    <div className="min-h-screen bg-[#050510] flex items-center justify-center">
+      <div className="text-center">
+        <div className="spin-loader mx-auto mb-4" />
+        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">Loading Profile</p>
+      </div>
+    </div>
+  );
+}
+
+function InfoRow({ label, val }: { label: string; val: string }) {
+  return (
+    <div className="flex justify-between items-center">
+      <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">{label}</span>
+      <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/55">{val}</span>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
-   EDIT MODAL
+   EDIT PROFILE MODAL
 ───────────────────────────────────────────────────────────── */
 function EditModal({ player, onClose, onSave }: {
-  player: typeof MOCK_PLAYER;
+  player: PlayerProfile;
   onClose: () => void;
   onSave: (data: PlayerEditForm) => void;
 }) {
   const { register, handleSubmit, formState: { errors } } = useForm<PlayerEditForm>({
     defaultValues: {
-      name: player.name,
-      player_tag: player.player_tag,
-      description: player.description,
-      region: player.region,
-      device: player.device,
-      skill_level: player.skill_level,
+      name:        player.name        ?? "",
+      player_tag:  player.player_tag  ?? "",
+      description: player.description ?? "",
+      region:      player.region      ?? REGIONS[0],
+      device:      player.device      ?? DEVICES[0],
+      skill_level: player.skill_level ?? SKILL_LEVELS[0],
     },
   });
 
@@ -162,8 +167,6 @@ function EditModal({ player, onClose, onSave }: {
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="relative w-full max-w-[480px] bg-[#080818] border border-[rgba(139,92,246,0.3)] p-8 modal-in"
         style={{ boxShadow: "0 0 60px rgba(139,92,246,0.15)" }}>
-
-        {/* Corner brackets */}
         <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-[rgba(139,92,246,0.5)]" />
         <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-[rgba(139,92,246,0.5)]" />
 
@@ -181,9 +184,9 @@ function EditModal({ player, onClose, onSave }: {
               error={errors.name?.message}
               {...register("name", { required: "NAME IS REQUIRED" })}
             />
-            <RkInput label="Player Tag / IGN" placeholder="e.g. ShadowStrike#1337"
+            <RkInput label="Player Tag / IGN" placeholder="e.g. #ABC123"
               error={errors.player_tag?.message}
-              {...register("player_tag", { required: "PLAYER TAG IS REQUIRED" })}
+              {...register("player_tag")}
             />
             <div className="mb-4">
               <label className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] block mb-2">Bio</label>
@@ -193,15 +196,9 @@ function EditModal({ player, onClose, onSave }: {
                 style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
               />
             </div>
-            <RkSelect label="Region" options={REGIONS}
-              {...register("region")}
-            />
-            <RkSelect label="Primary Device" options={DEVICES}
-              {...register("device")}
-            />
-            <RkSelect label="Skill Level" options={SKILL_LEVELS}
-              {...register("skill_level")}
-            />
+            <RkSelect label="Region" options={REGIONS} {...register("region")} />
+            <RkSelect label="Primary Device" options={DEVICES} {...register("device")} />
+            <RkSelect label="Skill Level" options={SKILL_LEVELS} {...register("skill_level")} />
           </div>
 
           <div className="flex gap-3 mt-6">
@@ -221,30 +218,322 @@ function EditModal({ player, onClose, onSave }: {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   UPDATE GAME DETAILS MODAL (In-Game / Clash Royale tag)
+───────────────────────────────────────────────────────────── */
+function InGameModal({ player, playerId, onClose, onSaved }: {
+  player: PlayerProfile;
+  playerId: string;
+  onClose: () => void;
+  onSaved: (updated: Partial<PlayerProfile>) => void;
+}) {
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<InGameForm>({
+    defaultValues: {
+      player_tag:  player.player_tag  ?? "",
+      skill_level: player.skill_level ?? SKILL_LEVELS[0],
+      device:      player.device      ?? DEVICES[0],
+    },
+  });
+
+  const [saveError, setSaveError] = useState("");
+
+  const onSubmit: SubmitHandler<InGameForm> = async (data) => {
+    setSaveError("");
+    try {
+      const res = await fetch(`/api/players/${playerId}/in-game`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const j = await res.json();
+        setSaveError(j.error ?? "Failed to save");
+        return;
+      }
+      onSaved(data);
+      onClose();
+    } catch {
+      setSaveError("Network error, please try again");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(5,5,16,0.88)", backdropFilter: "blur(8px)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="relative w-full max-w-[440px] bg-[#08081a] border border-[rgba(139,92,246,0.35)] p-8 modal-in"
+        style={{ boxShadow: "0 0 60px rgba(139,92,246,0.18)" }}>
+        <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-[rgba(139,92,246,0.6)]" />
+        <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-[rgba(139,92,246,0.6)]" />
+
+        {/* Header */}
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-1">In-Game</p>
+            <h3 className="font-[Cinzel,serif] text-lg font-bold text-white">Update Game Details</h3>
+            <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-white/30 mt-1">
+              Enter your Clash Royale tag to auto-fetch live stats
+            </p>
+          </div>
+          <button onClick={onClose} className="text-white/30 hover:text-white/70 transition-colors text-xl leading-none mt-1">✕</button>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <RkInput
+            label="Clash Royale Tag (e.g. #ABC123)"
+            placeholder="#ABC123"
+            error={errors.player_tag?.message}
+            {...register("player_tag")}
+          />
+          <RkSelect label="Skill Level" options={SKILL_LEVELS} {...register("skill_level")} />
+          <RkSelect label="Primary Device" options={DEVICES} {...register("device")} />
+
+          {saveError && (
+            <p className="warn mb-4">{saveError}</p>
+          )}
+
+          <div className="flex gap-3 mt-6">
+            <button type="button" onClick={onClose}
+              className="rk-btn-ghost flex-1 py-2.5 font-[Rajdhani,sans-serif] font-semibold text-[0.8rem] tracking-[0.2em] uppercase text-white/35 border border-[rgba(139,92,246,0.2)]">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSubmitting}
+              className="rk-btn-primary flex-1 py-2.5 font-[Rajdhani,sans-serif] font-bold text-[0.8rem] tracking-[0.2em] uppercase text-white disabled:opacity-50">
+              {isSubmitting ? "Saving..." : "Save Details"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CLASH ROYALE STATS PANEL
+───────────────────────────────────────────────────────────── */
+function CRStatsPanel({ tag }: { tag: string }) {
+  const [crData, setCrData] = useState<CRData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!tag) { setLoading(false); return; }
+    async function fetchCR() {
+      try {
+        const res = await fetch(`/api/clashroyale/player?tag=${encodeURIComponent(tag)}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        if (data.reason) throw new Error(data.message ?? "Not found");
+        setCrData(data);
+      } catch (e: any) {
+        setError(e.message ?? "Could not load Clash Royale data");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCR();
+  }, [tag]);
+
+  if (loading) return (
+    <div className="rk-card p-6 flex items-center gap-3">
+      <div className="spin-loader" />
+      <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-widest uppercase text-white/25">
+        Fetching Clash Royale data...
+      </p>
+    </div>
+  );
+
+  if (error) return (
+    <div className="rk-card p-6">
+      <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-1">Clash Royale</p>
+      <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-[#f87171]">{error}</p>
+    </div>
+  );
+
+  if (!crData) return null;
+
+  const winRate = crData.wins + crData.losses > 0
+    ? Math.round((crData.wins / (crData.wins + crData.losses)) * 100)
+    : 0;
+
+  return (
+    <div className="rk-card p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-0.5">Clash Royale</p>
+          <h4 className="font-[Cinzel,serif] font-bold text-white text-base">{crData.name}</h4>
+          <p className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/30 mt-0.5">{crData.tag}</p>
+        </div>
+        <div className="text-right">
+          {crData.arena && (
+            <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-[#a78bfa] font-semibold">{crData.arena.name}</p>
+          )}
+          <p className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-widest uppercase text-white/20 mt-0.5">
+            Lvl {crData.expLevel}
+          </p>
+        </div>
+      </div>
+
+      {/* Trophy row */}
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="p-3 border border-[rgba(251,191,36,0.15)] bg-[rgba(251,191,36,0.04)]"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+          <p className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.28em] uppercase text-[rgba(251,191,36,0.5)] mb-0.5">🏆 Trophies</p>
+          <p className="font-[Cinzel,serif] font-bold text-lg text-[#fbbf24]">{crData.trophies.toLocaleString()}</p>
+        </div>
+        <div className="p-3 border border-[rgba(251,191,36,0.08)] bg-[rgba(251,191,36,0.02)]"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+          <p className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.28em] uppercase text-white/20 mb-0.5">Best</p>
+          <p className="font-[Cinzel,serif] font-bold text-lg text-white/60">{crData.bestTrophies.toLocaleString()}</p>
+        </div>
+      </div>
+
+      {/* W/L/Win rate */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        {[
+          { label: "Wins", val: crData.wins.toLocaleString(), color: "#22c55e" },
+          { label: "Losses", val: crData.losses.toLocaleString(), color: "#f87171" },
+          { label: "Win Rate", val: `${winRate}%`, color: "#a78bfa" },
+        ].map(({ label, val, color }) => (
+          <div key={label} className="text-center p-3 border border-[rgba(139,92,246,0.08)] bg-white/[0.015]"
+            style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
+            <p className="font-[Cinzel,serif] font-bold text-base" style={{ color }}>{val}</p>
+            <p className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.22em] uppercase text-white/22 mt-0.5">{label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Win rate bar */}
+      <div className="win-bar mb-4">
+        <div className="win-bar-fill" style={{ ["--target" as string]: `${winRate}%` }} />
+      </div>
+
+      {/* Extras */}
+      <div className="space-y-2 pt-4 border-t border-[rgba(139,92,246,0.08)]">
+        {crData.threeCrownWins > 0 && (
+          <div className="flex justify-between">
+            <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">3-Crown Wins</span>
+            <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-[#fbbf24]">{crData.threeCrownWins.toLocaleString()}</span>
+          </div>
+        )}
+        {crData.challengeMaxWins !== undefined && crData.challengeMaxWins > 0 && (
+          <div className="flex justify-between">
+            <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">Challenge Max Wins</span>
+            <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-[#a78bfa]">{crData.challengeMaxWins}</span>
+          </div>
+        )}
+        {crData.clan && (
+          <div className="flex justify-between">
+            <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">Clan</span>
+            <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/55">
+              {crData.clan.name} <span className="text-white/25">{crData.clan.tag}</span>
+            </span>
+          </div>
+        )}
+        {crData.currentFavouriteCard && (
+          <div className="flex justify-between">
+            <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">Fav Card</span>
+            <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/55">{crData.currentFavouriteCard.name}</span>
+          </div>
+        )}
+        <div className="flex justify-between">
+          <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">Donations</span>
+          <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/55">
+            {crData.donations.toLocaleString()} sent · {crData.donationsReceived.toLocaleString()} received
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
    MAIN PROFILE PAGE
 ───────────────────────────────────────────────────────────── */
-type ActiveTab = "overview" | "tournaments" | "games";
+type ActiveTab = "overview" | "games";
 
 export default function PlayerProfilePage() {
-  const [player, setPlayer] = useState(MOCK_PLAYER);
+  const params = useParams();
+  const playerId = params?.id as string;
+  const { data: session } = useSession();
+
+  const [player, setPlayer] = useState<PlayerProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTab>("overview");
   const [editOpen, setEditOpen] = useState(false);
-  const [tourFilter, setTourFilter] = useState<string>("all");
+  const [inGameOpen, setInGameOpen] = useState(false);
 
-  const handleSave = (data: PlayerEditForm) => {
-    setPlayer(prev => ({ ...prev, ...data }));
+  const isOwner = session?.user?.username === player?.username;
+
+  /* ── Fetch player from DB */
+  useEffect(() => {
+    if (!playerId) return;
+    async function fetchPlayer() {
+      try {
+        const res = await fetch(`/api/players/${playerId}`);
+        if (res.status === 404) { setNotFound(true); return; }
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        setPlayer(data.player);
+      } catch {
+        setNotFound(true);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchPlayer();
+  }, [playerId]);
+
+  const handleProfileSave = async (data: PlayerEditForm) => {
+    if (!player) return;
+    try {
+      const res = await fetch(`/api/players/${playerId}/in-game`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          player_tag:  data.player_tag,
+          skill_level: data.skill_level,
+          device:      data.device,
+          description: data.description,
+          region:      data.region,
+        }),
+      });
+      if (res.ok) {
+        setPlayer(prev => prev ? { ...prev, ...data } : prev);
+      }
+    } catch { /* silently fail */ }
     setEditOpen(false);
   };
 
-  const filteredTournaments = tourFilter === "all"
-    ? MOCK_TOURNAMENTS
-    : MOCK_TOURNAMENTS.filter(t => t.result === tourFilter);
+  const handleInGameSaved = (updated: Partial<PlayerProfile>) => {
+    setPlayer(prev => prev ? { ...prev, ...updated } : prev);
+  };
 
   const TABS: { key: ActiveTab; label: string }[] = [
     { key: "overview", label: "Overview" },
-    { key: "tournaments", label: "Tournaments" },
-    { key: "games", label: "Games" },
+    { key: "games",    label: "In-Game Stats" },
   ];
+
+  const joinedDate = player?.created_at
+    ? new Date(player.created_at).toLocaleDateString("en-IN", { month: "long", year: "numeric" })
+    : "—";
+
+  /* ── States */
+  if (loading) return <Spinner />;
+
+  if (notFound) return (
+    <div className="min-h-screen bg-[#050510] flex items-center justify-center">
+      <div className="text-center">
+        <p className="font-[Cinzel,serif] text-2xl font-black text-white/20 mb-2">PLAYER NOT FOUND</p>
+        <Link href="/player" className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.25em] uppercase text-[#8b5cf6] no-underline hover:text-[#a78bfa] transition-colors">
+          ← Back to Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+
+  if (!player) return null;
 
   return (
     <>
@@ -271,6 +560,11 @@ export default function PlayerProfilePage() {
           0%, 100% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
           50%       { box-shadow: 0 0 0 8px rgba(139,92,246,0); }
         }
+        @keyframes spinPulse {
+          0%   { transform: rotate(0deg);   opacity: 0.4; }
+          50%  { opacity: 1; }
+          100% { transform: rotate(360deg); opacity: 0.4; }
+        }
 
         .fade-up   { animation: fadeUp 0.5s ease forwards; }
         .fade-up-2 { animation: fadeUp 0.5s ease 0.1s forwards; opacity: 0; }
@@ -278,6 +572,14 @@ export default function PlayerProfilePage() {
         .fade-up-4 { animation: fadeUp 0.5s ease 0.3s forwards; opacity: 0; }
         .modal-in  { animation: modalIn 0.3s ease forwards; }
         .anim-grid { animation: gridFade 2s ease forwards; }
+
+        .spin-loader {
+          width: 28px; height: 28px;
+          border: 2px solid rgba(139,92,246,0.15);
+          border-top-color: #8b5cf6;
+          border-radius: 50%;
+          animation: spinPulse 1s linear infinite;
+        }
 
         .rk-input:focus {
           outline: none;
@@ -338,13 +640,6 @@ export default function PlayerProfilePage() {
           border-bottom: 1.5px solid rgba(139,92,246,0.4);
           border-right: 1.5px solid rgba(139,92,246,0.4);
         }
-        .tour-row {
-          border-bottom: 1px solid rgba(139,92,246,0.07);
-          transition: background 0.2s ease;
-        }
-        .tour-row:last-child { border-bottom: none; }
-        .tour-row:hover { background: rgba(139,92,246,0.04); }
-
         .win-bar {
           height: 4px;
           background: rgba(139,92,246,0.15);
@@ -357,21 +652,16 @@ export default function PlayerProfilePage() {
           animation: barFill 1s ease 0.4s forwards;
           width: 0%;
         }
-
         .avatar-ring { animation: pulse-ring 3s ease-in-out infinite; }
-
         .scroll-form { max-height: 60vh; overflow-y: auto; padding-right: 4px; }
         .scroll-form::-webkit-scrollbar { width: 3px; }
         .scroll-form::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 2px; }
-
         .warn {
           font-family: 'Rajdhani', sans-serif;
           font-size: 0.7rem;
           color: #f87171;
           letter-spacing: 0.05em;
         }
-
-        /* verified checkmark */
         .verified-dot {
           width: 14px; height: 14px;
           background: rgba(139,92,246,0.2);
@@ -379,7 +669,6 @@ export default function PlayerProfilePage() {
           border-radius: 50%;
           display: inline-flex; align-items: center; justify-content: center;
         }
-
         .game-chip {
           font-family: 'Rajdhani', sans-serif;
           font-size: 0.7rem;
@@ -391,29 +680,17 @@ export default function PlayerProfilePage() {
           color: rgba(255,255,255,0.5);
           clip-path: polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%);
         }
-        .game-chip.fav {
-          border-color: rgba(139,92,246,0.7);
-          background: rgba(139,92,246,0.14);
-          color: #a78bfa;
+        .in-game-btn {
+          clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+          background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(139,92,246,0.1));
+          border: 1px solid rgba(139,92,246,0.45);
+          transition: all 0.3s ease;
         }
-        .filter-chip {
-          font-family: 'Rajdhani', sans-serif;
-          font-size: 0.6rem;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
-          padding: 5px 14px;
-          border: 1px solid rgba(139,92,246,0.2);
-          background: rgba(139,92,246,0.03);
-          color: rgba(255,255,255,0.3);
-          cursor: pointer;
-          transition: all 0.2s ease;
-          clip-path: polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%);
-        }
-        .filter-chip:hover { background: rgba(139,92,246,0.08); color: rgba(255,255,255,0.6); }
-        .filter-chip.active {
-          border-color: rgba(139,92,246,0.7);
-          background: rgba(139,92,246,0.12);
-          color: #a78bfa;
+        .in-game-btn:hover {
+          background: linear-gradient(135deg, rgba(139,92,246,0.35), rgba(139,92,246,0.2));
+          border-color: rgba(139,92,246,0.8);
+          box-shadow: 0 0 20px rgba(139,92,246,0.25);
+          transform: translateY(-1px);
         }
       `}</style>
 
@@ -434,12 +711,12 @@ export default function PlayerProfilePage() {
         <nav className="relative z-10 border-b border-[rgba(139,92,246,0.1)] px-6 py-4 flex items-center justify-between">
           <Link href="/" className="font-[Cinzel,serif] font-black text-white tracking-[0.08em] text-lg no-underline"
             style={{ background: "linear-gradient(135deg, #a78bfa, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-            RAIKAZEN
+            RANAKSHETRA
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/tournaments"
+            <Link href="/player"
               className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] uppercase text-white/30 hover:text-white/60 transition-colors no-underline">
-              Tournaments
+              ← Dashboard
             </Link>
             <div className="w-8 h-8 border border-[rgba(139,92,246,0.4)] bg-[rgba(139,92,246,0.1)] flex items-center justify-center"
               style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
@@ -463,7 +740,7 @@ export default function PlayerProfilePage() {
                 <div className="avatar-ring w-20 h-20 border-2 border-[rgba(139,92,246,0.6)] bg-[rgba(139,92,246,0.1)] flex items-center justify-center"
                   style={{ clipPath: "polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%)" }}>
                   <span className="font-[Cinzel,serif] text-3xl font-black text-[#a78bfa]">
-                    {player.name.split(" ").map(n => n[0]).join("")}
+                    {player.name?.split(" ").map(n => n[0]).join("") ?? player.username.slice(0, 2).toUpperCase()}
                   </span>
                 </div>
                 {player.is_verified && (
@@ -478,7 +755,7 @@ export default function PlayerProfilePage() {
               {/* Name & Meta */}
               <div className="flex-1 min-w-0">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
-                  <h1 className="font-[Cinzel,serif] text-2xl font-black text-white">{player.name}</h1>
+                  <h1 className="font-[Cinzel,serif] text-2xl font-black text-white">{player.name ?? player.username}</h1>
                   {player.is_verified && (
                     <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase px-2 py-0.5 border border-[rgba(139,92,246,0.4)] text-[#8b5cf6] bg-[rgba(139,92,246,0.08)]"
                       style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>
@@ -486,44 +763,62 @@ export default function PlayerProfilePage() {
                     </span>
                   )}
                 </div>
-                <p className="font-[Rajdhani,sans-serif] text-sm text-[#8b5cf6] tracking-widest mb-2">{player.player_tag}</p>
-                <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-white/40 leading-relaxed mb-3 max-w-xl">
-                  {player.description}
-                </p>
+                <p className="font-[Rajdhani,sans-serif] text-sm text-[#8b5cf6] tracking-widest mb-1">@{player.username}</p>
+                {player.player_tag && (
+                  <p className="font-[Rajdhani,sans-serif] text-xs text-white/35 tracking-wider mb-2">{player.player_tag}</p>
+                )}
+                {player.description && (
+                  <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-white/40 leading-relaxed mb-3 max-w-xl">
+                    {player.description}
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-x-5 gap-y-1">
                   {[
-                    { icon: "◈", val: player.skill_level },
-                    { icon: "◉", val: player.device },
-                    { icon: "⬡", val: player.region },
-                    { icon: "◎", val: `${player.city}, ${player.state}` },
-                    { icon: "◷", val: `Joined ${player.joined}` },
-                  ].map(({ icon, val }) => (
-                    <span key={val} className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/30 tracking-wide flex items-center gap-1.5">
-                      <span className="text-[#8b5cf6] text-[0.65rem]">{icon}</span>{val}
+                    player.skill_level && { icon: "◈", val: player.skill_level },
+                    player.device      && { icon: "◉", val: player.device },
+                    player.region      && { icon: "⬡", val: player.region },
+                    (player.city || player.state) && { icon: "◎", val: [player.city, player.state].filter(Boolean).join(", ") },
+                    { icon: "◷", val: `Joined ${joinedDate}` },
+                  ].filter(Boolean).map((item: any) => (
+                    <span key={item.val} className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/30 tracking-wide flex items-center gap-1.5">
+                      <span className="text-[#8b5cf6] text-[0.65rem]">{item.icon}</span>{item.val}
                     </span>
                   ))}
                 </div>
               </div>
 
-              {/* Edit button */}
-              <button onClick={() => setEditOpen(true)}
-                className="rk-btn-ghost shrink-0 px-5 py-2.5 font-[Rajdhani,sans-serif] font-semibold text-[0.75rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)] flex items-center gap-2">
-                <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 opacity-60">
-                  <path d="M11 2L14 5L5 14H2V11L11 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-                </svg>
-                Edit Profile
-              </button>
+              {/* Action buttons — only for owner */}
+              {isOwner && (
+                <div className="flex flex-col gap-2 shrink-0">
+                  <button onClick={() => setEditOpen(true)}
+                    className="rk-btn-ghost shrink-0 px-5 py-2.5 font-[Rajdhani,sans-serif] font-semibold text-[0.75rem] tracking-[0.2em] uppercase text-white/40 border border-[rgba(139,92,246,0.2)] flex items-center gap-2">
+                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5 opacity-60">
+                      <path d="M11 2L14 5L5 14H2V11L11 2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+                    </svg>
+                    Edit Profile
+                  </button>
+                  <button onClick={() => setInGameOpen(true)}
+                    className="in-game-btn shrink-0 px-5 py-2.5 font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.2em] uppercase text-[#a78bfa] flex items-center gap-2">
+                    <svg viewBox="0 0 16 16" fill="none" className="w-3.5 h-3.5">
+                      <rect x="2" y="5" width="12" height="8" rx="1" stroke="currentColor" strokeWidth="1.4" />
+                      <path d="M6 9H10M8 7V11" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                      <path d="M5 5V4C5 2.9 5.9 2 7 2H9C10.1 2 11 2.9 11 4V5" stroke="currentColor" strokeWidth="1.4" />
+                    </svg>
+                    Update Game Details
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
           {/* ══════════════════════════════════════
-              QUICK STATS ROW
+              QUICK INFO ROW
           ══════════════════════════════════════ */}
           <div className="fade-up-2 grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <StatBox label="Tournaments" value={player.stats.tournaments_played} />
-            <StatBox label="Victories" value={player.stats.wins} accent />
-            <StatBox label="Rank Points" value={player.stats.rank_points.toLocaleString()} accent />
-            <StatBox label="Win Rate" value={`${player.stats.win_rate}%`} />
+            <StatBox label="Username" value={player.username} />
+            <StatBox label="Role" value="Player" accent />
+            <StatBox label="Country" value={player.country || "—"} />
+            <StatBox label="Skill Level" value={player.skill_level || "—"} accent />
           </div>
 
           {/* ══════════════════════════════════════
@@ -544,236 +839,123 @@ export default function PlayerProfilePage() {
           {activeTab === "overview" && (
             <div className="fade-up-4 grid grid-cols-1 md:grid-cols-3 gap-4">
 
-              {/* Performance card */}
+              {/* Account info */}
               <div className="md:col-span-2 rk-card p-6">
-                <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-4">Performance Breakdown</p>
-                <div className="space-y-4">
-                  {[
-                    { label: "Win Rate",       value: player.stats.win_rate,              max: 100, display: `${player.stats.win_rate}%` },
-                    { label: "Top 3 Rate",     value: Math.round((player.stats.top3 / player.stats.tournaments_played) * 100), max: 100, display: `${Math.round((player.stats.top3 / player.stats.tournaments_played) * 100)}%` },
-                    { label: "Avg Placement",  value: Math.round((1 / player.stats.avg_placement) * 100), max: 100, display: `#${player.stats.avg_placement}` },
-                  ].map(bar => (
-                    <div key={bar.label}>
-                      <div className="flex justify-between mb-1.5">
-                        <span className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-widest uppercase text-white/40">{bar.label}</span>
-                        <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-[#a78bfa] font-semibold">{bar.display}</span>
-                      </div>
-                      <div className="win-bar">
-                        <div className="win-bar-fill" style={{ ["--target" as string]: `${bar.value}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Mini stats grid */}
-                <div className="grid grid-cols-3 gap-3 mt-6 pt-5 border-t border-[rgba(139,92,246,0.08)]">
-                  {[
-                    { label: "Total Kills", value: player.stats.total_kills },
-                    { label: "Top 3 Finishes", value: player.stats.top3 },
-                    { label: "Avg Placement", value: `#${player.stats.avg_placement}` },
-                  ].map(s => (
-                    <div key={s.label} className="text-center">
-                      <p className="font-[Cinzel,serif] font-bold text-lg text-white">{s.value}</p>
-                      <p className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.2em] uppercase text-white/25 mt-0.5">{s.label}</p>
-                    </div>
-                  ))}
+                <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-4">Account Details</p>
+                <div className="space-y-3">
+                  <InfoRow label="Email"       val={player.email} />
+                  <InfoRow label="Username"    val={player.username} />
+                  {player.player_tag  && <InfoRow label="Player Tag"  val={player.player_tag} />}
+                  {player.city        && <InfoRow label="City"         val={player.city} />}
+                  {player.state       && <InfoRow label="State"        val={player.state} />}
+                  <InfoRow label="Country"     val={player.country || "—"} />
+                  {player.region      && <InfoRow label="Region"       val={player.region} />}
+                  {player.device      && <InfoRow label="Device"       val={player.device} />}
+                  {player.skill_level && <InfoRow label="Skill Level"  val={player.skill_level} />}
+                  <InfoRow label="Joined"      val={joinedDate} />
                 </div>
               </div>
 
-              {/* Right col: recent + fav game */}
-              <div className="flex flex-col gap-4">
-                {/* Recent tournament */}
-                <div className="rk-card p-5">
-                  <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-3">Latest Result</p>
-                  {(() => {
-                    const latest = MOCK_TOURNAMENTS[0];
-                    return (
-                      <div>
-                        <p className="font-[Cinzel,serif] text-sm font-bold text-white mb-1 leading-snug">{latest.name}</p>
-                        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/30 mb-3">{latest.game} · {latest.date}</p>
-                        <div className="flex items-center justify-between">
-                          <Badge result={latest.result} />
-                          <span className="font-[Cinzel,serif] text-xl font-black"
-                            style={{ color: latest.result === "win" ? "#fbbf24" : "#a78bfa" }}>
-                            #{latest.placement}
-                          </span>
-                        </div>
-                        {latest.prize && (
-                          <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-widest uppercase text-white/30 mt-2">
-                            Prize · <span className="text-[#a78bfa]">{latest.prize}</span>
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Contact / info */}
-                <div className="rk-card p-5 flex-1">
-                  <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-3">Account Info</p>
-                  <div className="space-y-2.5">
-                    {[
-                      { label: "Email", val: player.email },
-                      { label: "Country", val: player.country },
-                      { label: "Role", val: "Player" },
-                    ].map(({ label, val }) => (
-                      <div key={label} className="flex justify-between items-center">
-                        <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-widest uppercase text-white/25">{label}</span>
-                        <span className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/55">{val}</span>
-                      </div>
+              {/* Games played */}
+              <div className="rk-card p-6">
+                <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-4">Games</p>
+                {player.games && player.games.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {player.games.map(g => (
+                      <span key={g} className="game-chip">{g}</span>
                     ))}
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ══════════════════════════════════════
-              TAB: TOURNAMENTS
-          ══════════════════════════════════════ */}
-          {activeTab === "tournaments" && (
-            <div className="fade-up-4">
-
-              {/* Summary row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
-                <StatBox label="Played" value={player.stats.tournaments_played} />
-                <StatBox label="Wins" value={player.stats.wins} accent />
-                <StatBox label="Top 3" value={player.stats.top3} />
-                <StatBox label="Prize Earned" value="₹36,000" accent />
-              </div>
-
-              {/* Filter chips */}
-              <div className="flex flex-wrap gap-2 mb-5">
-                {(["all", "win", "top3", "top8", "eliminated"] as const).map(f => (
-                  <button key={f} onClick={() => setTourFilter(f)}
-                    className={`filter-chip ${tourFilter === f ? "active" : ""}`}>
-                    {f === "all" ? "All" : f === "win" ? "Wins" : f === "top3" ? "Top 3" : f === "top8" ? "Top 8" : "Eliminated"}
-                  </button>
-                ))}
-              </div>
-
-              {/* Table */}
-              <div className="rk-card overflow-hidden">
-                {/* Header */}
-                <div className="grid grid-cols-12 px-5 py-3 border-b border-[rgba(139,92,246,0.1)]">
-                  {[["Tournament", "col-span-5"], ["Game", "col-span-2"], ["Date", "col-span-2 hidden md:block"], ["Result", "col-span-2"], ["Prize", "col-span-1 hidden md:block"]].map(([label, cls]) => (
-                    <p key={label} className={`${cls} font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.3em] uppercase text-white/25`}>
-                      {label}
-                    </p>
-                  ))}
-                </div>
-
-                {filteredTournaments.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <p className="font-[Rajdhani,sans-serif] text-[0.75rem] tracking-widest uppercase text-white/20">No records found</p>
-                  </div>
                 ) : (
-                  filteredTournaments.map(t => (
-                    <div key={t.id} className="tour-row grid grid-cols-12 px-5 py-4 items-center">
-                      <div className="col-span-5 pr-4">
-                        <p className="font-[Rajdhani,sans-serif] text-[0.82rem] font-semibold text-white/80 leading-snug">{t.name}</p>
-                        <p className="font-[Rajdhani,sans-serif] text-[0.6rem] text-white/25 mt-0.5">
-                          {t.placement}/{t.totalTeams} teams
-                        </p>
-                      </div>
-                      <div className="col-span-2">
-                        <span className="game-chip text-[0.55rem]">{t.game}</span>
-                      </div>
-                      <div className="col-span-2 hidden md:block">
-                        <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/35">{t.date}</p>
-                      </div>
-                      <div className="col-span-2 flex items-center gap-2">
-                        <Badge result={t.result} />
-                        <span className="font-[Cinzel,serif] text-sm font-bold"
-                          style={{ color: t.result === "win" ? "#fbbf24" : t.result === "top3" ? "#a78bfa" : "rgba(255,255,255,0.3)" }}>
-                          #{t.placement}
-                        </span>
-                      </div>
-                      <div className="col-span-1 hidden md:block">
-                        <p className="font-[Rajdhani,sans-serif] text-[0.72rem]"
-                          style={{ color: t.prize ? "#a78bfa" : "rgba(255,255,255,0.2)" }}>
-                          {t.prize ?? "—"}
-                        </p>
-                      </div>
-                    </div>
-                  ))
+                  <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/20">
+                    No games linked yet.{" "}
+                    {isOwner && (
+                      <button onClick={() => setInGameOpen(true)}
+                        className="text-[#8b5cf6] underline cursor-pointer bg-transparent border-none">
+                        Add now →
+                      </button>
+                    )}
+                  </p>
+                )}
+
+                {player.description && (
+                  <div className="mt-5 pt-4 border-t border-[rgba(139,92,246,0.08)]">
+                    <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.3em] uppercase text-[#8b5cf6] mb-2">Bio</p>
+                    <p className="font-[Rajdhani,sans-serif] text-[0.78rem] text-white/40 leading-relaxed">{player.description}</p>
+                  </div>
+                )}
+
+                {isOwner && (
+                  <button onClick={() => setInGameOpen(true)}
+                    className="mt-5 w-full in-game-btn py-2.5 font-[Rajdhani,sans-serif] font-bold text-[0.72rem] tracking-[0.2em] uppercase text-[#a78bfa]">
+                    ⊕ Update Game Details
+                  </button>
                 )}
               </div>
             </div>
           )}
 
           {/* ══════════════════════════════════════
-              TAB: GAMES
+              TAB: IN-GAME STATS
           ══════════════════════════════════════ */}
           {activeTab === "games" && (
-            <div className="fade-up-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {player.games.map(game => {
-                const isFav = game === player.fav_game;
-                const gameTours = MOCK_TOURNAMENTS.filter(t => t.game === game.split(" ")[0] || t.game === game);
-                const wins = gameTours.filter(t => t.result === "win").length;
-                return (
-                  <div key={game} className="rk-card p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <p className="font-[Cinzel,serif] text-base font-bold text-white mb-1">{game}</p>
-                        {isFav && (
-                          <span className="game-chip fav text-[0.5rem]">⭑ Favourite</span>
-                        )}
-                      </div>
-                      <div className="w-10 h-10 border border-[rgba(139,92,246,0.3)] flex items-center justify-center bg-[rgba(139,92,246,0.05)]"
-                        style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
-                        <span className="font-[Cinzel,serif] text-[0.7rem] text-[#8b5cf6] font-bold">
-                          {game.slice(0, 2).toUpperCase()}
-                        </span>
-                      </div>
+            <div className="fade-up-4 space-y-4">
+              {player.player_tag ? (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase text-[#8b5cf6]">Live Data</p>
+                      <h2 className="font-[Cinzel,serif] text-base font-bold text-white">In-Game Statistics</h2>
                     </div>
-                    <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[rgba(139,92,246,0.08)]">
-                      <div className="text-center">
-                        <p className="font-[Cinzel,serif] font-bold text-lg text-white">{gameTours.length}</p>
-                        <p className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-white/25 mt-0.5">Played</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="font-[Cinzel,serif] font-bold text-lg text-[#fbbf24]">{wins}</p>
-                        <p className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-white/25 mt-0.5">Wins</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="font-[Cinzel,serif] font-bold text-lg text-[#a78bfa]">
-                          {gameTours.length ? Math.round((wins / gameTours.length) * 100) : 0}%
-                        </p>
-                        <p className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase text-white/25 mt-0.5">Win Rate</p>
-                      </div>
-                    </div>
-                    {/* Mini bar */}
-                    {gameTours.length > 0 && (
-                      <div className="mt-4 win-bar">
-                        <div className="win-bar-fill"
-                          style={{ ["--target" as string]: `${Math.round((wins / gameTours.length) * 100)}%` }} />
-                      </div>
+                    {isOwner && (
+                      <button onClick={() => setInGameOpen(true)}
+                        className="in-game-btn px-4 py-2 font-[Rajdhani,sans-serif] font-bold text-[0.7rem] tracking-[0.2em] uppercase text-[#a78bfa]">
+                        Update Tag
+                      </button>
                     )}
                   </div>
-                );
-              })}
-
-              {/* Placeholder — more games CTA */}
-              <div className="rk-card p-6 flex flex-col items-center justify-center text-center min-h-[140px] border-dashed"
-                style={{ borderColor: "rgba(139,92,246,0.12)", borderStyle: "dashed" }}>
-                <p className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.3em] uppercase text-white/20 mb-2">Add More Games</p>
-                <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/15 mb-4">Track all your titles in one place</p>
-                <button onClick={() => setEditOpen(true)}
-                  className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase px-4 py-2 border border-[rgba(139,92,246,0.2)] text-[#8b5cf6]/60 hover:border-[rgba(139,92,246,0.5)] hover:text-[#8b5cf6] transition-all duration-200"
-                  style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
-                  + Edit Profile
-                </button>
-              </div>
+                  <CRStatsPanel tag={player.player_tag} />
+                </>
+              ) : (
+                <div className="rk-card p-10 text-center">
+                  <div className="w-14 h-14 border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.04)] flex items-center justify-center mx-auto mb-4"
+                    style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7 opacity-30">
+                      <rect x="3" y="6" width="18" height="14" rx="2" stroke="#8b5cf6" strokeWidth="1.5" />
+                      <path d="M10 11H14M12 9V13" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
+                      <path d="M8 6V5C8 3.9 8.9 3 10 3H14C15.1 3 16 3.9 16 5V6" stroke="#8b5cf6" strokeWidth="1.5" />
+                    </svg>
+                  </div>
+                  <p className="font-[Cinzel,serif] text-sm font-bold text-white/25 mb-1">No Player Tag Linked</p>
+                  <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/18 mb-5">
+                    Link a Clash Royale tag to see live in-game stats
+                  </p>
+                  {isOwner && (
+                    <button onClick={() => setInGameOpen(true)}
+                      className="in-game-btn px-6 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.2em] uppercase text-[#a78bfa]">
+                      ⊕ Add Player Tag
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
         </div>{/* /max-w container */}
       </div>
 
-      {/* ── EDIT MODAL ── */}
-      {editOpen && (
-        <EditModal player={player} onClose={() => setEditOpen(false)} onSave={handleSave} />
+      {/* ── EDIT PROFILE MODAL ── */}
+      {editOpen && isOwner && (
+        <EditModal player={player} onClose={() => setEditOpen(false)} onSave={handleProfileSave} />
+      )}
+
+      {/* ── UPDATE IN-GAME MODAL ── */}
+      {inGameOpen && isOwner && (
+        <InGameModal
+          player={player}
+          playerId={playerId}
+          onClose={() => setInGameOpen(false)}
+          onSaved={handleInGameSaved}
+        />
       )}
     </>
   );
