@@ -915,8 +915,8 @@ export default function PlayerMainPage() {
                     <p className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-widest uppercase text-[#8b5cf6]/60 mt-0.5">{user.role}</p>
                   )}
                 </div>
-                <Link href="/profile" className="dropdown-item" onClick={() => setAvatarOpen(false)}>
-                  Profile
+                <Link href={`/player/${user?.username ?? ""}`} className="dropdown-item" onClick={() => setAvatarOpen(false)}>
+                  My Profile
                 </Link>
                 <Link href="/settings" className="dropdown-item" onClick={() => setAvatarOpen(false)}>
                   Settings
@@ -990,6 +990,12 @@ export default function PlayerMainPage() {
                   </div>
                 </div>
               </div>
+              <Link
+                href={`/player/${user?.username ?? ""}`}
+                className="mt-2 block text-center font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.22em] uppercase text-[#8b5cf6]/50 hover:text-[#8b5cf6] transition-colors no-underline pt-1"
+              >
+                View Profile →
+              </Link>
             </div>
           </aside>
 

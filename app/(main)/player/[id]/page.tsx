@@ -454,8 +454,8 @@ type ActiveTab = "overview" | "games";
 
 export default function PlayerProfilePage() {
   const params = useParams();
-  const playerId = params?.id as string;
-  const { data: session } = useSession();
+  const rawId = params?.id as string;
+  const { data: session, status: sessionStatus } = useSession();
 
   const [player, setPlayer] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -464,14 +464,28 @@ export default function PlayerProfilePage() {
   const [editOpen, setEditOpen] = useState(false);
   const [inGameOpen, setInGameOpen] = useState(false);
 
+  // Resolve the actual fetch ID:
+  // - If the URL param looks like a real username (non-numeric), use it directly.
+  // - Otherwise (e.g. the route renders as "/player/1" from a stale link),
+  //   fall back to the session username so the logged-in user always sees their own profile.
+  const isNumericId = /^\d+$/.test(rawId ?? "");
+  const resolvedId = isNumericId && session?.user?.username
+    ? session.user.username
+    : rawId;
+
   const isOwner = session?.user?.username === player?.username;
 
-  /* ── Fetch player from DB */
+  /* ── Fetch player – wait until session is settled so we have the fallback username */
   useEffect(() => {
-    if (!playerId) return;
+    if (sessionStatus === "loading") return; // wait for session before deciding
+    if (!resolvedId) return;
+
+    setLoading(true);
+    setNotFound(false);
+
     async function fetchPlayer() {
       try {
-        const res = await fetch(`/api/players/${playerId}`);
+        const res = await fetch(`/api/players/${resolvedId}`);
         if (res.status === 404) { setNotFound(true); return; }
         if (!res.ok) throw new Error("Failed");
         const data = await res.json();
@@ -483,12 +497,12 @@ export default function PlayerProfilePage() {
       }
     }
     fetchPlayer();
-  }, [playerId]);
+  }, [resolvedId, sessionStatus]);
 
   const handleProfileSave = async (data: PlayerEditForm) => {
     if (!player) return;
     try {
-      const res = await fetch(`/api/players/${playerId}/in-game`, {
+      const res = await fetch(`/api/players/${resolvedId}/in-game`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -520,7 +534,7 @@ export default function PlayerProfilePage() {
     : "—";
 
   /* ── States */
-  if (loading) return <Spinner />;
+  if (sessionStatus === "loading" || loading) return <Spinner />;
 
   if (notFound) return (
     <div className="min-h-screen bg-[#050510] flex items-center justify-center">
@@ -952,7 +966,7 @@ export default function PlayerProfilePage() {
       {inGameOpen && isOwner && (
         <InGameModal
           player={player}
-          playerId={playerId}
+          playerId={resolvedId}
           onClose={() => setInGameOpen(false)}
           onSaved={handleInGameSaved}
         />
