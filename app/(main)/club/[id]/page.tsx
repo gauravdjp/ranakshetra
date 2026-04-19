@@ -196,7 +196,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
               src={player.photo}
               alt={player.ign}
               fill
-              className="object-cover object-top"
+              className="object-cover object-center"
               style={{ filter: hovered ? "brightness(1.05) saturate(1.1)" : "brightness(0.92) saturate(1)" }}
             />
           ) : (
@@ -265,7 +265,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
             </span>
           </div>
 
-          {/* Owner badge — top-right */}
+          {/* Role badge — top-right, label changes per category */}
           <div
             className="absolute top-3 right-0 flex items-center gap-1.5 px-3 py-1 z-10"
             style={{
@@ -278,7 +278,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
               className="font-[Rajdhani,sans-serif] font-bold text-[0.5rem] tracking-[0.3em]"
               style={{ color: c1 }}
             >
-              OWNER
+              {player.category === "representing" ? "OWNER" : player.category === "core" ? "MANAGER" : "PRO"}
             </span>
           </div>
 
