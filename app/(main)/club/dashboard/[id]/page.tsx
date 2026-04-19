@@ -1,7 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 
 /* ─────────────────────────────────────────────────────────────
@@ -50,17 +49,18 @@ function LoadingState({ label }: { label: string }) {
   );
 }
 
-function EmptyState({ label }: { label: string }) {
+function ShortlyUpdate() {
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-4">
-      <div className="empty-float inline-block">
-        <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12 mx-auto opacity-15">
-          <path d="M24 4L42 12V24C42 33.5 34 41.5 24 44C14 41.5 6 33.5 6 24V12L24 4Z" stroke="#8b5cf6" strokeWidth="1.5" />
-          <path d="M16 24L21 29L32 18" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
+      <div className="w-14 h-14 border border-[rgba(139,92,246,0.2)] flex items-center justify-center bg-[rgba(139,92,246,0.04)]"
+        style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
+        <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+          <circle cx="12" cy="12" r="9" stroke="#8b5cf6" strokeWidth="1.2" />
+          <path d="M12 7V12L15 14" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
-      <p className="font-[Cinzel,serif] text-white/20 text-lg">No {label} Yet</p>
-      <p className="font-[Rajdhani,sans-serif] text-white/15 text-sm mt-1 tracking-wide">Check back soon!</p>
+      <p className="font-[Cinzel,serif] text-base font-bold text-white/30">Will Shortly Update</p>
+      <p className="font-[Rajdhani,sans-serif] text-[0.68rem] tracking-[0.25em] uppercase text-white/15">Data is being prepared</p>
     </div>
   );
 }
@@ -87,15 +87,43 @@ function ComingSoon({ label }: { label: string }) {
 
 /* ── Overview panel */
 function OverviewContent() {
+  const [club, setClub]       = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/clubs")
+      .then(r => r.json())
+      .then(d => setClub(d.clubs?.[0] ?? null))   // leader sees their own club first
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <LoadingState label="overview" />;
+
+  if (!club) return <ShortlyUpdate />;
+
+  const memberCount = club.members?.length ?? 0;
+  const gamesList   = club.supported_games?.join(", ") ?? "—";
+
   const stats = [
-    { label: "Total Members", value: "24", icon: "👥", accent: "#a78bfa" },
-    { label: "Active Tournaments", value: "3", icon: "⚔️", accent: "#60a5fa" },
-    { label: "Club Rank", value: "#12", icon: "🏆", accent: "#fbbf24" },
-    { label: "Win Rate", value: "68%", icon: "📈", accent: "#4ade80" },
+    { label: "Total Members",  value: String(memberCount),          icon: "👥", accent: "#a78bfa" },
+    { label: "Games",          value: gamesList,                    icon: "⚔️", accent: "#60a5fa" },
+    { label: "Club Tag",       value: `[${club.club_tag ?? "—"}]`,  icon: "🏷️", accent: "#fbbf24" },
+    { label: "Status",         value: club.is_verified ? "Verified" : "Unverified", icon: "✅", accent: club.is_verified ? "#4ade80" : "rgba(255,255,255,0.25)" },
   ];
 
   return (
     <div className="content-in space-y-6 p-1">
+      {/* Club name banner */}
+      <div className="border border-[rgba(139,92,246,0.18)] bg-[rgba(139,92,246,0.04)] px-5 py-4"
+        style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
+        <p className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.4em] uppercase text-[#8b5cf6]/50 mb-1">Your Club</p>
+        <h2 className="font-[Cinzel,serif] text-xl font-black text-white">{club.club_name}</h2>
+        {club.club_description && (
+          <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 mt-1">{club.club_description}</p>
+        )}
+      </div>
+
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-3">
         {stats.map((s) => (
@@ -103,27 +131,10 @@ function OverviewContent() {
             className="border border-[rgba(139,92,246,0.14)] bg-[rgba(139,92,246,0.03)] px-5 py-4 flex items-center gap-4"
             style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
             <span className="text-2xl">{s.icon}</span>
-            <div>
+            <div className="min-w-0">
               <p className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.3em] uppercase text-white/25 mb-0.5">{s.label}</p>
-              <p className="font-[Cinzel,serif] text-xl font-black" style={{ color: s.accent }}>{s.value}</p>
+              <p className="font-[Cinzel,serif] text-lg font-black truncate" style={{ color: s.accent }}>{s.value}</p>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Recent Activity */}
-      <div>
-        <p className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.35em] uppercase text-[#8b5cf6]/50 mb-3">Recent Activity</p>
-        {[
-          { text: "xSlayer joined the club",      time: "2m ago",  dot: "#4ade80" },
-          { text: "Tournament #7 registration open", time: "1h ago", dot: "#a78bfa" },
-          { text: "Sniper99 promoted to Co-Leader",  time: "3h ago", dot: "#fbbf24" },
-          { text: "Monthly leaderboard reset",        time: "1d ago", dot: "#60a5fa" },
-        ].map((a, i) => (
-          <div key={i} className="flex items-center gap-3 py-2.5 border-b border-[rgba(139,92,246,0.07)] last:border-none">
-            <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: a.dot, boxShadow: `0 0 6px ${a.dot}` }} />
-            <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/45 flex-1">{a.text}</p>
-            <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-widest text-white/18 uppercase">{a.time}</span>
           </div>
         ))}
       </div>
@@ -137,9 +148,12 @@ function MembersContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/club/members")
+    fetch("/api/clubs")
       .then(r => r.json())
-      .then(d => setMembers(d.members ?? []))
+      .then(d => {
+        const club = d.clubs?.[0];
+        setMembers(club?.members ?? []);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
@@ -154,7 +168,7 @@ function MembersContent() {
   };
 
   if (loading) return <LoadingState label="members" />;
-  if (members.length === 0) return <EmptyState label="Members" />;
+  if (members.length === 0) return <ShortlyUpdate />;
 
   return (
     <div className="content-in space-y-0">
