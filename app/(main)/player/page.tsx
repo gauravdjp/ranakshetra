@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { Tournament } from "@/types";
 import { Club } from "@/types";
@@ -235,11 +236,15 @@ function DashboardSection({ session }: { session: any }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   TOURNAMENTS SECTION
+   TOURNAMENTS SECTION — with join / check-out
 ───────────────────────────────────────────────────────────── */
 function TournamentsSection() {
+  const router = useRouter();
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
+  const [joined, setJoined] = useState<string[]>([]);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
+  const [checkingJoined, setCheckingJoined] = useState(true);
 
   useEffect(() => {
     async function fetch_() {
@@ -252,6 +257,43 @@ function TournamentsSection() {
     }
     fetch_();
   }, []);
+
+  /* Check which tournaments the user already joined */
+  useEffect(() => {
+    if (tournaments.length === 0) { setCheckingJoined(false); return; }
+    const checkAll = async () => {
+      try {
+        const results = await Promise.all(
+          tournaments.map(async (t) => {
+            const tid = t._id ?? "";
+            const res = await fetch("/api/tournaments/check", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ tournamentId: tid }),
+            });
+            const data = await res.json();
+            return data.joined ? tid : null;
+          })
+        );
+        setJoined(results.filter(Boolean) as string[]);
+      } catch { /* */ } finally { setCheckingJoined(false); }
+    };
+    checkAll();
+  }, [tournaments]);
+
+  const handleJoin = async (tournamentId: string) => {
+    setJoiningId(tournamentId);
+    try {
+      const res = await fetch("/api/tournaments/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tournamentId }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert(data.error || "Failed to join"); return; }
+      setJoined(prev => [...prev, tournamentId]);
+    } catch { alert("Something went wrong"); } finally { setJoiningId(null); }
+  };
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -287,6 +329,7 @@ function TournamentsSection() {
         const reg = t.registered_players ?? 0;
         const lim = t.participants_limit ?? 0;
         const pct = lim > 0 ? Math.min(100, Math.round((reg / lim) * 100)) : 0;
+        const isFull = lim > 0 && reg >= lim;
 
         return (
           <div key={tid || i}
@@ -333,6 +376,31 @@ function TournamentsSection() {
                     <p className="font-[Rajdhani,sans-serif] text-[0.6rem] text-[#f59e0b]">Unlimited</p>
                   )}
                 </div>
+
+                {/* ── Join / Check Out button */}
+                <div className="flex-shrink-0">
+                  {checkingJoined ? (
+                    <button disabled className="join-btn px-4 py-2 text-[0.6rem] uppercase font-bold tracking-[0.18em] font-[Rajdhani,sans-serif] whitespace-nowrap opacity-40 bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.4)] text-[#a78bfa]"
+                      style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                      ...
+                    </button>
+                  ) : joined.includes(tid) ? (
+                    <button
+                      onClick={() => router.push(`/tournaments/${tid}`)}
+                      className="join-btn px-4 py-2 text-[0.6rem] uppercase font-bold tracking-[0.18em] font-[Rajdhani,sans-serif] whitespace-nowrap transition-all bg-[#a78bfa]/10 border border-[#a78bfa] text-[#a78bfa]"
+                      style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                      Check Out →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleJoin(tid)}
+                      disabled={joiningId === tid || isFull || t.status === "completed" || t.status === "cancelled"}
+                      className="join-btn px-4 py-2 text-[0.6rem] uppercase font-bold tracking-[0.18em] font-[Rajdhani,sans-serif] whitespace-nowrap transition-all bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.4)] text-[#a78bfa] disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                      {joiningId === tid ? "Joining..." : isFull ? "Full" : "Join →"}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -343,11 +411,74 @@ function TournamentsSection() {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   CLUBS SECTION
+   CLUB APPLY MODAL
+───────────────────────────────────────────────────────────── */
+function ClubApplyModal({ club, onClose }: { club: Club; onClose: () => void }) {
+  const memberCount = club.members?.length ?? 0;
+  const gameLabel = club.supported_games?.join(", ") ?? "—";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-[#050510]/80 backdrop-blur-sm" />
+      <div className="modal-panel relative w-full max-w-[460px] bg-[#09091a] border border-[rgba(139,92,246,0.35)] p-8"
+        style={{ clipPath: "polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%)" }}
+        onClick={e => e.stopPropagation()}>
+        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-[rgba(139,92,246,0.6)]" />
+        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-[rgba(139,92,246,0.6)]" />
+        <div className="flex items-start justify-between mb-6">
+          <div>
+            <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-1">Application</p>
+            <h3 className="font-[Cinzel,serif] font-bold text-white text-xl">Apply to [{club.club_tag}]</h3>
+            <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/30 mt-0.5">{club.club_name}</p>
+          </div>
+          <button onClick={onClose}
+            className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] text-white/25 hover:text-white/60 transition-colors border border-[rgba(139,92,246,0.15)] px-3 py-1 bg-transparent cursor-pointer"
+            style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>ESC</button>
+        </div>
+        <div className="flex gap-3 mb-6 p-3 border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.04)]"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+          {[{ label: "Game", val: gameLabel }, { label: "City", val: club.city }, { label: "Members", val: String(memberCount) }].map(({ label, val }) => (
+            <div key={label} className="flex-1 text-center">
+              <p className="font-[Rajdhani,sans-serif] text-[0.52rem] tracking-[0.2em] uppercase text-white/25 mb-0.5">{label}</p>
+              <p className="font-[Rajdhani,sans-serif] font-bold text-[0.78rem] text-white/70">{val}</p>
+            </div>
+          ))}
+        </div>
+        <div className="border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.05)] px-4 py-4 mb-6"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+          <div className="flex items-start gap-3">
+            <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-60">
+              <circle cx="10" cy="10" r="8" stroke="#8b5cf6" strokeWidth="1.5" />
+              <line x1="10" y1="9" x2="10" y2="14" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="10" cy="6.5" r="0.8" fill="#8b5cf6" />
+            </svg>
+            <div>
+              <p className="font-[Rajdhani,sans-serif] font-bold text-[0.72rem] tracking-[0.1em] text-[#a78bfa] mb-1">Applications Opening Soon</p>
+              <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/35 leading-relaxed">
+                Club application forms are being built. Once live, you'll submit your IGN, rank proof,
+                and a short message to the club leader.
+              </p>
+            </div>
+          </div>
+        </div>
+        <button className="apply-btn w-full py-3 font-[Rajdhani,sans-serif] font-bold text-[0.88rem] tracking-[0.2em] uppercase text-white mb-3 border-none cursor-pointer" onClick={onClose}>
+          Notify Me When Open
+        </button>
+        <button onClick={onClose}
+          className="w-full py-2.5 font-[Rajdhani,sans-serif] text-[0.78rem] tracking-[0.15em] uppercase text-white/25 hover:text-white/45 transition-colors border border-[rgba(139,92,246,0.1)] hover:border-[rgba(139,92,246,0.3)] bg-transparent cursor-pointer"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>Close</button>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CLUBS SECTION — with Apply modal
 ───────────────────────────────────────────────────────────── */
 function ClubsSection() {
   const [clubs, setClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
+  const [applyClub, setApplyClub] = useState<Club | null>(null);
 
   useEffect(() => {
     async function fetch_() {
@@ -365,53 +496,64 @@ function ClubsSection() {
   if (clubs.length === 0) return <EmptyState label="Clubs" />;
 
   return (
-    <div className="content-in space-y-0">
-      {clubs.map((club, i) => {
-        const memberCount = club.members?.length ?? 0;
-        const gameLabel = club.supported_games?.join(", ") ?? "—";
-        return (
-          <div key={club._id ?? i}
-            className="group relative border-b border-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.03)] transition-all duration-200 pl-5 pr-4 py-4 flex items-center gap-4">
-            <div className="absolute left-0 top-0 bottom-0 w-[3px]"
-              style={{ background: club.is_verified ? "rgba(139,92,246,0.6)" : "rgba(255,255,255,0.15)" }} />
+    <>
+      {applyClub && <ClubApplyModal club={applyClub} onClose={() => setApplyClub(null)} />}
+      <div className="content-in space-y-0">
+        {clubs.map((club, i) => {
+          const memberCount = club.members?.length ?? 0;
+          const gameLabel = club.supported_games?.join(", ") ?? "—";
+          return (
+            <div key={club._id ?? i}
+              className="group relative border-b border-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.03)] transition-all duration-200 pl-5 pr-4 py-4 flex items-center gap-4">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px]"
+                style={{ background: club.is_verified ? "rgba(139,92,246,0.6)" : "rgba(255,255,255,0.15)" }} />
 
-            {/* Tag */}
-            <div className="w-[60px] flex-shrink-0">
-              <div className="font-[Cinzel,serif] font-black text-center text-[#a78bfa] text-sm" style={{ textShadow: "0 0 16px rgba(139,92,246,0.4)" }}>
-                [{club.club_tag}]
+              {/* Tag */}
+              <div className="w-[60px] flex-shrink-0">
+                <div className="font-[Cinzel,serif] font-black text-center text-[#a78bfa] text-sm" style={{ textShadow: "0 0 16px rgba(139,92,246,0.4)" }}>
+                  [{club.club_tag}]
+                </div>
               </div>
+
+              <div className="w-px self-stretch bg-[rgba(139,92,246,0.1)] flex-shrink-0" />
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <h3 className="font-[Cinzel,serif] font-bold text-[0.88rem] text-white/85 group-hover:text-[#a78bfa] transition-colors">{club.club_name}</h3>
+                  {club.is_verified && (
+                    <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase px-1.5 py-0.5 border text-[#8b5cf6] border-[rgba(139,92,246,0.44)] bg-[rgba(139,92,246,0.11)]"
+                      style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>Verified</span>
+                  )}
+                </div>
+                {club.club_description && <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-white/25 line-clamp-1">{club.club_description}</p>}
+                <p className="font-[Rajdhani,sans-serif] text-[0.58rem] text-white/18 mt-0.5">Led by {club.username} · {club.city}</p>
+              </div>
+
+              {/* Stats */}
+              <div className="hidden md:flex items-center gap-5 shrink-0">
+                <div className="text-center">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Games</p>
+                  <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/55">{gameLabel}</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Members</p>
+                  <p className="font-[Cinzel,serif] font-bold text-[0.8rem] text-[#a78bfa]">{memberCount}</p>
+                </div>
+              </div>
+
+              {/* Apply button */}
+              <button
+                onClick={() => setApplyClub(club)}
+                className="apply-btn-sm flex-shrink-0 font-[Rajdhani,sans-serif] font-bold text-[0.6rem] tracking-[0.2em] uppercase px-4 py-2 transition-all duration-200 bg-[rgba(139,92,246,0.12)] border border-[rgba(139,92,246,0.4)] text-[#a78bfa] cursor-pointer"
+                style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                Apply →
+              </button>
             </div>
-
-            <div className="w-px self-stretch bg-[rgba(139,92,246,0.1)] flex-shrink-0" />
-
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-0.5">
-                <h3 className="font-[Cinzel,serif] font-bold text-[0.88rem] text-white/85 group-hover:text-[#a78bfa] transition-colors">{club.club_name}</h3>
-                {club.is_verified && (
-                  <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase px-1.5 py-0.5 border text-[#8b5cf6] border-[rgba(139,92,246,0.44)] bg-[rgba(139,92,246,0.11)]"
-                    style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>Verified</span>
-                )}
-              </div>
-              {club.club_description && <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-white/25 line-clamp-1">{club.club_description}</p>}
-              <p className="font-[Rajdhani,sans-serif] text-[0.58rem] text-white/18 mt-0.5">Led by {club.username} · {club.city}</p>
-            </div>
-
-            {/* Stats */}
-            <div className="hidden md:flex items-center gap-5 shrink-0">
-              <div className="text-center">
-                <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Games</p>
-                <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/55">{gameLabel}</p>
-              </div>
-              <div className="text-center">
-                <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Members</p>
-                <p className="font-[Cinzel,serif] font-bold text-[0.8rem] text-[#a78bfa]">{memberCount}</p>
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -698,6 +840,34 @@ export default function PlayerMainPage() {
           -webkit-box-orient: vertical;
           overflow: hidden;
         }
+
+        /* Join / Apply buttons */
+        .join-btn:hover:not(:disabled) {
+          background: rgba(139,92,246,0.2) !important;
+          border-color: rgba(139,92,246,0.7) !important;
+          box-shadow: 0 0 14px rgba(139,92,246,0.2);
+        }
+        .apply-btn {
+          clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+          background: linear-gradient(135deg, #a78bfa, #8b5cf6);
+          transition: all 0.3s ease;
+        }
+        .apply-btn:hover {
+          box-shadow: 0 0 25px rgba(139,92,246,0.5);
+          transform: translateY(-1px);
+        }
+        .apply-btn-sm:hover:not(:disabled) {
+          background: rgba(139,92,246,0.2) !important;
+          border-color: rgba(139,92,246,0.7) !important;
+          box-shadow: 0 0 14px rgba(139,92,246,0.2);
+        }
+
+        /* Modal */
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.96) translateY(12px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-panel { animation: modalIn 0.25s ease forwards; }
       `}</style>
 
       <div className="fixed inset-0 bg-[#050510] flex flex-col overflow-hidden">
