@@ -196,7 +196,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
               src={player.photo}
               alt={player.ign}
               fill
-              className="object-cover object-center"
+              className="object-contain"
               style={{ filter: hovered ? "brightness(1.05) saturate(1.1)" : "brightness(0.92) saturate(1)" }}
             />
           ) : (
