@@ -184,8 +184,8 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
         }}
       >
 
-        {/* ── PHOTO / AVATAR AREA — 260px, full bleed ── */}
-        <div className="relative overflow-hidden" style={{ height: "260px" }}>
+        {/* ── PHOTO / AVATAR AREA — taller for owner ── */}
+        <div className="relative overflow-hidden" style={{ height: player.category === "representing" ? "340px" : "260px" }}>
 
           {player.photo ? (
             /* ── REAL PHOTO MODE
