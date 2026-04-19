@@ -1,12 +1,16 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
+import { Tournament } from "@/types";
+import { Club } from "@/types";
+import { Arena } from "@/types";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
 ───────────────────────────────────────────────────────────── */
+type NavSection = "dashboard" | "tournaments" | "clubs" | "arenas" | "leaderboard";
+
 type UpdatePost = {
   _id?: string;
   tag?: string;
@@ -42,8 +46,48 @@ function PostTagBadge({ tag }: { tag: string }) {
   );
 }
 
+function PlaceholderSection({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full min-h-[400px] gap-4">
+      <div className="w-14 h-14 border border-[rgba(139,92,246,0.25)] flex items-center justify-center bg-[rgba(139,92,246,0.04)]"
+        style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
+        <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6"><path d="M12 2L20 6V12C20 16.5 16.5 20 12 22C7.5 20 4 16.5 4 12V6L12 2Z" stroke="#8b5cf6" strokeWidth="1.2" strokeLinejoin="round" /><path d="M12 8V12M12 16H12.01" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" /></svg>
+      </div>
+      <p className="font-[Cinzel,serif] text-base font-bold text-white/40">{label}</p>
+      <p className="font-[Rajdhani,sans-serif] text-[0.72rem] tracking-[0.25em] uppercase text-white/20">Under Construction</p>
+    </div>
+  );
+}
+
+/* ── Shared loading / empty / error states */
+function LoadingState({ label }: { label: string }) {
+  return (
+    <div className="text-center py-16">
+      <div className="spin-loader mx-auto mb-3" />
+      <p className="font-[Rajdhani,sans-serif] text-white/20 text-sm tracking-wide">Loading {label}...</p>
+    </div>
+  );
+}
+
+function EmptyState({ label }: { label: string }) {
+  return (
+    <div className="text-center py-16">
+      <div className="empty-float mb-4 inline-block">
+        <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12 mx-auto opacity-15">
+          <path d="M24 4L42 12V24C42 33.5 34 41.5 24 44C14 41.5 6 33.5 6 24V12L24 4Z" stroke="#8b5cf6" strokeWidth="1.5" />
+          <path d="M16 24L21 29L32 18" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
+        </svg>
+      </div>
+      <p className="font-[Cinzel,serif] text-white/20 text-lg">No {label} Yet</p>
+      <p className="font-[Rajdhani,sans-serif] text-white/15 text-sm mt-2 tracking-wide">
+        Check back soon!
+      </p>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
-   DASHBOARD SECTION — welcome + official feed from DB
+   DASHBOARD SECTION — welcome + updates from DB
 ───────────────────────────────────────────────────────────── */
 function DashboardSection({ session }: { session: any }) {
   const [updates, setUpdates] = useState<UpdatePost[]>([]);
@@ -104,38 +148,16 @@ function DashboardSection({ session }: { session: any }) {
           <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase text-[#8b5cf6]">Official</p>
           <h2 className="font-[Cinzel,serif] text-base font-bold text-white">Updates & Announcements</h2>
         </div>
-        {/* Live dot */}
         <div className="flex items-center gap-2">
           <span className="w-1.5 h-1.5 rounded-full bg-[#8b5cf6]" style={{ boxShadow: "0 0 6px #8b5cf6", animation: "livePulse 2s ease-in-out infinite" }} />
           <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.25em] uppercase text-white/25">Live</span>
         </div>
       </div>
 
-      {/* ── Loading */}
-      {loading && (
-        <div className="text-center py-12">
-          <div className="spin-loader mx-auto mb-3" />
-          <p className="font-[Rajdhani,sans-serif] text-white/20 text-sm tracking-wide">Loading updates...</p>
-        </div>
-      )}
+      {loading && <LoadingState label="updates" />}
 
-      {/* ── No updates */}
-      {!loading && updates.length === 0 && (
-        <div className="text-center py-16">
-          <div className="empty-float mb-4 inline-block">
-            <svg viewBox="0 0 48 48" fill="none" className="w-12 h-12 mx-auto opacity-15">
-              <path d="M24 4L42 12V24C42 33.5 34 41.5 24 44C14 41.5 6 33.5 6 24V12L24 4Z" stroke="#8b5cf6" strokeWidth="1.5" />
-              <path d="M16 24L21 29L32 18" stroke="#8b5cf6" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-          </div>
-          <p className="font-[Cinzel,serif] text-white/20 text-lg">No Updates Yet</p>
-          <p className="font-[Rajdhani,sans-serif] text-white/15 text-sm mt-2 tracking-wide">
-            Check back soon for announcements and updates!
-          </p>
-        </div>
-      )}
+      {!loading && updates.length === 0 && <EmptyState label="Updates" />}
 
-      {/* ── Posts feed */}
       {!loading && updates.length > 0 && (
         <div className="space-y-3">
           {updates.map((post, i) => (
@@ -146,51 +168,34 @@ function DashboardSection({ session }: { session: any }) {
                 clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)",
                 animationDelay: `${i * 0.05}s`,
               }}>
-
-              {/* Pinned left accent */}
               {post.pinned && (
                 <div className="absolute left-0 top-0 bottom-0 w-[2px]"
                   style={{ background: "linear-gradient(180deg, transparent 0%, #8b5cf6 30%, #8b5cf6 70%, transparent 100%)" }} />
               )}
-
               <div className="px-5 pt-4 pb-4">
-
-                {/* Post header */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="flex items-center gap-2.5">
-                    {/* Official avatar */}
                     <div className="w-7 h-7 border border-[rgba(139,92,246,0.5)] bg-[rgba(139,92,246,0.12)] flex items-center justify-center shrink-0"
                       style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
                       <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5">
-                        <path d="M7 1L11.5 3.5V7C11.5 9.8 9.5 12 7 13C4.5 12 2.5 9.8 2.5 7V3.5L7 1Z"
-                          stroke="#8b5cf6" strokeWidth="1" strokeLinejoin="round" />
+                        <path d="M7 1L11.5 3.5V7C11.5 9.8 9.5 12 7 13C4.5 12 2.5 9.8 2.5 7V3.5L7 1Z" stroke="#8b5cf6" strokeWidth="1" strokeLinejoin="round" />
                         <path d="M5 7L6.5 8.5L9 6" stroke="#8b5cf6" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
                     </div>
                     <div>
-                      <p className="font-[Rajdhani,sans-serif] text-[0.68rem] font-semibold text-[#a78bfa] tracking-wide leading-none">
-                        RANAKSHETRA Official
-                      </p>
+                      <p className="font-[Rajdhani,sans-serif] text-[0.68rem] font-semibold text-[#a78bfa] tracking-wide leading-none">RANAKSHETRA Official</p>
                       <p className="font-[Rajdhani,sans-serif] text-[0.52rem] text-white/25 tracking-wide mt-0.5">
                         {post.timestamp ?? (post.created_at ? new Date(post.created_at).toLocaleDateString() : "")}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    {post.pinned && (
-                      <span className="font-[Rajdhani,sans-serif] text-[0.46rem] tracking-[0.2em] uppercase text-[#8b5cf6]/50">
-                        ◈ pinned
-                      </span>
-                    )}
+                    {post.pinned && <span className="font-[Rajdhani,sans-serif] text-[0.46rem] tracking-[0.2em] uppercase text-[#8b5cf6]/50">◈ pinned</span>}
                     {post.tag && <PostTagBadge tag={post.tag} />}
                   </div>
                 </div>
-
-                {/* Post content */}
                 <h4 className="font-[Cinzel,serif] text-[0.95rem] font-bold text-white mb-2 leading-snug">{post.title}</h4>
                 <p className="font-[Rajdhani,sans-serif] text-[0.78rem] text-white/45 leading-relaxed">{post.body}</p>
-
-                {/* Meta grid */}
                 {post.meta && (
                   <div className="flex flex-wrap gap-x-5 gap-y-1.5 mt-3 pt-3 border-t border-[rgba(139,92,246,0.08)]">
                     {post.meta.map(({ label, value }) => (
@@ -201,8 +206,6 @@ function DashboardSection({ session }: { session: any }) {
                     ))}
                   </div>
                 )}
-
-                {/* CTA */}
                 {post.cta && (
                   <div className="mt-3">
                     <Link href={post.cta.href}
@@ -218,7 +221,6 @@ function DashboardSection({ session }: { session: any }) {
         </div>
       )}
 
-      {/* End of feed */}
       {!loading && updates.length > 0 && (
         <div className="text-center pt-4 pb-8">
           <div className="inline-flex items-center gap-3">
@@ -233,10 +235,282 @@ function DashboardSection({ session }: { session: any }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
+   TOURNAMENTS SECTION
+───────────────────────────────────────────────────────────── */
+function TournamentsSection() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetch_() {
+      try {
+        const res = await fetch("/api/tournaments");
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        setTournaments(data.tournaments ?? []);
+      } catch { /* */ } finally { setLoading(false); }
+    }
+    fetch_();
+  }, []);
+
+  const statusColor = (s: string) => {
+    switch (s) {
+      case "registration_open": return "#22c55e";
+      case "upcoming": return "#f59e0b";
+      case "ongoing": return "#3b82f6";
+      case "completed": return "#6b7280";
+      case "cancelled": return "#ef4444";
+      default: return "#8b5cf6";
+    }
+  };
+  const statusLabel = (s: string) => {
+    switch (s) {
+      case "registration_open": return "Open";
+      case "upcoming": return "Upcoming";
+      case "ongoing": return "Live";
+      case "completed": return "Done";
+      case "cancelled": return "Cancelled";
+      case "draft": return "Draft";
+      default: return s;
+    }
+  };
+
+  if (loading) return <LoadingState label="tournaments" />;
+  if (tournaments.length === 0) return <EmptyState label="Tournaments" />;
+
+  return (
+    <div className="content-in space-y-2">
+      {tournaments.map((t, i) => {
+        const tid = t._id ?? "";
+        const sc = statusColor(t.status);
+        const sl = statusLabel(t.status);
+        const reg = t.registered_players ?? 0;
+        const lim = t.participants_limit ?? 0;
+        const pct = lim > 0 ? Math.min(100, Math.round((reg / lim) * 100)) : 0;
+
+        return (
+          <div key={tid || i}
+            className="relative bg-[#070718] border-b border-[rgba(139,92,246,0.08)] pl-5 pr-4 py-4 flex flex-col gap-3 hover:bg-[rgba(139,92,246,0.03)] transition-all duration-200">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px]" style={{ background: sc }} />
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase px-1.5 py-0.5 border"
+                    style={{ color: sc, borderColor: `${sc}44`, background: `${sc}11`, clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>
+                    {sl}
+                  </span>
+                  {t.visibility === "private" && (
+                    <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.15em] uppercase text-white/20 border border-white/10 px-1.5 py-0.5"
+                      style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>Private</span>
+                  )}
+                </div>
+                <h3 className="font-[Cinzel,serif] text-[0.88rem] text-white font-bold leading-snug">{t.title}</h3>
+                {t.description && <p className="font-[Rajdhani,sans-serif] text-[0.6rem] text-white/25 mt-0.5 line-clamp-1">{t.description}</p>}
+              </div>
+              <div className="flex items-center gap-4 shrink-0">
+                <div className="text-center">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.52rem] uppercase text-white/20 mb-0.5">Region</p>
+                  <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/60">{t.region || "—"}</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.52rem] uppercase text-white/20 mb-0.5">Prize</p>
+                  <p className="font-[Cinzel,serif] text-[0.8rem] font-bold text-[#a78bfa]">
+                    {t.prize_pool > 0 ? `₹${t.prize_pool.toLocaleString()}` : "Trophy"}
+                  </p>
+                </div>
+                <div className="text-center min-w-[60px]">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.52rem] uppercase text-white/20 mb-0.5">Slots</p>
+                  {lim > 0 ? (
+                    <>
+                      <div className="h-1 w-full bg-[rgba(255,255,255,0.05)] my-0.5" style={{ clipPath: "polygon(2px 0%, 100% 0%, calc(100% - 2px) 100%, 0% 100%)" }}>
+                        <div className="h-full transition-all duration-500" style={{ width: `${pct}%`, background: pct >= 100 ? "#f87171" : pct > 80 ? "#f59e0b" : "#8b5cf6" }} />
+                      </div>
+                      <p className="font-[Rajdhani,sans-serif] text-[0.6rem]" style={{ color: pct >= 100 ? "#f87171" : "rgba(255,255,255,0.4)" }}>
+                        {pct >= 100 ? "FULL" : `${reg}/${lim}`}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="font-[Rajdhani,sans-serif] text-[0.6rem] text-[#f59e0b]">Unlimited</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   CLUBS SECTION
+───────────────────────────────────────────────────────────── */
+function ClubsSection() {
+  const [clubs, setClubs] = useState<Club[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetch_() {
+      try {
+        const res = await fetch("/api/clubs");
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        setClubs(data.clubs ?? []);
+      } catch { /* */ } finally { setLoading(false); }
+    }
+    fetch_();
+  }, []);
+
+  if (loading) return <LoadingState label="clubs" />;
+  if (clubs.length === 0) return <EmptyState label="Clubs" />;
+
+  return (
+    <div className="content-in space-y-0">
+      {clubs.map((club, i) => {
+        const memberCount = club.members?.length ?? 0;
+        const gameLabel = club.supported_games?.join(", ") ?? "—";
+        return (
+          <div key={club._id ?? i}
+            className="group relative border-b border-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.03)] transition-all duration-200 pl-5 pr-4 py-4 flex items-center gap-4">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px]"
+              style={{ background: club.is_verified ? "rgba(139,92,246,0.6)" : "rgba(255,255,255,0.15)" }} />
+
+            {/* Tag */}
+            <div className="w-[60px] flex-shrink-0">
+              <div className="font-[Cinzel,serif] font-black text-center text-[#a78bfa] text-sm" style={{ textShadow: "0 0 16px rgba(139,92,246,0.4)" }}>
+                [{club.club_tag}]
+              </div>
+            </div>
+
+            <div className="w-px self-stretch bg-[rgba(139,92,246,0.1)] flex-shrink-0" />
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h3 className="font-[Cinzel,serif] font-bold text-[0.88rem] text-white/85 group-hover:text-[#a78bfa] transition-colors">{club.club_name}</h3>
+                {club.is_verified && (
+                  <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase px-1.5 py-0.5 border text-[#8b5cf6] border-[rgba(139,92,246,0.44)] bg-[rgba(139,92,246,0.11)]"
+                    style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>Verified</span>
+                )}
+              </div>
+              {club.club_description && <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-white/25 line-clamp-1">{club.club_description}</p>}
+              <p className="font-[Rajdhani,sans-serif] text-[0.58rem] text-white/18 mt-0.5">Led by {club.username} · {club.city}</p>
+            </div>
+
+            {/* Stats */}
+            <div className="hidden md:flex items-center gap-5 shrink-0">
+              <div className="text-center">
+                <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Games</p>
+                <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/55">{gameLabel}</p>
+              </div>
+              <div className="text-center">
+                <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Members</p>
+                <p className="font-[Cinzel,serif] font-bold text-[0.8rem] text-[#a78bfa]">{memberCount}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   ARENAS SECTION
+───────────────────────────────────────────────────────────── */
+function ArenasSection() {
+  const [arenas, setArenas] = useState<Arena[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetch_() {
+      try {
+        const res = await fetch("/api/arenas");
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        setArenas(data.arenas ?? []);
+      } catch { /* */ } finally { setLoading(false); }
+    }
+    fetch_();
+  }, []);
+
+  if (loading) return <LoadingState label="arenas" />;
+  if (arenas.length === 0) return <EmptyState label="Arenas" />;
+
+  return (
+    <div className="content-in space-y-0">
+      {arenas.map((arena, i) => {
+        const gamesLabel = arena.supported_games?.join(", ") ?? "—";
+        return (
+          <div key={arena._id ?? i}
+            className="group relative border-b border-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.03)] transition-all duration-200 pl-5 pr-4 py-4 flex items-center gap-4">
+            <div className="absolute left-0 top-0 bottom-0 w-[3px]"
+              style={{ background: arena.is_verified ? "rgba(139,92,246,0.6)" : "rgba(255,255,255,0.15)" }} />
+
+            {/* Icon */}
+            <div className="w-[48px] h-[48px] flex-shrink-0 flex items-center justify-center border border-[rgba(139,92,246,0.2)] bg-[rgba(139,92,246,0.05)]"
+              style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
+              {arena.arena_image ? (
+                <img src={arena.arena_image} alt={arena.arena_name} className="w-full h-full object-cover" />
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5 opacity-30">
+                  <path d="M3 21V7L12 3L21 7V21H3Z" stroke="#8b5cf6" strokeWidth="1.5" />
+                  <path d="M9 21V14H15V21" stroke="#8b5cf6" strokeWidth="1.5" />
+                </svg>
+              )}
+            </div>
+
+            <div className="w-px self-stretch bg-[rgba(139,92,246,0.1)] flex-shrink-0" />
+
+            {/* Info */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h3 className="font-[Cinzel,serif] font-bold text-[0.88rem] text-white/85 group-hover:text-[#a78bfa] transition-colors">{arena.arena_name}</h3>
+                {arena.is_verified && (
+                  <span className="font-[Rajdhani,sans-serif] text-[0.5rem] tracking-[0.2em] uppercase px-1.5 py-0.5 border text-[#8b5cf6] border-[rgba(139,92,246,0.44)] bg-[rgba(139,92,246,0.11)]"
+                    style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>Verified</span>
+                )}
+              </div>
+              {arena.arena_description && <p className="font-[Rajdhani,sans-serif] text-[0.68rem] text-white/25 line-clamp-1">{arena.arena_description}</p>}
+              <p className="font-[Rajdhani,sans-serif] text-[0.58rem] text-white/18 mt-0.5">
+                {arena.arena_location}{arena.arena_city ? ` · ${arena.arena_city}` : ""}
+                {arena.organizer_name ? ` · by ${arena.organizer_name}` : ""}
+              </p>
+            </div>
+
+            {/* Stats */}
+            <div className="hidden md:flex items-center gap-5 shrink-0">
+              <div className="text-center">
+                <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Games</p>
+                <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/55">{gamesLabel}</p>
+              </div>
+              {arena.capacity && arena.capacity > 0 && (
+                <div className="text-center">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.5rem] uppercase text-white/20 mb-0.5">Capacity</p>
+                  <p className="font-[Cinzel,serif] font-bold text-[0.8rem] text-[#a78bfa]">{arena.capacity}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   LEADERBOARD SECTION (placeholder — no collection yet)
+───────────────────────────────────────────────────────────── */
+function LeaderboardSection() {
+  return <PlaceholderSection label="Leaderboard" />;
+}
+
+/* ─────────────────────────────────────────────────────────────
    MAIN LAYOUT SHELL
 ───────────────────────────────────────────────────────────── */
 export default function PlayerMainPage() {
   const { data: session } = useSession();
+  const [activeSection, setActiveSection] = useState<NavSection>("dashboard");
   const [avatarOpen, setAvatarOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
 
@@ -255,12 +529,22 @@ export default function PlayerMainPage() {
   const displayName = user?.username ?? "Warrior";
   const initials = displayName.slice(0, 2).toUpperCase();
 
-  const NAV_LINKS = [
-    { href: "/tournaments", label: "TOURNAMENTS" },
-    { href: "/club",        label: "CLUBS"       },
-    { href: "/arena",       label: "ARENAS"      },
-    { href: "/leaderboard", label: "LEADERBOARD" },
+  const NAV_LINKS: { key: NavSection; label: string }[] = [
+    { key: "tournaments", label: "TOURNAMENTS" },
+    { key: "clubs",       label: "CLUBS"       },
+    { key: "arenas",      label: "ARENAS"      },
+    { key: "leaderboard", label: "LEADERBOARD" },
   ];
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case "dashboard":    return <DashboardSection session={session} />;
+      case "tournaments":  return <TournamentsSection />;
+      case "clubs":        return <ClubsSection />;
+      case "arenas":       return <ArenasSection />;
+      case "leaderboard":  return <LeaderboardSection />;
+    }
+  };
 
   return (
     <>
@@ -327,12 +611,20 @@ export default function PlayerMainPage() {
           display: block;
           width: 100%;
           text-align: left;
-          text-decoration: none;
+          background: none;
+          border-right: none;
+          border-top: none;
+          border-bottom: none;
         }
         .nav-link:hover {
           color: rgba(255,255,255,0.65);
           border-left-color: rgba(139,92,246,0.35);
           background: rgba(139,92,246,0.04);
+        }
+        .nav-link.active {
+          color: #a78bfa;
+          border-left-color: #8b5cf6;
+          background: rgba(139,92,246,0.08);
         }
 
         /* Avatar dropdown */
@@ -399,11 +691,18 @@ export default function PlayerMainPage() {
         .sidebar-scroll { overflow-y: auto; }
         .sidebar-scroll::-webkit-scrollbar { width: 2px; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.2); }
+
+        .line-clamp-1 {
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
       `}</style>
 
       <div className="fixed inset-0 bg-[#050510] flex flex-col overflow-hidden">
 
-        {/* ── Background grid (fixed so it doesn't scroll) */}
+        {/* ── Background grid */}
         <div className="anim-grid absolute inset-0 pointer-events-none"
           style={{
             backgroundImage: "linear-gradient(rgba(139,92,246,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.7) 1px, transparent 1px)",
@@ -421,12 +720,12 @@ export default function PlayerMainPage() {
           style={{ background: "rgba(5,5,16,0.7)", backdropFilter: "blur(12px)" }}>
 
           {/* Brand */}
-          <Link href="/player" className="focus:outline-none no-underline">
+          <button onClick={() => setActiveSection("dashboard")} className="focus:outline-none bg-transparent border-none cursor-pointer">
             <span className="font-[Cinzel,serif] font-black tracking-[0.12em] text-xl"
               style={{ background: "linear-gradient(135deg, #c4b5fd, #8b5cf6)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
               RANAKSHETRA
             </span>
-          </Link>
+          </button>
 
           {/* Avatar + dropdown */}
           <div className="relative" ref={avatarRef}>
@@ -440,7 +739,6 @@ export default function PlayerMainPage() {
 
             {avatarOpen && (
               <div className="dropdown drop-in">
-                {/* Mini user info */}
                 <div className="px-4 py-3 border-b border-[rgba(139,92,246,0.12)]">
                   <p className="font-[Cinzel,serif] text-[0.72rem] font-bold text-white/70">{displayName}</p>
                   {user?.role && (
@@ -472,8 +770,8 @@ export default function PlayerMainPage() {
 
             {/* Dashboard link at top */}
             <div className="pt-5 pb-2 px-4">
-              <Link href="/player"
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 border border-[rgba(139,92,246,0.18)] bg-[rgba(139,92,246,0.05)] hover:bg-[rgba(139,92,246,0.1)] transition-all duration-200 no-underline"
+              <button onClick={() => setActiveSection("dashboard")}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 border border-[rgba(139,92,246,0.18)] bg-[rgba(139,92,246,0.05)] hover:bg-[rgba(139,92,246,0.1)] transition-all duration-200 cursor-pointer"
                 style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
                 <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3 shrink-0">
                   <rect x="1" y="1" width="6" height="6" rx="0.5" stroke="#8b5cf6" strokeWidth="1.2" />
@@ -481,10 +779,11 @@ export default function PlayerMainPage() {
                   <rect x="1" y="9" width="6" height="6" rx="0.5" stroke="#8b5cf6" strokeWidth="1.2" />
                   <rect x="9" y="9" width="6" height="6" rx="0.5" stroke="#8b5cf6" strokeWidth="1.2" />
                 </svg>
-                <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.25em] uppercase text-[#a78bfa]">
+                <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.25em] uppercase"
+                  style={{ color: activeSection === "dashboard" ? "#a78bfa" : "rgba(255,255,255,0.4)" }}>
                   Dashboard
                 </span>
-              </Link>
+              </button>
             </div>
 
             {/* Divider */}
@@ -493,11 +792,11 @@ export default function PlayerMainPage() {
             {/* Nav links */}
             <nav className="flex-1 py-1">
               {NAV_LINKS.map(link => (
-                <Link key={link.href}
-                  href={link.href}
-                  className="nav-link">
+                <button key={link.key}
+                  className={`nav-link ${activeSection === link.key ? "active" : ""}`}
+                  onClick={() => setActiveSection(link.key)}>
                   {link.label}
-                </Link>
+                </button>
               ))}
             </nav>
 
@@ -526,7 +825,7 @@ export default function PlayerMainPage() {
 
           {/* ── MAIN CONTENT */}
           <main className="flex-1 main-scroll">
-            <DashboardSection session={session} />
+            {renderContent()}
           </main>
 
         </div>
