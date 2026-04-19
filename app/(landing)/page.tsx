@@ -593,7 +593,7 @@ export default function Home() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-[Cinzel,serif] font-black whitespace-nowrap pointer-events-none select-none tracking-[0.1em] text-[rgba(232,108,47,0.07)]"
           style={{ fontSize: "clamp(5rem, 18vw, 16rem)" }}
         >
-          RK
+          RKS
         </p>
 
         <p className="relative z-10 font-[Rajdhani,sans-serif] text-[0.85rem] tracking-[0.4em] uppercase text-[#E86C2F] mb-6">
