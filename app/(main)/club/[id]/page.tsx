@@ -53,45 +53,44 @@ interface Club {
 ───────────────────────────────────────────────────────────── */
 const CLUBS: Record<string, Club> = {
   "c001": {
-    id: "c001", name: "XIE CLUB", tag: "MPX", game: "Valorant",
-    region: "Central India", city: "Mumbai", founded: "2024", leader: "Odis",
+    id: "c001", name: "XIE CLASH ROYALE GAMING CLUB", tag: "XIE", game: "Clash Royale",
+    region: "Central India", city: "Mumbai", founded: "2024", leader: "Gaurav",
     wins: 12, tournaments: 28, rank: "Semi-Pro", status: "recruiting",
-    bio: "South India's most feared BGMI squad. Born from the ranked trenches of Bangalore, MPX has climbed from Amateur to Semi-Pro in under a year. We play disciplined, we play smart — and when it matters, we play to win.",
-    achievements: ["RK South India Open — 1st Place", "BGMI Regional Qualifiers — Top 4", "City Cup Champion 2024", "12 Tournament Wins"],
-    socials: { discord: "discord.gg/mpx", instagram: "@mysticphoenixgg" },
+    bio: "Mumbai's premier Clash Royale club, forged in the arena and built on strategy. XIE brings together the sharpest minds in card-based combat — from cycle decks to beatdown — united by one goal: dominate every tournament we enter.",
+    achievements: [],
+    socials: { discord: "discord.gg/xie", instagram: "@xieclashroyale" },
     seats: 8, filled: 6,
   },
 };
 
 const PLAYERS: Player[] = [
-  // ── REPRESENTING (active roster — assign real photos here)
+  // ── REPRESENTING (owner)
   {
-    id: "p1", name: "Arjun Sharma", ign: "ShadowX", position: "IGL", clubRank: 1,
+    id: "p1", name: "Odis", ign: "#220RULVURY", position: "Leader", clubRank: 1,
     skillTag: "Pro", category: "representing", wins: 9, tournaments: 20,
-    joinedYear: "2024", avatarSeed: "a", country: "🇮🇳", game: "BGMI",
-    // photo: "/players/shadowx.png",   ← drop your photo path here
+    joinedYear: "2024", avatarSeed: "a", country: "🇮🇳", game: "Clash Royale",
+    photo: "/images/1.png",
+  },
+  // ── CORE (manager)
+  {
+    id: "p2", name: "Omkar", ign: "#228GQ8JL8U", position: "Co-Leader", clubRank: 2,
+    skillTag: "Pro", category: "core", wins: 8, tournaments: 18,
+    joinedYear: "2024", avatarSeed: "b", country: "🇮🇳", game: "Clash Royale",
+    photo: "/images/2.png",
+  },
+  // ── RESERVE (pro players)
+  {
+    id: "p3", name: "Cleatus", ign: "#20LJQVQQLV", position: "Fragger", clubRank: 3,
+    skillTag: "Pro", category: "reserve", wins: 7, tournaments: 17,
+    joinedYear: "2024", avatarSeed: "c", country: "🇮🇳", game: "Clash Royale",
+    photo: "/images/3.png",
   },
   {
-    id: "p2", name: "Ravi Menon", ign: "PhantomRK", position: "Fragger", clubRank: 2,
-    skillTag: "Pro", category: "representing", wins: 8, tournaments: 18,
-    joinedYear: "2024", avatarSeed: "b", country: "🇮🇳", game: "BGMI",
+    id: "p4", name: "Vinay", ign: "#VP920CGQQ", position: "Support", clubRank: 4,
+    skillTag: "Pro", category: "reserve", wins: 6, tournaments: 15,
+    joinedYear: "2024", avatarSeed: "d", country: "🇮🇳", game: "Clash Royale",
+    photo: "/images/4.png",
   },
-  {
-    id: "p3", name: "Kiran Nair", ign: "ViperKN", position: "Support", clubRank: 3,
-    skillTag: "Intermediate", category: "representing", wins: 7, tournaments: 17,
-    joinedYear: "2024", avatarSeed: "c", country: "🇮🇳", game: "BGMI",
-  },
-  {
-    id: "p4", name: "Dev Pillai", ign: "ZeroGravDev", position: "Sniper", clubRank: 4,
-    skillTag: "Intermediate", category: "representing", wins: 6, tournaments: 15,
-    joinedYear: "2024", avatarSeed: "d", country: "🇮🇳", game: "BGMI",
-  },
-  // ── CORE
-  { id: "p5", name: "Sai Krishnan", ign: "SaiStrike",   position: "Entry",  clubRank: 5, skillTag: "Intermediate", category: "core",    wins: 4, tournaments: 10, joinedYear: "2024", avatarSeed: "e", country: "🇮🇳", game: "BGMI" },
-  { id: "p6", name: "Rohan Das",    ign: "RD_Anchor",   position: "Anchor", clubRank: 6, skillTag: "Intermediate", category: "core",    wins: 3, tournaments: 8,  joinedYear: "2025", avatarSeed: "f", country: "🇮🇳", game: "BGMI" },
-  // ── RESERVE
-  { id: "p7", name: "Aakash Rao",   ign: "AK_Wildfire", position: "Scout",  clubRank: 7, skillTag: "Noob",         category: "reserve", wins: 1, tournaments: 3,  joinedYear: "2025", avatarSeed: "g", country: "🇮🇳", game: "BGMI" },
-  { id: "p8", name: "Nikhil Bhat",  ign: "NB_Ranger",   position: "Flex",   clubRank: 8, skillTag: "Noob",         category: "reserve", wins: 0, tournaments: 1,  joinedYear: "2025", avatarSeed: "h", country: "🇮🇳", game: "BGMI" },
 ];
 
 /* ─────────────────────────────────────────────────────────────
@@ -104,10 +103,10 @@ const SKILL_CFG = {
 };
 
 const CATEGORY_CFG = {
-  representing: { label: "Active Duty",   accent: "#f59e0b" },
-  core:         { label: "Core Roster",   accent: "#8b5cf6" },
-  reserve:      { label: "Reserve Bench", accent: "#06b6d4" },
-  trial:        { label: "On Trial",      accent: "#6b7280" },
+  representing: { label: "Owner",                              accent: "#f59e0b" },
+  core:         { label: "Manager",                            accent: "#8b5cf6" },
+  reserve:      { label: "Pro Players & Active Tournament Players", accent: "#06b6d4" },
+  trial:        { label: "On Trial",                           accent: "#6b7280" },
 };
 
 const AVATAR_GRADIENTS: Record<string, [string, string, string]> = {
@@ -266,7 +265,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
             </span>
           </div>
 
-          {/* Active duty badge — top-right */}
+          {/* Owner badge — top-right */}
           <div
             className="absolute top-3 right-0 flex items-center gap-1.5 px-3 py-1 z-10"
             style={{
@@ -279,7 +278,7 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
               className="font-[Rajdhani,sans-serif] font-bold text-[0.5rem] tracking-[0.3em]"
               style={{ color: c1 }}
             >
-              ACTIVE
+              OWNER
             </span>
           </div>
 
@@ -292,10 +291,10 @@ function RepresentingCard({ player, index }: { player: Player; index: number }) 
                 textShadow: hovered ? `0 0 24px ${c1}88, 0 2px 12px rgba(0,0,0,0.8)` : "0 2px 12px rgba(0,0,0,0.9)",
               }}
             >
-              {player.ign}
+              {player.name}
             </p>
             <p className="font-[Rajdhani,sans-serif] text-[0.62rem] text-white/35">
-              {player.name} {player.country}
+              {player.ign} {player.country}
             </p>
           </div>
 
@@ -471,6 +470,9 @@ function MemberCard({ player, index }: { player: Player; index: number }) {
               className="font-[Cinzel,serif] font-bold text-white text-[0.82rem] tracking-[0.04em] leading-tight"
               style={{ textShadow: "0 2px 8px rgba(0,0,0,0.9)" }}
             >
+              {player.name}
+            </p>
+            <p className="font-[Rajdhani,sans-serif] text-[0.55rem] text-white/35">
               {player.ign}
             </p>
           </div>
@@ -763,14 +765,7 @@ export default function ClubDetailPage() {
                   <p className="font-[Rajdhani,sans-serif] text-[0.82rem] text-white/45 leading-relaxed max-w-[560px] mb-5">
                     {club.bio}
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {club.achievements.map((a, i) => (
-                      <span key={i} className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.12em] px-3 py-1 border border-[rgba(139,92,246,0.15)] bg-[rgba(139,92,246,0.04)] text-white/35"
-                        style={{ clipPath:"polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)" }}>
-                        🏆 {a}
-                      </span>
-                    ))}
-                  </div>
+
                 </div>
 
                 <div className="flex flex-col gap-3 flex-shrink-0">
@@ -793,12 +788,6 @@ export default function ClubDetailPage() {
                     </div>
                   </div>
 
-                  <button
-                    disabled={club.status !== "recruiting"}
-                    className="py-3 font-[Rajdhani,sans-serif] font-black text-[0.82rem] tracking-[0.25em] uppercase text-white transition-all duration-300 hover:shadow-[0_0_28px_rgba(139,92,246,0.6)] disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{ clipPath:"polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%)", background:"linear-gradient(135deg,#a78bfa,#8b5cf6)" }}>
-                    Apply to Join
-                  </button>
                 </div>
               </div>
             </div>
@@ -859,4 +848,4 @@ export default function ClubDetailPage() {
       </div>
     </>
   );
-}
+} 
