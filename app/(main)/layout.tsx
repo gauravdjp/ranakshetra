@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${cinzel.variable} ${rajdhani.variable} antialiased`}>
-        <main className="pt-72px">
+        <main>
           <Providers>
             {children}
           </Providers>
