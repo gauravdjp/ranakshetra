@@ -4,6 +4,8 @@ import { Access_Level_USER_Role } from "@/types/index";
 declare module "next-auth" {
     interface Session {
         user: {
+            _id?: string;              // FIX: added — MongoDB document _id
+            id?: string;               // FIX: added — NextAuth default id alias
             username: string;
             email: string;
             role: Access_Level_USER_Role;
@@ -18,6 +20,8 @@ declare module "next-auth" {
         };
     }
     interface User {
+        _id?: string;
+        id?: string;
         username: string;
         email: string;
         role: Access_Level_USER_Role;
@@ -31,6 +35,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
     interface JWT {
+        _id?: string;                  // FIX: added — carried in JWT token
         username: string;
         role: Access_Level_USER_Role;
         player_tag?: string;

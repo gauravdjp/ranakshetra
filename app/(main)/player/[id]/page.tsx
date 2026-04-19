@@ -1,10 +1,10 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Games, Access_Level_USER_Role } from "../../../../types/index";
+import { Games, Access_Level_USER_Role, CRApiData } from "../../../../types/index";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -13,44 +13,24 @@ type PlayerProfile = {
   _id: string;
   name: string;
   username: string;
-  player_tag?: string;
+  player_tag?: string;        // optional — player may not have set it yet
   role: Access_Level_USER_Role;
   email: string;
   city: string;
   state: string;
   country: string;
-  region?: string;
-  device?: string;
-  skill_level?: string;
+  region?: string;            // extra field stored in DB, also now in Player type
+  device?: string;            // optional — may not be set
+  skill_level?: string;       // optional — may not be set
   description?: string;
-  games?: Games[];
-  fav_game?: Games;
+  games?: Games[];            // optional — may not be set
+  fav_game?: Games;           // extra field stored in DB, also now in Player type
   is_verified?: boolean;
-  created_at?: string;
+  created_at?: string;        // comes as ISO string from JSON response (Date in Player type)
 };
 
-type CRData = {
-  tag: string;
-  name: string;
-  expLevel: number;
-  trophies: number;
-  bestTrophies: number;
-  wins: number;
-  losses: number;
-  threeCrownWins: number;
-  challengeMaxWins?: number;
-  warDayWins?: number;
-  donations: number;
-  donationsReceived: number;
-  arena?: { name: string };
-  clan?: { name: string; tag: string; badgeId: number };
-  role?: string;
-  leagueStatistics?: {
-    currentSeason?: { trophies?: number; bestTrophies?: number };
-    previousSeason?: { trophies?: number; bestTrophies?: number };
-  };
-  currentFavouriteCard?: { name: string };
-};
+// CRApiData is imported from types/index — it represents the raw CR external API response
+// (camelCase field names as returned by the Clash Royale API)
 
 type PlayerEditForm = {
   name: string;
@@ -311,7 +291,7 @@ function InGameModal({ player, playerId, onClose, onSaved }: {
    CLASH ROYALE STATS PANEL
 ───────────────────────────────────────────────────────────── */
 function CRStatsPanel({ tag }: { tag: string }) {
-  const [crData, setCrData] = useState<CRData | null>(null);
+  const [crData, setCrData] = useState<CRApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 

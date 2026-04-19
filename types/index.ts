@@ -1,17 +1,17 @@
 // basic information that can be reused in types
 export type Basic_Info = {
-    readonly name : string,
-    readonly email : string,
-    readonly username : string,
-    readonly password : string,
-    readonly phone? : number,
-    readonly date_of_birth : Date,
-    readonly city : string,
-    readonly state : string,
-    readonly country : string,
-    readonly created_at : Date,
-    readonly updated_at : Date,
-    readonly access_role : Access_Level.USER,
+    name : string,
+    email : string,
+    username : string,
+    password : string,
+    phone? : number,
+    date_of_birth? : Date,
+    city : string,
+    state : string,
+    country : string,
+    created_at : Date,
+    updated_at : Date,
+    access_role : Access_Level,          // FIX: was hardcoded to Access_Level.USER
 }
 /*--------------------------------------------------------*/
 
@@ -53,7 +53,7 @@ export type Organiser = Basic_Info & {
     arena_location : string,
     arena_description? : string,
     arena_image? : string,
-    readonly is_verified : boolean, 
+    is_verified : boolean,
 }
 /*--------------------------------------------------------*/
 
@@ -70,7 +70,9 @@ export type Player = Basic_Info & {
     device : string,
     profile_image? : string,
     description? : string,
-    readonly is_verified : boolean, 
+    region? : string,                   // FIX: added — used in UI and in-game API
+    fav_game? : Games,                  // FIX: added — used in player profile page
+    is_verified : boolean,
 }
 /*--------------------------------------------------------*/
 
@@ -81,19 +83,20 @@ export type Club = Basic_Info & {
     _id? : string,
     role : Access_Level_USER_Role.CLUB,
     club_name : string,
-    club_tag : string,            // short identifier e.g. #SHDW
+    club_tag : string,                  // short identifier e.g. #SHDW
     club_description? : string,
     club_image? : string,
     supported_games : Games[],
-    members? : string[],          // array of player _id or usernames
-    readonly is_verified : boolean,
+    members? : string[],                // array of player _id references
+    is_verified : boolean,
 }
 
-export type Club_Roles = {
-    LEADER : "leader",
-    CO_LEADER : "co_leader",
-    ELDER : "elder",
-    MEMBER : "member",
+// FIX: was a broken type object — converted to proper enum
+export enum Club_Roles {
+    LEADER     = "leader",
+    CO_LEADER  = "co_leader",
+    ELDER      = "elder",
+    MEMBER     = "member",
 }
 /*--------------------------------------------------------*/
 
@@ -158,8 +161,17 @@ export type Tournament_Registration = {
     joinedAt: Date;
 }
 
+// FIX: Match was completely empty — added minimal structure
 export type Match = {
-
+    _id?: string;
+    tournament_id: string;
+    bracket_match_id: string;          // references BracketMatch.matchId
+    player1_tag: string;
+    player2_tag: string;
+    winner_tag?: string;
+    score?: string;
+    played_at?: Date;
+    status: "pending" | "live" | "completed";
 }
 
 export type BracketPlayer = {
@@ -209,8 +221,11 @@ export type Arena = {
     updated_at?: Date;
 }
 
-export type Arena_Roles = {
-
+// FIX: was completely empty — added basic arena role enum
+export enum Arena_Roles {
+    OWNER    = "owner",
+    MANAGER  = "manager",
+    STAFF    = "staff",
 }
 /*--------------------------------------------------------*/
 
@@ -220,14 +235,16 @@ export enum Games{
     CLASH_ROYALE = "CLASH ROYALE",
 }
 
+// FIX: game was Games[] (array) — changed to Games (single game per detail record)
 export type In_Game_Details = {
-    game : Games[],
+    game : Games,
     username : string,
     rank? : number,
     trophies? : number,
     level? : number,
 }
 
+// ClashRoyaleDetails: DB-side representation (snake_case, stored in player record)
 export type ClashRoyaleDetails = In_Game_Details & {
     player_tag: string;
     player_name: string;
@@ -246,11 +263,36 @@ export type ClashRoyaleDetails = In_Game_Details & {
 
     clan_name?: string;
     clan_tag?: string;
-    clan_role?: 'leader' | 'co_leader' | 'elder' | 'member';
+    clan_role?: Club_Roles;           // FIX: now uses the Club_Roles enum
     total_donations: number;
     
     favorite_card?: string;
     current_deck?: string[]; 
+};
+
+// CRApiData: Raw Clash Royale external API response (camelCase)
+// Used when calling the CR API endpoint directly
+export type CRApiData = {
+    tag: string;
+    name: string;
+    expLevel: number;
+    trophies: number;
+    bestTrophies: number;
+    wins: number;
+    losses: number;
+    threeCrownWins: number;
+    challengeMaxWins?: number;
+    warDayWins?: number;
+    donations: number;
+    donationsReceived: number;
+    arena?: { name: string };
+    clan?: { name: string; tag: string; badgeId: number };
+    role?: string;
+    leagueStatistics?: {
+        currentSeason?: { trophies?: number; bestTrophies?: number };
+        previousSeason?: { trophies?: number; bestTrophies?: number };
+    };
+    currentFavouriteCard?: { name: string };
 };
 
 /*--------------------------------------------------------*/

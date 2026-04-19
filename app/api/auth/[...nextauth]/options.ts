@@ -32,10 +32,11 @@ export const authOptions: NextAuthOptions = {
 
                 // Build the base return object shared by all roles
                 const baseUser = {
-                    id: user._id.toString(),
+                    id:       user._id.toString(),
+                    _id:      user._id.toString(),   // FIX: expose MongoDB _id explicitly
                     username: user.username,
-                    email: user.email,
-                    role: user.role,
+                    email:    user.email,
+                    role:     user.role,
                 };
 
                 // Attach role-specific fields only when they exist
@@ -57,6 +58,7 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
+                token._id           = user._id ?? user.id;    // FIX: carry _id in token
                 token.username      = user.username;
                 token.role          = user.role;
                 token.email         = user.email;
@@ -74,6 +76,8 @@ export const authOptions: NextAuthOptions = {
 
         async session({ session, token }) {
             if (token) {
+                session.user._id          = token._id;             // FIX: expose _id in session
+                session.user.id           = token._id;             // FIX: id alias
                 session.user.username     = token.username;
                 session.user.email        = token.email ?? "";
                 session.user.role         = token.role;
