@@ -801,7 +801,6 @@ export default function ClubDetailPage() {
             {representing.length > 0 && (
               <div className="mb-2">
                 <SectionHeader category="representing" count={representing.length} />
-                {/* Representing cards: wider on desktop — 4 per row but bigger */}
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
                   {representing.map((p, i) => (
                     <RepresentingCard key={p.id} player={p} index={i} />
@@ -813,9 +812,9 @@ export default function ClubDetailPage() {
             {core.length > 0 && (
               <div className="mb-2">
                 <SectionHeader category="core" count={core.length} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
                   {core.map((p, i) => (
-                    <MemberCard key={p.id} player={p} index={i} />
+                    <RepresentingCard key={p.id} player={p} index={i} />
                   ))}
                 </div>
               </div>
@@ -824,9 +823,9 @@ export default function ClubDetailPage() {
             {reserve.length > 0 && (
               <div className="mb-2">
                 <SectionHeader category="reserve" count={reserve.length} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
                   {reserve.map((p, i) => (
-                    <MemberCard key={p.id} player={p} index={i} />
+                    <RepresentingCard key={p.id} player={p} index={i} />
                   ))}
                 </div>
               </div>
@@ -835,9 +834,9 @@ export default function ClubDetailPage() {
             {trial.length > 0 && (
               <div className="mb-2">
                 <SectionHeader category="trial" count={trial.length} />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-5">
                   {trial.map((p, i) => (
-                    <MemberCard key={p.id} player={p} index={i} />
+                    <RepresentingCard key={p.id} player={p} index={i} />
                   ))}
                 </div>
               </div>
@@ -848,4 +847,4 @@ export default function ClubDetailPage() {
       </div>
     </>
   );
-} 
+}
