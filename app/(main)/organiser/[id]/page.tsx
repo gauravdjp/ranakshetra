@@ -1,9 +1,10 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
-import { Tournament } from "@/types";
+import { Tournament, Tournament_Types, Games } from "@/types";
 import { Club } from "@/types";
 import { Arena } from "@/types";
 
@@ -12,6 +13,21 @@ import { Arena } from "@/types";
    ───────────────────────────────────────────────────────────── */
 type NavTab    = "tournaments" | "arenas" | "leaderboard" | "clubs";
 type SidePanel = "manage" | "create" | "post-updates" | "settings";
+
+type TournamentFormData = {
+  title: string;
+  tournament_type: "single_elimination" | "double_elimination";
+  game_id: string;
+  participants_limit_type: "fixed" | "unlimited";
+  participants_limit: number;
+  registration_start_date: string;
+  registration_deadline: string;
+  prize_pool: number;
+  entry_fee: number;
+  start_date: string;
+  visibility: "public" | "private";
+  description: string;
+};
 
 type UpdatePost = {
   _id?: string;
@@ -89,10 +105,35 @@ function ComingSoon({ label }: { label: string }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   SIDE PANEL CONTENT SECTIONS
+   FORM FIELD HELPERS  (shared styled inputs)
    ───────────────────────────────────────────────────────────── */
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.32em] uppercase text-white/30 block mb-1.5">
+      {children}
+    </label>
+  );
+}
 
-/* MANAGE — shows the current nav tab's content (tournaments list etc.) */
+function FieldError({ msg }: { msg?: string }) {
+  if (!msg) return null;
+  return (
+    <p className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-wide text-red-400/80 mt-1">
+      ⚠ {msg}
+    </p>
+  );
+}
+
+const inputCls =
+  "w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.18)] px-4 py-2.5 " +
+  "font-[Rajdhani,sans-serif] text-[0.82rem] text-white placeholder-white/15 " +
+  "focus:outline-none focus:border-[rgba(139,92,246,0.55)] focus:bg-[rgba(139,92,246,0.07)] " +
+  "transition-all duration-200";
+const inputStyle = { clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" };
+
+/* ─────────────────────────────────────────────────────────────
+   MANAGE — shows the current nav tab's content
+   ───────────────────────────────────────────────────────────── */
 function ManageContent({ activeTab }: { activeTab: NavTab }) {
   switch (activeTab) {
     case "tournaments":  return <ManageTournaments />;
@@ -150,7 +191,6 @@ function ManageTournaments() {
         const reg  = t.registered_players ?? 0;
         const lim  = t.participants_limit ?? 0;
         const pct  = lim > 0 ? Math.min(100, Math.round((reg / lim) * 100)) : 0;
-        const isFull = lim > 0 && reg >= lim;
 
         return (
           <div key={tid || i}
@@ -346,34 +386,386 @@ function ManageClubs() {
   );
 }
 
-/* ── Create new entity */
-function CreateContent({ activeTab }: { activeTab: NavTab }) {
-  const label = activeTab.charAt(0).toUpperCase() + activeTab.slice(1, -1); // e.g. "Tournament"
+/* ─────────────────────────────────────────────────────────────
+   CREATE TOURNAMENT FORM
+   ───────────────────────────────────────────────────────────── */
+function CreateTournamentForm({ session }: { session: any }) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<TournamentFormData>({
+    defaultValues: {
+      tournament_type: "single_elimination",
+      participants_limit_type: "fixed",
+      participants_limit: 16,
+      visibility: "public",
+      prize_pool: 0,
+      entry_fee: 0,
+      game_id: Games.CLASH_ROYALE,
+    },
+  });
+
+  const limitType = watch("participants_limit_type");
+
+  const onSubmit = async (data: TournamentFormData) => {
+    setSubmitting(true);
+    setSubmitStatus("idle");
+    setErrorMsg("");
+
+    try {
+      const payload: Partial<Tournament> = {
+        title: data.title,
+        tournament_type: data.tournament_type as Tournament_Types,
+        game_id: data.game_id,
+        participants_limit: data.participants_limit_type === "unlimited" ? 0 : Number(data.participants_limit),
+        registration_start_date: new Date(data.registration_start_date),
+        registration_deadline: new Date(data.registration_deadline),
+        start_date: new Date(data.start_date),
+        // Set a default end_date 7 days after start
+        end_date: new Date(new Date(data.start_date).getTime() + 7 * 24 * 60 * 60 * 1000),
+        prize_pool: Number(data.prize_pool),
+        entry_fee: Number(data.entry_fee),
+        visibility: data.visibility,
+        description: data.description,
+        organizer_id: session?.user?._id ?? session?.user?.id ?? "",
+        status: "draft",
+        single_player: true,
+        team_based: false,
+        brackets_generated: false,
+        results_declared: false,
+        progress: 0,
+        format_rules: data.tournament_type === "single_elimination"
+          ? "Single elimination — lose once and you're out."
+          : "Double elimination — two losses required for elimination.",
+        registered_players: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
+      };
+
+      const res = await fetch("/api/tournaments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to create tournament");
+      }
+
+      setSubmitStatus("success");
+      reset();
+      setTimeout(() => setSubmitStatus("idle"), 4000);
+    } catch (e: any) {
+      setErrorMsg(e.message ?? "Something went wrong");
+      setSubmitStatus("error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  /* ── Toggle pill component */
+  const TogglePill = ({
+    name, value, current, label, onChange,
+  }: { name: string; value: string; current: string; label: string; onChange: () => void }) => (
+    <button type="button" onClick={onChange}
+      className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase px-4 py-2 border transition-all duration-150"
+      style={{
+        clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+        borderColor: current === value ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.15)",
+        background:  current === value ? "rgba(139,92,246,0.18)" : "transparent",
+        color:       current === value ? "#a78bfa" : "rgba(255,255,255,0.28)",
+      }}>
+      {label}
+    </button>
+  );
+
+  if (submitStatus === "success") {
+    return (
+      <div className="content-in flex flex-col items-center justify-center h-full min-h-[300px] gap-5">
+        <div className="w-16 h-16 border border-[rgba(34,197,94,0.4)] flex items-center justify-center bg-[rgba(34,197,94,0.06)]"
+          style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
+          <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
+            <path d="M5 13L9 17L19 7" stroke="#4ade80" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <div className="text-center">
+          <h2 className="font-[Cinzel,serif] text-lg font-bold text-white">Tournament Created!</h2>
+          <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/30 mt-2 tracking-wide">
+            Saved as draft. Go to Manage → Tournaments to publish it.
+          </p>
+        </div>
+        <button onClick={() => setSubmitStatus("idle")}
+          className="font-[Rajdhani,sans-serif] font-bold text-[0.7rem] tracking-[0.25em] uppercase px-6 py-2.5 border border-[rgba(139,92,246,0.35)] text-[#a78bfa] bg-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.18)] transition-all"
+          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+          + Create Another
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="content-in flex flex-col items-center justify-center h-full min-h-[300px] gap-6">
-      <div className="w-16 h-16 border border-[rgba(139,92,246,0.3)] flex items-center justify-center bg-[rgba(139,92,246,0.06)]"
-        style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-        <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
-          <path d="M12 5V19M5 12H19" stroke="#8b5cf6" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
+    <div className="content-in max-w-[620px] mx-auto pb-8">
+
+      {/* Section header */}
+      <div className="mb-6">
+        <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.38em] uppercase text-[#8b5cf6] mb-1">Organiser Tools</p>
+        <h2 className="font-[Cinzel,serif] text-[1.15rem] font-bold text-white">New Tournament</h2>
       </div>
-      <div className="text-center">
-        <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-1">Organiser Tools</p>
-        <h2 className="font-[Cinzel,serif] text-xl font-bold text-white">Create {label}</h2>
-        <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/30 mt-2 tracking-wide">
-          Creation forms are coming soon for organisers.
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+
+        {/* ── Tournament Name */}
+        <div>
+          <FieldLabel>Tournament Name *</FieldLabel>
+          <input
+            {...register("title", { required: "Tournament name is required", minLength: { value: 3, message: "At least 3 characters" } })}
+            placeholder="e.g. Shadow Cup Season 3"
+            className={inputCls}
+            style={inputStyle}
+          />
+          <FieldError msg={errors.title?.message} />
+        </div>
+
+        {/* ── Tournament Type */}
+        <div>
+          <FieldLabel>Tournament Type *</FieldLabel>
+          <div className="flex gap-2">
+            {([
+              { value: "single_elimination", label: "Single Elimination" },
+              { value: "double_elimination", label: "Double Elimination" },
+            ] as const).map(opt => (
+              <label key={opt.value}
+                className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.18em] uppercase px-4 py-2.5 border transition-all duration-150 cursor-pointer flex items-center gap-2"
+                style={{
+                  clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                  borderColor: watch("tournament_type") === opt.value ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.15)",
+                  background:  watch("tournament_type") === opt.value ? "rgba(139,92,246,0.18)" : "transparent",
+                  color:       watch("tournament_type") === opt.value ? "#a78bfa" : "rgba(255,255,255,0.28)",
+                }}>
+                <input type="radio" value={opt.value} {...register("tournament_type")} className="sr-only" />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+          <p className="font-[Rajdhani,sans-serif] text-[0.52rem] text-white/20 mt-1.5 tracking-wide">
+            {watch("tournament_type") === "single_elimination"
+              ? "One loss = eliminated. Fast-paced bracket."
+              : "Two losses required. More forgiving format."}
+          </p>
+        </div>
+
+        {/* ── Game */}
+        <div>
+          <FieldLabel>Game *</FieldLabel>
+          <select
+            {...register("game_id", { required: "Select a game" })}
+            className={inputCls + " appearance-none cursor-pointer"}
+            style={inputStyle}>
+            {Object.values(Games).map(g => (
+              <option key={g} value={g} className="bg-[#090919]">{g}</option>
+            ))}
+          </select>
+          <FieldError msg={errors.game_id?.message} />
+        </div>
+
+        {/* ── Participants */}
+        <div>
+          <FieldLabel>Participant Slots *</FieldLabel>
+          <div className="flex gap-2 mb-2.5">
+            {([
+              { value: "fixed", label: "Fixed Count" },
+              { value: "unlimited", label: "Unlimited" },
+            ] as const).map(opt => (
+              <label key={opt.value}
+                className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.18em] uppercase px-4 py-2 border transition-all duration-150 cursor-pointer flex items-center gap-2"
+                style={{
+                  clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                  borderColor: limitType === opt.value ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.15)",
+                  background:  limitType === opt.value ? "rgba(139,92,246,0.18)" : "transparent",
+                  color:       limitType === opt.value ? "#a78bfa" : "rgba(255,255,255,0.28)",
+                }}>
+                <input type="radio" value={opt.value} {...register("participants_limit_type")} className="sr-only" />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+          {limitType === "fixed" && (
+            <input
+              type="number"
+              {...register("participants_limit", {
+                required: limitType === "fixed" ? "Slot count is required" : false,
+                min: { value: 2, message: "Minimum 2 participants" },
+                max: { value: 512, message: "Maximum 512 participants" },
+              })}
+              placeholder="e.g. 32"
+              className={inputCls}
+              style={inputStyle}
+            />
+          )}
+          <FieldError msg={errors.participants_limit?.message} />
+          {limitType === "unlimited" && (
+            <p className="font-[Rajdhani,sans-serif] text-[0.52rem] text-[#f59e0b]/70 mt-1.5 tracking-wide">
+              No cap — anyone can register until deadline.
+            </p>
+          )}
+        </div>
+
+        {/* ── Dates row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>Registration Opens *</FieldLabel>
+            <input
+              type="datetime-local"
+              {...register("registration_start_date", { required: "Required" })}
+              className={inputCls}
+              style={{ ...inputStyle, colorScheme: "dark" }}
+            />
+            <FieldError msg={errors.registration_start_date?.message} />
+          </div>
+          <div>
+            <FieldLabel>Registration Closes *</FieldLabel>
+            <input
+              type="datetime-local"
+              {...register("registration_deadline", { required: "Required" })}
+              className={inputCls}
+              style={{ ...inputStyle, colorScheme: "dark" }}
+            />
+            <FieldError msg={errors.registration_deadline?.message} />
+          </div>
+        </div>
+
+        {/* ── Tournament Start Date */}
+        <div>
+          <FieldLabel>Tournament Start (Round 1) *</FieldLabel>
+          <input
+            type="datetime-local"
+            {...register("start_date", { required: "Start date is required" })}
+            className={inputCls}
+            style={{ ...inputStyle, colorScheme: "dark" }}
+          />
+          <FieldError msg={errors.start_date?.message} />
+        </div>
+
+        {/* ── Prize Pool + Entry Fee */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <FieldLabel>Prize Pool (₹)</FieldLabel>
+            <input
+              type="number"
+              {...register("prize_pool", { min: { value: 0, message: "Cannot be negative" } })}
+              placeholder="0"
+              className={inputCls}
+              style={inputStyle}
+            />
+            <FieldError msg={errors.prize_pool?.message} />
+            <p className="font-[Rajdhani,sans-serif] text-[0.5rem] text-white/15 mt-1 tracking-wide">Leave 0 for trophy-only</p>
+          </div>
+          <div>
+            <FieldLabel>Entry Fee (₹)</FieldLabel>
+            <input
+              type="number"
+              {...register("entry_fee", { min: { value: 0, message: "Cannot be negative" } })}
+              placeholder="0"
+              className={inputCls}
+              style={inputStyle}
+            />
+            <FieldError msg={errors.entry_fee?.message} />
+            <p className="font-[Rajdhani,sans-serif] text-[0.5rem] text-white/15 mt-1 tracking-wide">Leave 0 for free entry</p>
+          </div>
+        </div>
+
+        {/* ── Visibility */}
+        <div>
+          <FieldLabel>Visibility</FieldLabel>
+          <div className="flex gap-2">
+            {([
+              { value: "public", label: "Public" },
+              { value: "private", label: "Private" },
+            ] as const).map(opt => (
+              <label key={opt.value}
+                className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.18em] uppercase px-4 py-2 border transition-all duration-150 cursor-pointer flex items-center gap-2"
+                style={{
+                  clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)",
+                  borderColor: watch("visibility") === opt.value ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.15)",
+                  background:  watch("visibility") === opt.value ? "rgba(139,92,246,0.18)" : "transparent",
+                  color:       watch("visibility") === opt.value ? "#a78bfa" : "rgba(255,255,255,0.28)",
+                }}>
+                <input type="radio" value={opt.value} {...register("visibility")} className="sr-only" />
+                {opt.label}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Description (optional) */}
+        <div>
+          <FieldLabel>Description (optional)</FieldLabel>
+          <textarea
+            {...register("description")}
+            rows={3}
+            placeholder="Brief tournament description, rules summary, special prizes…"
+            className={inputCls + " resize-none"}
+            style={inputStyle}
+          />
+        </div>
+
+        {/* ── Divider */}
+        <div className="h-px bg-[rgba(139,92,246,0.08)]" />
+
+        {/* ── Error banner */}
+        {submitStatus === "error" && (
+          <div className="border border-red-500/30 bg-red-500/05 px-4 py-3"
+            style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
+            <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-red-400/80 tracking-wide">⚠ {errorMsg}</p>
+          </div>
+        )}
+
+        {/* ── Submit */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="w-full py-3.5 font-[Rajdhani,sans-serif] font-bold text-[0.85rem] tracking-[0.28em] uppercase transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed text-white border-none"
+          style={{
+            clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)",
+            background: submitting
+              ? "rgba(139,92,246,0.4)"
+              : "linear-gradient(135deg, rgba(167,139,250,0.95), rgba(109,40,217,0.95))",
+            boxShadow: submitting ? "none" : "0 0 30px rgba(139,92,246,0.25)",
+          }}>
+          {submitting ? "Creating…" : "Create Tournament →"}
+        </button>
+
+        <p className="font-[Rajdhani,sans-serif] text-[0.52rem] text-white/15 text-center tracking-wide">
+          Tournament is saved as draft. Publish from Manage → Tournaments.
         </p>
-      </div>
-      <button
-        className="font-[Rajdhani,sans-serif] font-bold text-[0.72rem] tracking-[0.25em] uppercase px-8 py-3 border border-[rgba(139,92,246,0.4)] text-[#a78bfa] bg-[rgba(139,92,246,0.08)] hover:bg-[rgba(139,92,246,0.18)] hover:border-[rgba(139,92,246,0.7)] transition-all duration-200"
-        style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
-        + New {label}
-      </button>
+      </form>
     </div>
   );
 }
 
-/* ── Post Updates */
+/* ─────────────────────────────────────────────────────────────
+   CREATE CONTENT — routes to correct form based on activeTab
+   ───────────────────────────────────────────────────────────── */
+function CreateContent({ activeTab, session }: { activeTab: NavTab; session: any }) {
+  switch (activeTab) {
+    case "tournaments": return <CreateTournamentForm session={session} />;
+    case "arenas":      return <ComingSoon label="Create Arena" />;
+    case "clubs":       return <ComingSoon label="Create Club" />;
+    default:            return <ComingSoon label="Create" />;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────
+   POST UPDATES
+   ───────────────────────────────────────────────────────────── */
 function PostUpdatesContent() {
   const [title, setTitle] = useState("");
   const [body,  setBody]  = useState("");
@@ -406,7 +798,6 @@ function PostUpdatesContent() {
         <h2 className="font-[Cinzel,serif] text-lg font-bold text-white">Post an Update</h2>
       </div>
 
-      {/* Tag selector */}
       <div className="flex gap-2 flex-wrap">
         {tagOptions.map(t => (
           <button key={t} onClick={() => setTag(t)}
@@ -422,34 +813,23 @@ function PostUpdatesContent() {
         ))}
       </div>
 
-      {/* Title */}
       <div>
         <label className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.3em] uppercase text-white/25 block mb-1.5">Title</label>
-        <input
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="Update title…"
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Update title…"
           className="w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.18)] px-4 py-3 font-[Rajdhani,sans-serif] text-[0.82rem] text-white placeholder-white/15 focus:outline-none focus:border-[rgba(139,92,246,0.55)] transition-all"
           style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
         />
       </div>
 
-      {/* Body */}
       <div>
         <label className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.3em] uppercase text-white/25 block mb-1.5">Message</label>
-        <textarea
-          value={body}
-          onChange={e => setBody(e.target.value)}
-          rows={5}
-          placeholder="Write your update…"
+        <textarea value={body} onChange={e => setBody(e.target.value)} rows={5} placeholder="Write your update…"
           className="w-full bg-[rgba(139,92,246,0.04)] border border-[rgba(139,92,246,0.18)] px-4 py-3 font-[Rajdhani,sans-serif] text-[0.82rem] text-white placeholder-white/15 focus:outline-none focus:border-[rgba(139,92,246,0.55)] transition-all resize-none"
           style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}
         />
       </div>
 
-      <button
-        onClick={handleSend}
-        disabled={sending || !title.trim() || !body.trim()}
+      <button onClick={handleSend} disabled={sending || !title.trim() || !body.trim()}
         className="w-full py-3 font-[Rajdhani,sans-serif] font-bold text-[0.82rem] tracking-[0.25em] uppercase transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
         style={{
           clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)",
@@ -463,7 +843,9 @@ function PostUpdatesContent() {
   );
 }
 
-/* ── Settings */
+/* ─────────────────────────────────────────────────────────────
+   SETTINGS
+   ───────────────────────────────────────────────────────────── */
 function SettingsContent({ session }: { session: any }) {
   const user = session?.user;
   return (
@@ -477,9 +859,9 @@ function SettingsContent({ session }: { session: any }) {
         style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
         <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.3em] uppercase text-white/25">Account</p>
         {[
-          { label: "Username",  val: user?.username ?? "—" },
-          { label: "Role",      val: user?.role ?? "—" },
-          { label: "Email",     val: user?.email ?? "—" },
+          { label: "Username", val: user?.username ?? "—" },
+          { label: "Role",     val: user?.role ?? "—"     },
+          { label: "Email",    val: user?.email ?? "—"    },
         ].map(({ label, val }) => (
           <div key={label} className="flex items-center justify-between border-b border-[rgba(139,92,246,0.07)] pb-2 last:border-none last:pb-0">
             <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-widest uppercase text-white/25">{label}</span>
@@ -488,7 +870,7 @@ function SettingsContent({ session }: { session: any }) {
         ))}
       </div>
 
-      <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.03)] px-5 py-4 rounded-none"
+      <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.03)] px-5 py-4"
         style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
         <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.2em] text-white/20">
           More organiser settings are coming soon. Contact support for advanced configuration.
@@ -499,7 +881,7 @@ function SettingsContent({ session }: { session: any }) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   RIGHT PANEL — switch based on activeTab
+   RIGHT PANEL — switch based on activePanel + activeTab
    ───────────────────────────────────────────────────────────── */
 function RightPanelContent({
   activePanel, activeTab, session,
@@ -510,7 +892,7 @@ function RightPanelContent({
 }) {
   switch (activePanel) {
     case "manage":       return <ManageContent activeTab={activeTab} />;
-    case "create":       return <CreateContent activeTab={activeTab} />;
+    case "create":       return <CreateContent activeTab={activeTab} session={session} />;
     case "post-updates": return <PostUpdatesContent />;
     case "settings":     return <SettingsContent session={session} />;
   }
@@ -521,6 +903,8 @@ function RightPanelContent({
    ───────────────────────────────────────────────────────────── */
 export default function OrganiserDashboardPage() {
   const { data: session } = useSession();
+  const router = useRouter();
+
   const [activeTab,   setActiveTab]   = useState<NavTab>("tournaments");
   const [activePanel, setActivePanel] = useState<SidePanel>("manage");
   const [avatarOpen,  setAvatarOpen]  = useState(false);
@@ -539,11 +923,17 @@ export default function OrganiserDashboardPage() {
   const displayName = user?.username ?? "Organiser";
   const initials    = displayName.slice(0, 2).toUpperCase();
 
-  const NAV_TABS: { key: NavTab; label: string }[] = [
-    { key: "tournaments", label: "TOURNAMENTS" },
-    { key: "arenas",      label: "ARENAS"      },
-    { key: "leaderboard", label: "LEADERBOARD" },
-    { key: "clubs",       label: "CLUBS"       },
+  /* 
+   * NAV_TABS — each tab has:
+   *   key:   the activeTab state value (controls the Manage panel sub-content)
+   *   label: display text
+   *   href:  where to navigate when clicked
+   */
+  const NAV_TABS: { key: NavTab; label: string; href: string }[] = [
+    { key: "tournaments", label: "TOURNAMENTS", href: "/tournaments"  },
+    { key: "arenas",      label: "ARENAS",      href: "/arenas"       },
+    { key: "leaderboard", label: "LEADERBOARD", href: "/leaderboard"  },
+    { key: "clubs",       label: "CLUBS",       href: "/clubs"        },
   ];
 
   const SIDE_ITEMS: { key: SidePanel; label: string }[] = [
@@ -552,6 +942,11 @@ export default function OrganiserDashboardPage() {
     { key: "post-updates", label: "POST UPDATES" },
     { key: "settings",     label: "SETTINGS"     },
   ];
+
+  const handleNavTab = (tab: typeof NAV_TABS[number]) => {
+    setActiveTab(tab.key);       // also update dashboard panel context
+    router.push(tab.href);       // navigate to the public page
+  };
 
   return (
     <>
@@ -562,7 +957,6 @@ export default function OrganiserDashboardPage() {
 
         /* ── Animations */
         @keyframes fadeUp    { from { opacity:0; transform:translateY(12px);  } to { opacity:1; transform:translateY(0);    } }
-        @keyframes fadeIn    { from { opacity:0;                              } to { opacity:1;                             } }
         @keyframes contentIn { from { opacity:0; transform:translateX(8px);   } to { opacity:1; transform:translateX(0);   } }
         @keyframes dropIn    { from { opacity:0; transform:translateY(-6px) scale(0.97); } to { opacity:1; transform:translateY(0) scale(1); } }
         @keyframes spinPulse { 0%{transform:rotate(0deg);opacity:.4;} 50%{opacity:1;} 100%{transform:rotate(360deg);opacity:.4;} }
@@ -664,20 +1058,15 @@ export default function OrganiserDashboardPage() {
         /* ── Line clamp */
         .line-clamp-1 { display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
 
-        /* button helpers */
-        .join-btn:hover:not(:disabled) { background:rgba(139,92,246,0.2) !important; border-color:rgba(139,92,246,0.7) !important; box-shadow:0 0 14px rgba(139,92,246,0.2); }
+        /* datetime-local color fix */
+        input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.4); cursor: pointer; }
 
-        /* Modal */
-        @keyframes modalIn { from{opacity:0;transform:scale(0.96) translateY(12px);} to{opacity:1;transform:scale(1) translateY(0);} }
-        .modal-panel { animation:modalIn .25s ease forwards; }
+        /* select arrow */
+        select option { background: #090919; color: white; }
       `}</style>
 
-      {/* ══════════════════════════════════════════════════════════
-          FULL-PAGE BACKGROUND
-          ══════════════════════════════════════════════════════════ */}
+      {/* ── Background */}
       <div className="fixed inset-0 bg-[#050510]" />
-
-      {/* Background grid */}
       <div className="anim-grid fixed inset-0 pointer-events-none"
         style={{
           backgroundImage: "linear-gradient(rgba(139,92,246,0.7) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.7) 1px, transparent 1px)",
@@ -688,12 +1077,10 @@ export default function OrganiserDashboardPage() {
         style={{ background: "radial-gradient(ellipse 100% 50% at 50% 0%, rgba(139,92,246,0.06) 0%, transparent 65%)" }}
       />
 
-      {/* ══════════════════════════════════════════════════════════
-          LAYOUT — full viewport, flex column
-          ══════════════════════════════════════════════════════════ */}
+      {/* ── LAYOUT */}
       <div className="fixed inset-0 flex flex-col overflow-hidden">
 
-        {/* ── TOP NAVBAR ── */}
+        {/* ══ TOP NAVBAR ══ */}
         <header className="shell-in relative z-30 shrink-0 flex items-center justify-between px-6 border-b border-[rgba(139,92,246,0.14)]"
           style={{ background: "rgba(5,5,16,0.75)", backdropFilter: "blur(14px)", height: "58px" }}>
 
@@ -703,12 +1090,14 @@ export default function OrganiserDashboardPage() {
             RANAKSHETRA
           </span>
 
-          {/* Center nav tabs */}
+          {/* Nav tabs — each navigates to the public page */}
           <nav className="flex items-end h-full gap-1">
             {NAV_TABS.map(tab => (
-              <button key={tab.key}
+              <button
+                key={tab.key}
                 className={`nav-tab ${activeTab === tab.key ? "active" : ""}`}
-                onClick={() => setActiveTab(tab.key)}>
+                onClick={() => handleNavTab(tab)}
+                title={`Go to ${tab.label}`}>
                 {tab.label}
               </button>
             ))}
@@ -729,8 +1118,8 @@ export default function OrganiserDashboardPage() {
                     <p className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-widest uppercase text-[#8b5cf6]/60 mt-0.5">{user.role}</p>
                   )}
                 </div>
-                <Link href="/profile"   className="dropdown-item" onClick={() => setAvatarOpen(false)}>Profile</Link>
-                <Link href="/settings"  className="dropdown-item" onClick={() => setAvatarOpen(false)}>Settings</Link>
+                <Link href="/profile"  className="dropdown-item" onClick={() => setAvatarOpen(false)}>Profile</Link>
+                <Link href="/settings" className="dropdown-item" onClick={() => setAvatarOpen(false)}>Settings</Link>
                 <button className="dropdown-item danger"
                   onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}>
                   Logout
@@ -740,9 +1129,8 @@ export default function OrganiserDashboardPage() {
           </div>
         </header>
 
-        {/* ── BODY — padded container with outer border ── */}
+        {/* ── BODY */}
         <div className="flex-1 overflow-hidden p-5">
-          {/* Outer bordered container (matches the design wireframe) */}
           <div className="shell-in h-full border border-[rgba(139,92,246,0.22)] flex overflow-hidden"
             style={{
               background: "rgba(5,5,16,0.5)",
@@ -750,11 +1138,8 @@ export default function OrganiserDashboardPage() {
               boxShadow: "0 0 60px rgba(139,92,246,0.06), inset 0 0 60px rgba(139,92,246,0.02)",
             }}>
 
-            {/* ── LEFT PANEL (MANAGE / CREATE / POST UPDATES / SETTINGS) ── */}
+            {/* LEFT SIDE PANEL */}
             <aside className="shrink-0 w-[185px] border-r border-[rgba(139,92,246,0.14)] flex flex-col">
-              {/* Decorative corner accent */}
-              <div className="absolute top-0 left-0 w-5 h-5 border-t border-l border-[rgba(139,92,246,0.4)]" />
-
               <div className="pt-4 pb-2">
                 <p className="font-[Rajdhani,sans-serif] text-[0.48rem] tracking-[0.4em] uppercase text-white/15 px-4 mb-2">Tools</p>
               </div>
@@ -786,12 +1171,19 @@ export default function OrganiserDashboardPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Current context indicator */}
+                <div className="mt-2 px-1">
+                  <p className="font-[Rajdhani,sans-serif] text-[0.48rem] tracking-[0.25em] uppercase text-white/12">
+                    Context: <span className="text-[#8b5cf6]/40">{activeTab}</span>
+                  </p>
+                </div>
               </div>
             </aside>
 
-            {/* ── RIGHT CONTENT PANEL ── */}
+            {/* RIGHT CONTENT PANEL */}
             <main className="flex-1 overflow-y-auto scroll-thin p-5">
-              {/* Content section header */}
+              {/* Section breadcrumb */}
               <div className="flex items-center gap-3 mb-5 pb-3 border-b border-[rgba(139,92,246,0.09)]">
                 <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.35em] uppercase text-[#8b5cf6]/60">
                   {activePanel.replace("-", " ")}
@@ -808,7 +1200,6 @@ export default function OrganiserDashboardPage() {
                 session={session}
               />
             </main>
-
           </div>
         </div>
       </div>

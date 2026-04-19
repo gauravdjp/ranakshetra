@@ -119,7 +119,8 @@ export type Tournament = {
  
     start_date: Date;
     end_date: Date;
-    registration_deadline: Date;
+    registration_start_date?: Date;    // when registration opens
+    registration_deadline: Date;       // when registration closes
     created_at: Date;
     updated_at: Date;
 
