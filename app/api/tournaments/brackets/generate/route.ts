@@ -53,22 +53,26 @@ export async function POST(req: NextRequest) {
       await db.collection("brackets").deleteOne({ tournament_id: tournamentId });
     }
 
-    // FIX: Was querying { tournamentId: tournamentId } — field doesn't exist.
-    // Tournaments are identified by MongoDB _id.
-    let tournament = null;
+    let tournament: any = null;
     if (ObjectId.isValid(tournamentId)) {
-      tournament = await db.collection("tournaments").findOne({ _id: new ObjectId(tournamentId) });
+      try {
+        tournament = await db.collection("tournaments").findOne({ _id: new ObjectId(tournamentId) });
+      } catch {}
+    }
+    if (!tournament) {
+      tournament = await db.collection("tournaments").findOne({ tournamentId });
     }
     if (!tournament) {
       return NextResponse.json({ error: "Tournament not found" }, { status: 404 });
     }
 
-    // FIX: Was reading tournament.players — field doesn't exist.
-    // Registrations are stored in a separate "registrations" collection.
-    const registrations = await db
-      .collection("registrations")
-      .find({ tournament_id: tournamentId })
-      .toArray() as unknown as Tournament_Registration[];
+    let registrations: any[] = tournament.players || [];
+    if (!registrations || registrations.length === 0) {
+      registrations = await db
+        .collection("registrations")
+        .find({ tournament_id: tournamentId })
+        .toArray();
+    }
 
     if (!registrations || registrations.length < 2) {
       return NextResponse.json(
@@ -153,13 +157,14 @@ export async function POST(req: NextRequest) {
 
     await db.collection("brackets").insertOne(doc);
 
-    // Mark tournament as brackets_generated
-    if (ObjectId.isValid(tournamentId)) {
-      await db.collection("tournaments").updateOne(
-        { _id: new ObjectId(tournamentId) },
-        { $set: { brackets_generated: true, updated_at: new Date() } }
-      );
-    }
+    // Mark tournament as brackets_generated and status ongoing
+    const tFilter: any = ObjectId.isValid(tournamentId)
+      ? { $or: [{ _id: new ObjectId(tournamentId) }, { tournamentId }] }
+      : { tournamentId };
+    await db.collection("tournaments").updateOne(
+      tFilter,
+      { $set: { brackets_generated: true, status: "ongoing", updated_at: new Date() } }
+    );
 
     return NextResponse.json({ success: true, total_rounds: finalTotalRounds, total_matches: matches.length });
   } catch (err) {

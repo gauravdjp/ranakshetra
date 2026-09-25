@@ -32,5 +32,21 @@ export async function POST(req: NextRequest) {
     { arrayFilters }
   );
 
+  // If final match completed, mark tournament completed
+  if (!nextExists) {
+    try {
+      const { ObjectId } = await import("mongodb");
+      const tFilter: any = ObjectId.isValid(tournamentId)
+        ? { $or: [{ _id: new ObjectId(tournamentId) }, { tournamentId }] }
+        : { tournamentId };
+      await db.collection("tournaments").updateOne(
+        tFilter,
+        { $set: { status: "completed", results_declared: true, updated_at: new Date() } }
+      );
+    } catch (e) {
+      console.error("[test-winner] tournament status update error:", e);
+    }
+  }
+
   return NextResponse.json({ success: true, winner });
 }

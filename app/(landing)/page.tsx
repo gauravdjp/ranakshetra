@@ -1,6 +1,26 @@
 import Link from "next/link";
 import ScrollReveal from "../../components/ScrollReveal";
-export default function Home() {
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (session) {
+    const role = session.user.role as string;
+    const id = session.user.id;
+
+    const redirectMap: Record<string, string> = {
+      player:      `/playerhp/${id}`,
+      organiser:   `/arenahp/${id}`,
+      club_leader: `/clubhp/${id}`,
+      admin:       `/admin`,
+    };
+
+    redirect(redirectMap[role] ?? "/");
+  }
   return (
     <>
       {/* ══════════════════════════════════════════════════════

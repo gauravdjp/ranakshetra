@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/options";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: NextRequest) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return NextResponse.json({ joined: false });
 
     const { tournamentId } = await req.json();
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     const existing = await db.collection("tournaments").findOne({
         tournamentId,
-        "players.player_tag": session.user.player_tag
+        "players.player_tag": (session.user as any).player_tag
     });
 
     return NextResponse.json({ joined: !!existing });

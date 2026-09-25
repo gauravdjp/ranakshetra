@@ -2,15 +2,51 @@
 import Link from "next/link";
 import NavLink from "./NavLink";
 import MobileMenu from "./Mobilemenu";
-import { signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const NAV_LINKS = [
+  { label: "Live Demo", href: "/tournament_test" },
   { label: "Tournaments", href: "/tournaments" },
   { label: "Leaderboard", href: "/leaderboard" },
   { label: "Clubs", href: "/club" },
 ];
 
 export default function Header() {
+  const [guestLoading, setGuestLoading] = useState(false);
+  const [guestId, setGuestId] = useState<string | null>(null);
+
+  // check on mount
+  useEffect(() => {
+    const stored = localStorage.getItem("guestId");
+    if (stored) setGuestId(stored);
+  }, []);
+  const router = useRouter();
+    
+  const handleGuest = async () => {
+    // if already a guest, just redirect
+    if (guestId) {
+      router.push(`/explore?guestId=${guestId}`);
+      return;
+    }
+
+    setGuestLoading(true);
+    try {
+      const res = await fetch("/api/guest", { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      const { guestId: newGuestId } = await res.json();
+      
+      // save to localStorage
+      localStorage.setItem("guestId", newGuestId);
+      setGuestId(newGuestId);
+      
+      router.push(`/explore?guestId=${newGuestId}`);
+    } catch (err) {
+      console.error("Guest error:", err);
+    } finally {
+      setGuestLoading(false);
+    }
+  };
   return (
     <>
       <style>{`
@@ -158,7 +194,7 @@ export default function Header() {
 
             <div className="hidden md:flex items-center gap-3 shrink-0">
               <Link
-                href="/login"
+                href="/signin"
                 className="
                   px-[1.1rem] py-[0.45rem]
                   font-semibold text-[0.9rem] tracking-0.1em uppercase
@@ -169,10 +205,10 @@ export default function Header() {
                 "
                 style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
               >
-                Login
+                Sign In
               </Link>
               <Link
-                href="/sign-up"
+                href="/signup"
                 className="
                   px-[1.1rem] py-[0.45rem]
                   font-semibold text-[0.9rem] tracking-0.1em uppercase
@@ -183,20 +219,37 @@ export default function Header() {
                  "
                 style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
               >
-                SIGNUP
+                Sign Up
               </Link>
-
-              {/*<button
-                className="cursor-pointer px-[1.1rem] py-[0.45rem] font-semibold text-[0.9rem] tracking-0.1em uppercase text-[#FFB596] bg-transparent border border-[rgba(232,108,47,0.3)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596] transition-all duration-300"
-                style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
-                onClick={() => signOut({ callbackUrl: "/" })}
-              >
-                Logout
-              </button>*/}
+              {guestId? (
+                 <button
+                  onClick={() => router.push(`/explore?guestId=${guestId}`)}
+                  className="cursor-pointer px-[1.1rem] py-[0.45rem] 
+                  font-semibold text-[0.9rem] tracking-0.1em uppercase text-[#FFB596] 
+                  bg-transparent border border-[rgba(232,108,47,0.3)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596] 
+                  transition-all duration-300" 
+                  style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
+                >
+                  Explore
+                </button>
+              ) : (
+                <button
+                  onClick={handleGuest}
+                  disabled={guestLoading}
+                  className="cursor-pointer px-[1.1rem] py-[0.45rem] 
+                  font-semibold text-[0.9rem] tracking-0.1em uppercase text-[#FFB596] 
+                  bg-transparent border border-[rgba(232,108,47,0.3)] hover:bg-[rgba(232,108,47,0.08)] hover:border-[#E86C2F] hover:text-[#FFB596] 
+                  transition-all duration-300" 
+                  style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}
+                >
+                  {guestLoading ? "Loading..." : "Be a Guest"}
+                </button>
+              )}
             </div>
 
             <MobileMenu />
           </div>
+
 
         </div>
       </header>

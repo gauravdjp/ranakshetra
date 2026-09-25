@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 import { Tournament, Tournament_Types, Games } from "@/types";
 import { Club } from "@/types";
 import { Arena } from "@/types";
@@ -919,8 +919,8 @@ export default function OrganiserDashboardPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const user        = session?.user;
-  const displayName = user?.username ?? "Organiser";
+  const user        = session?.user as any;
+  const displayName = user?.username ?? user?.name ?? "Organiser";
   const initials    = displayName.slice(0, 2).toUpperCase();
 
   /* 
@@ -1121,7 +1121,7 @@ export default function OrganiserDashboardPage() {
                 <Link href="/profile"  className="dropdown-item" onClick={() => setAvatarOpen(false)}>Profile</Link>
                 <Link href="/settings" className="dropdown-item" onClick={() => setAvatarOpen(false)}>Settings</Link>
                 <button className="dropdown-item danger"
-                  onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}>
+                  onClick={() => { setAvatarOpen(false); signOut(); }}>
                   Logout
                 </button>
               </div>

@@ -1,43 +1,63 @@
-//initial work done
-part 1 -- we did everything in rush due to submission of project progress report
-Landing page --done
-tournament basic page --done
-club basic page --done
-basic signup and login page  --done
-[things will be changed]
+`rebuild ranakshetra`
 
-//development of project started
-part 2
-building an optimal structure (routing)  --done
-complete database setup -- weuse native itself, connection is done, we will keep on updating types as we explore
-complete the login and signup pages and connection of database with respective pages  --partially done
-we will update the landing page (in ui){
-    showing ranking system as stairs level ups from college/city to global
-}
-check for efficient use of components and remove unwanted components
-initialize the bracket system to the project
+redesign the signup and signin pages with better auth  -- ui part done
+signup page connection with mongodb --done
+zod validation --done 
 
-signup page, username need to add,
-database connection done for signup page, tested successfully
-remove defaults from the signups
-adding the email, username unique check
-adding encrytion and hashing for password
-
-add clashroyale api and test it --done
+schema check --done
+better auth url check --done
+sigup and action file code check --done
+login betterauth setup --done
+page access and role setup --almost done need autosign, need more work 
+admin setup --done 
+admin connection
+page auth --done
+guest auth and access --done
 
 
-we are done with the login and whole auth setup, working perfectly
-now just need to manage role permissions we will do it later
-add profile icons to navigate login and log out easily
-handle guest
+remaining ------
+
+Admin
+├── manual account setup in MongoDB
+├── admin login page wiring (/admin$login)
+└── admin dashboard (basic)
+
+Explore page
+└── guest landing (basic UI)
+
+Small things
+├── forgot password flow
+├── email verification (better auth has this built in)
+└── session expiry handling
 
 
+database structure 
 
-///////
-
-18 april
-
-id checkin update it!! tomorrow
+--------
 
 
+project timeline and developement (PTD)
+// --deadline
+1. auth / pages (all required user pages) -- 3 days  
+2. building components (bracket, rating and chat system, reusbale components, filter) --15 days
+3. starting developing organiser pages (tournament pages also included init ) --3 days
+4. players pages -- 3 days
+5. integration of organisers and players pages  --1 day
+6. develop the clubs pages -- 3 days
+7. integrate all -- 2 days
+8. testing(page testing period) --2 days
+9. debugging --3 days
+10. from top 20 games we find api's which we can integrate in our app  --1 day
+11. identifying the particular game tournament needs. -- 2 day
+12. developing that needs -- 6 days
+13. game api development -- 7 days
+14. testing(apis) -- 2 days
+15. payment system -- 7 days
+expected of completion of the ranakshetra project, ~~ 2.5 months. phase 1 development.
+16. we announce the first version of our application and launch it.
 
+//todo
+1. make list of all pages and required components?
+2. cleaning of the project structure (removing, fixing the previous app files)
+3. push and connect direct on vercel. ~~think about it
+4. actual development starts

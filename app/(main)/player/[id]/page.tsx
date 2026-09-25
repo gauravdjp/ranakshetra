@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession } from "@/lib/auth-client";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Games, Access_Level_USER_Role, CRApiData } from "../../../../types/index";
 
@@ -435,7 +435,7 @@ type ActiveTab = "overview" | "games";
 export default function PlayerProfilePage() {
   const params = useParams();
   const rawId = params?.id as string;
-  const { data: session, status: sessionStatus } = useSession();
+  const { data: session, isPending: sessionPending } = useSession();
 
   const [player, setPlayer] = useState<PlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -449,15 +449,15 @@ export default function PlayerProfilePage() {
   // - Otherwise (e.g. the route renders as "/player/1" from a stale link),
   //   fall back to the session username so the logged-in user always sees their own profile.
   const isNumericId = /^\d+$/.test(rawId ?? "");
-  const resolvedId = isNumericId && session?.user?.username
-    ? session.user.username
+  const resolvedId = isNumericId && (session?.user as any)?.username
+    ? (session?.user as any).username
     : rawId;
 
-  const isOwner = session?.user?.username === player?.username;
+  const isOwner = (session?.user as any)?.username === player?.username;
 
   /* ── Fetch player – wait until session is settled so we have the fallback username */
   useEffect(() => {
-    if (sessionStatus === "loading") return; // wait for session before deciding
+    if (sessionPending) return; // wait for session before deciding
     if (!resolvedId) return;
 
     setLoading(true);
@@ -477,7 +477,7 @@ export default function PlayerProfilePage() {
       }
     }
     fetchPlayer();
-  }, [resolvedId, sessionStatus]);
+  }, [resolvedId, sessionPending]);
 
   const handleProfileSave = async (data: PlayerEditForm) => {
     if (!player) return;
@@ -514,7 +514,7 @@ export default function PlayerProfilePage() {
     : "—";
 
   /* ── States */
-  if (sessionStatus === "loading" || loading) return <Spinner />;
+  if (sessionPending || loading) return <Spinner />;
 
   if (notFound) return (
     <div className="min-h-screen bg-[#050510] flex items-center justify-center">

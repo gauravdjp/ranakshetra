@@ -7,9 +7,10 @@ interface StandardBracketProps {
   matches: BracketMatch[];
   onStart: (matchId: string) => void;
   currentPlayerTag?: string;
+  onDeclareWinner?: (matchId: string, winnerTag: string) => void;
 }
 
-export default function StandardBracket({ matches, onStart, currentPlayerTag }: StandardBracketProps) {
+export default function StandardBracket({ matches, onStart, currentPlayerTag, onDeclareWinner }: StandardBracketProps) {
   const CARD_W = 220, COL_GAP = 140, COL_W = CARD_W + COL_GAP, SLOT_H = 150;
 
   const totalRounds = matches.length > 0 ? Math.max(...matches.map(m => m.round)) + 1 : 0;
@@ -82,7 +83,8 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag }: 
                   winner_tag={match.winner_tag}
                   player1_tag={match.player1.tag}
                   player2_tag={match.player2?.tag}
-                  onStart={isMyMatch && match.status === "pending" ? onStart : undefined}
+                  onStart={match.status === "pending" && (isMyMatch || !currentPlayerTag) ? onStart : undefined}
+                  onDeclareWinner={onDeclareWinner}
                 />
               </div>
             </div>

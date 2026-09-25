@@ -1,10 +1,10 @@
-import {  NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../auth/[...nextauth]/options";
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: await headers() });
 
     if (!session) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     // Check if already joined
     const existing = await db.collection("tournaments").findOne({
         tournamentId,
-        "players.player_tag": session.user.player_tag
+        "players.player_tag": (session.user as any).player_tag
     });
 
     if (existing) {
@@ -30,10 +30,10 @@ export async function POST(req: Request) {
         {
             $push: {
                 players: {
-                    username: session.user.username,
+                    username: (session.user as any).username,
                     email: session.user.email,
-                    player_tag: session.user.player_tag,
-                    role: session.user.role,
+                    player_tag: (session.user as any).player_tag,
+                    role: (session.user as any).role,
                     joinedAt: new Date(),
                 }
             } as any

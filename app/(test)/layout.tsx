@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Rajdhani } from "next/font/google";
 import "../globals.css";
-import Providers from "./providers";
+
 
 const cinzel = Cinzel({
   variable: "--font-cinzel",
@@ -33,9 +33,9 @@ export default function RootLayout({
         className={`${cinzel.variable} ${rajdhani.variable} antialiased`}
       >
         <main className = "pt-72px">
-          <Providers>
+      
             {children}
-          </Providers>
+
         </main>
         
       </body>

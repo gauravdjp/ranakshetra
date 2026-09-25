@@ -12,6 +12,7 @@ interface BracketProps {
   player1_tag?: string;
   player2_tag?: string;
   onStart?: (matchId: string) => void;
+  onDeclareWinner?: (matchId: string, winnerTag: string) => void;
 }
 
 export default function Bracket({
@@ -25,6 +26,7 @@ export default function Bracket({
   player1_tag,
   player2_tag,
   onStart,
+  onDeclareWinner,
 }: BracketProps) {
   const [showInfo, setShowInfo] = useState(false);
 
@@ -149,14 +151,36 @@ export default function Bracket({
               </>
             )}
 
-            {/* Live indicator */}
+            {/* Live indicator & instant winner advance */}
             {status === "live" && (
               <>
-                <div className="border-t border-[#1a4a7a] mb-3" />
-                <div className="flex items-center justify-center gap-2 text-green-400 text-[10px] tracking-widest">
+                <div className="border-t border-[#1a4a7a] mb-2.5" />
+                <div className="flex items-center justify-center gap-2 text-green-400 text-[10px] tracking-widest mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
                   POLLING BATTLE LOG
                 </div>
+                {onDeclareWinner && (
+                  <div className="flex gap-1.5 pt-1">
+                    <button
+                      onClick={() => {
+                        if (matchId && player1_tag) onDeclareWinner(matchId, player1_tag);
+                        setShowInfo(false);
+                      }}
+                      className="flex-1 py-1 px-1 rounded-sm text-[9px] font-bold bg-green-950/80 border border-green-700/60 text-green-300 hover:bg-green-800 transition-colors truncate">
+                      {team1} Won
+                    </button>
+                    {player2_tag && (
+                      <button
+                        onClick={() => {
+                          if (matchId && player2_tag) onDeclareWinner(matchId, player2_tag);
+                          setShowInfo(false);
+                        }}
+                        className="flex-1 py-1 px-1 rounded-sm text-[9px] font-bold bg-green-950/80 border border-green-700/60 text-green-300 hover:bg-green-800 transition-colors truncate">
+                        {team2} Won
+                      </button>
+                    )}
+                  </div>
+                )}
               </>
             )}
 

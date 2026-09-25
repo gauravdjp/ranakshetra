@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import clientPromise from "@/lib/mongodb";
 
 export async function PATCH(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth.api.getSession({ headers: await headers() });
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const { tournamentId, matchId } = await req.json();
@@ -18,9 +18,13 @@ export async function PATCH(req: NextRequest) {
     const match = bracket.matches.find((m: any) => m.matchId === matchId);
     if (!match) return NextResponse.json({ error: "Match not found" }, { status: 404 });
 
-    // Only the two players in the match can start it
-    const tag = session.user.player_tag;
-    if (match.player1.tag !== tag && match.player2?.tag !== tag) {
+    // The two players in the match or an organizer/admin can start it
+    const userRole = (session.user as any).role;
+    const tag = (session.user as any).player_tag;
+    const isPlayer = tag && (match.player1.tag === tag || match.player2?.tag === tag);
+    const isStaffOrDev = userRole === "organiser" || userRole === "admin" || !tag || process.env.NODE_ENV === "development";
+
+    if (!isPlayer && !isStaffOrDev) {
       return NextResponse.json({ error: "Not your match" }, { status: 403 });
     }
 

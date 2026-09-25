@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 import { Tournament } from "@/types";
 import { Club } from "@/types";
 import { Arena } from "@/types";
@@ -667,8 +667,8 @@ export default function PlayerMainPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const user = session?.user;
-  const displayName = user?.username ?? "Warrior";
+  const user = session?.user as any;
+  const displayName = user?.username ?? user?.name ?? "Warrior";
   const initials = displayName.slice(0, 2).toUpperCase();
 
   const NAV_LINKS: { key: NavSection; label: string }[] = [
@@ -921,7 +921,7 @@ export default function PlayerMainPage() {
                 <Link href="/settings" className="dropdown-item" onClick={() => setAvatarOpen(false)}>
                   Settings
                 </Link>
-                <button className="dropdown-item danger" onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}>
+                <button className="dropdown-item danger" onClick={() => { setAvatarOpen(false); signOut(); }}>
                   Logout
                 </button>
               </div>

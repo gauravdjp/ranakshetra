@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { useSession, signOut } from "@/lib/auth-client";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES
@@ -541,8 +541,8 @@ export default function ClubLeaderDashboardPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const user        = session?.user;
-  const displayName = user?.username ?? "Leader";
+  const user        = session?.user as any;
+  const displayName = user?.username ?? user?.name ?? "Leader";
   const initials    = displayName.slice(0, 2).toUpperCase();
 
   const NAV_TABS: { key: NavTab; label: string }[] = [
@@ -737,7 +737,7 @@ export default function ClubLeaderDashboardPage() {
                 <Link href="/profile"  className="dropdown-item" onClick={() => setAvatarOpen(false)}>Profile</Link>
                 <Link href="/settings" className="dropdown-item" onClick={() => setAvatarOpen(false)}>Settings</Link>
                 <button className="dropdown-item danger"
-                  onClick={() => { setAvatarOpen(false); signOut({ callbackUrl: "/" }); }}>
+                  onClick={() => { setAvatarOpen(false); signOut(); }}>
                   Logout
                 </button>
               </div>

@@ -1,7 +1,7 @@
 // app/api/players/[id]/in-game/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/options";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
@@ -11,14 +11,15 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // Only allow the player themselves to update
-  if (session.user.username !== id && session.user.player_tag !== id) {
+  const username = (session.user as any).username;
+  if (username !== id && session.user.id !== id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
