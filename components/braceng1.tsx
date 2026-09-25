@@ -11,14 +11,14 @@ interface StandardBracketProps {
 }
 
 export default function StandardBracket({ matches, onStart, currentPlayerTag, onDeclareWinner }: StandardBracketProps) {
-  const CARD_W = 220, COL_GAP = 140, COL_W = CARD_W + COL_GAP, SLOT_H = 150;
+  const CARD_W = 260, COL_GAP = 140, COL_W = CARD_W + COL_GAP, SLOT_H = 170;
 
   const totalRounds = matches.length > 0 ? Math.max(...matches.map(m => m.round)) + 1 : 0;
   const round0Count = matches.filter(m => m.round === 0).length;
 
   const getRoundLabel = (round: number) => {
     const fromEnd = totalRounds - 1 - round;
-    if (fromEnd === 0) return "Final";
+    if (fromEnd === 0) return "Finals Trophy Match";
     if (fromEnd === 1) return "Semi Finals";
     if (fromEnd === 2) return "Quarter Finals";
     return `Round of ${round0Count * 2 / Math.pow(2, round)}`;
@@ -44,7 +44,7 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag, on
 
   return (
     <div style={{ overflowX: "auto", paddingBottom: 24 }}>
-      <div style={{ position: "relative", width: totalW, height: totalH, minWidth: Math.max(750, totalRounds * 300) }}>
+      <div style={{ position: "relative", width: totalW, height: totalH, minWidth: Math.max(820, totalRounds * 340) }}>
 
         {/* Round labels */}
         {Array.from({ length: totalRounds }, (_, round) => {
@@ -53,8 +53,13 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag, on
             <div key={round} style={{
               position: "absolute", left: x, top: 0, width: CARD_W,
               textAlign: "center", fontFamily: "Rajdhani, sans-serif",
-              fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase",
-              color: "rgba(139,92,246,0.5)",
+              fontSize: 13, fontWeight: "bold", letterSpacing: "0.22em", textTransform: "uppercase",
+              color: "#e9d5ff",
+              background: "rgba(139,92,246,0.18)",
+              border: "1px solid rgba(139,92,246,0.45)",
+              borderRadius: "4px",
+              padding: "5px 0",
+              boxShadow: "0 0 15px rgba(139,92,246,0.2)",
             }}>
               {getRoundLabel(round)}
             </div>
@@ -97,13 +102,13 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag, on
             key={`${from}-${to}`}
             start={from}
             end={to}
-            color="rgba(139,92,246,0.5)"
-            strokeWidth={1.5}
+            color="rgba(168,85,247,0.75)"
+            strokeWidth={2.2}
             headSize={0}
             path="grid"
             gridBreak="50%"
-            startAnchor={{ position: "right", offset: { x: 0,  y: 20 } }}
-            endAnchor={{   position: "left",  offset: { x: 30, y: 20 } }}
+            startAnchor={{ position: "right", offset: { x: 0,  y: 25 } }}
+            endAnchor={{   position: "left",  offset: { x: 25, y: 25 } }}
           />
         ))}
       </div>

@@ -42,20 +42,20 @@ export default function Bracket({
   // ── BYE early return
   if (isBye) {
     return (
-      <div className="flex items-center gap-3 mt-10 ml-10">
-        <div className="w-[220px]">
-          <div className="flex items-center h-[42px] bg-[#0f1e36] border border-purple-900 skew-x-24">
-            <span className="text-[10px] bg-[#1a4a7a] text-sky-300 px-1.5 py-0.5 rounded ml-3 tracking-wider -skew-x-24">1</span>
-            <span className="flex-1 px-2 text-[13px] text-sky-100 tracking-wide truncate -skew-x-24">{team1}</span>
-            <span className="mr-4 text-[10px] tracking-widest text-purple-400 -skew-x-24">BYE</span>
+      <div className="flex items-center gap-3 mt-10 ml-6">
+        <div className="w-[260px] shadow-[0_4px_16px_rgba(0,0,0,0.6)]">
+          <div className="flex items-center h-[50px] bg-[#111827] border-2 border-purple-600/70 skew-x-24 rounded-sm">
+            <span className="text-[11px] font-extrabold bg-[#1e293b] text-cyan-300 border border-cyan-500/50 px-2 py-0.5 rounded ml-3 tracking-wider -skew-x-24">1</span>
+            <span className="flex-1 px-3 text-[15px] font-bold text-white tracking-wide truncate -skew-x-24">{team1}</span>
+            <span className="mr-4 text-[11px] font-black tracking-widest text-purple-300 bg-purple-950/80 border border-purple-500/50 px-2 py-0.5 rounded -skew-x-24">BYE</span>
           </div>
         </div>
         <div id={id} className="flex flex-col items-center relative">
-          <div className="w-px h-[21px] bg-[#1a4a7a]"></div>
-          <div className="w-[22px] h-[22px] rounded-full bg-[#0f1e36] border border-purple-900 flex items-center justify-center">
-            <span className="text-purple-400 text-[8px] tracking-wider">BYE</span>
+          <div className="w-0.5 h-[25px] bg-purple-500/50"></div>
+          <div className="w-[26px] h-[26px] rounded-full bg-[#111827] border-2 border-purple-500 flex items-center justify-center shadow-[0_0_10px_rgba(168,85,247,0.4)]">
+            <span className="text-purple-300 text-[9px] font-bold tracking-wider">BYE</span>
           </div>
-          <div className="w-px h-[21px] bg-[#1a4a7a]"></div>
+          <div className="w-0.5 h-[25px] bg-purple-500/50"></div>
         </div>
       </div>
     );
@@ -63,29 +63,56 @@ export default function Bracket({
 
   // ── Normal bracket
   return (
-    <div className="flex items-center gap-3 mt-10 ml-10">
-      <div className="w-[220px]">
+    <div className="flex items-center gap-3 mt-10 ml-6">
+      <div className={`w-[260px] transition-all duration-300 rounded-sm shadow-[0_6px_20px_rgba(0,0,0,0.6)] ${
+        status === "live" ? "ring-2 ring-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.5)]" : ""
+      }`}>
 
         {/* Team 1 */}
-        <div className={`flex items-center h-[42px] bg-[#0f1e36] border transition-colors duration-200 skew-x-24
-          ${team1Result === "W" ? "border-green-600" : team1Result === "L" ? "border-red-900 opacity-60" : "border-[#1a4a7a] hover:border-cyan-400"}`}>
-          <span className="text-[10px] bg-[#1a4a7a] text-sky-300 px-1.5 py-0.5 rounded ml-3 tracking-wider -skew-x-24">1</span>
-          <span className="flex-1 px-2 text-[13px] text-sky-100 tracking-wide truncate -skew-x-24">{team1}</span>
-          <span className={`mr-4 px-2 text-[11px] font-bold -skew-x-24
-            ${team1Result === "W" ? "text-green-400" : team1Result === "L" ? "text-red-400" : "text-slate-600"}`}>
+        <div className={`flex items-center h-[50px] transition-all duration-200 skew-x-24 rounded-t-sm border-2 ${
+          team1Result === "W"
+            ? "bg-gradient-to-r from-emerald-950/80 to-[#111827] border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+            : team1Result === "L"
+            ? "bg-[#0d0f17] border-rose-950/80 opacity-60"
+            : "bg-[#111827] border-[#374151] hover:border-cyan-400"
+        }`}>
+          <span className="text-[11px] font-extrabold bg-[#1e293b] text-cyan-300 border border-cyan-500/50 px-2 py-0.5 rounded ml-3 tracking-wider -skew-x-24">1</span>
+          <span className="flex-1 px-3 text-[15px] font-bold text-white tracking-wide truncate -skew-x-24">{team1}</span>
+          <span className={`mr-4 px-2.5 py-0.5 text-[12px] font-extrabold rounded -skew-x-24 ${
+            team1Result === "W"
+              ? "text-emerald-300 bg-emerald-950/90 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+              : team1Result === "L"
+              ? "text-rose-300 bg-rose-950/70 border border-rose-500/50"
+              : "text-slate-400"
+          }`}>
             {team1Result ?? "—"}
           </span>
         </div>
 
-        <p className="text-center text-[9px] text-slate-600 tracking-widest py-0.5">VS</p>
+        {/* VS Badge */}
+        <div className="flex items-center justify-center my-0.5 relative z-10">
+          <span className="text-[10px] font-extrabold tracking-widest text-purple-200 bg-[#1d1435] px-3 py-0.5 rounded-full border border-purple-500/50 shadow-[0_0_10px_rgba(168,85,247,0.35)]">
+            VS
+          </span>
+        </div>
 
         {/* Team 2 */}
-        <div className={`flex items-center h-[42px] bg-[#0f1e36] border transition-colors duration-200 -skew-x-24
-          ${team2Result === "W" ? "border-green-600" : team2Result === "L" ? "border-red-900 opacity-60" : "border-[#1a4a7a] hover:border-cyan-400"}`}>
-          <span className="text-[10px] bg-[#1a4a7a] text-sky-300 px-1.5 py-0.5 rounded ml-3 tracking-wider skew-x-24">2</span>
-          <span className="flex-1 px-2 text-[13px] text-sky-100 tracking-wide truncate skew-x-24">{team2}</span>
-          <span className={`mr-4 px-2 text-[11px] font-bold skew-x-24
-            ${team2Result === "W" ? "text-green-400" : team2Result === "L" ? "text-red-400" : "text-slate-600"}`}>
+        <div className={`flex items-center h-[50px] transition-all duration-200 -skew-x-24 rounded-b-sm border-2 ${
+          team2Result === "W"
+            ? "bg-gradient-to-r from-emerald-950/80 to-[#111827] border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+            : team2Result === "L"
+            ? "bg-[#0d0f17] border-rose-950/80 opacity-60"
+            : "bg-[#111827] border-[#374151] hover:border-cyan-400"
+        }`}>
+          <span className="text-[11px] font-extrabold bg-[#1e293b] text-cyan-300 border border-cyan-500/50 px-2 py-0.5 rounded ml-3 tracking-wider skew-x-24">2</span>
+          <span className="flex-1 px-3 text-[15px] font-bold text-white tracking-wide truncate skew-x-24">{team2}</span>
+          <span className={`mr-4 px-2.5 py-0.5 text-[12px] font-extrabold rounded skew-x-24 ${
+            team2Result === "W"
+              ? "text-emerald-300 bg-emerald-950/90 border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+              : team2Result === "L"
+              ? "text-rose-300 bg-rose-950/70 border border-rose-500/50"
+              : "text-slate-400"
+          }`}>
             {team2Result ?? "—"}
           </span>
         </div>
@@ -93,45 +120,50 @@ export default function Bracket({
 
       {/* Connector + Info */}
       <div id={id} className="flex flex-col items-center relative">
-        <div className="w-px h-[21px] bg-[#1a4a7a]"></div>
+        <div className="w-0.5 h-[25px] bg-purple-500/50"></div>
         <button
           onClick={() => setShowInfo(!showInfo)}
-          className="w-[22px] h-[22px] rounded-full bg-[#0f1e36] border border-[#1a4a7a] text-sky-300 text-[11px] hover:bg-cyan-400 hover:text-[#0f1e36] transition-all">i</button>
-        <div className="w-px h-[21px] bg-[#1a4a7a]"></div>
+          title="Match Details & Controls"
+          className="w-[28px] h-[28px] rounded-full bg-[#111827] border-2 border-cyan-400 text-cyan-300 text-[13px] font-extrabold hover:bg-cyan-400 hover:text-black transition-all cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.4)] flex items-center justify-center">
+          i
+        </button>
+        <div className="w-0.5 h-[25px] bg-purple-500/50"></div>
 
-        {/* Info Box */}
+        {/* Info Box Popover */}
         {showInfo && (
-          <div className="absolute left-8 top-1/2 -translate-y-1/2 w-[180px] bg-[#0f1e36] border border-[#1a4a7a] rounded-md p-3 z-10 text-[12px]">
+          <div className="absolute left-9 top-1/2 -translate-y-1/2 w-[240px] bg-[#0c1322] border-2 border-cyan-500/70 rounded-md p-4 z-30 text-[13px] shadow-[0_0_40px_rgba(0,0,0,0.85)]">
 
             {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sky-400 font-medium tracking-wide text-[11px]">Match Info</p>
-              <span className={`text-[9px] tracking-widest px-1.5 py-0.5 rounded-sm font-bold
-                ${status === "live"      ? "bg-green-900/60 text-green-400" :
-                  status === "completed" ? "bg-slate-800 text-slate-400"    :
-                                           "bg-[#1a4a7a]/60 text-sky-400"}`}>
+            <div className="flex items-center justify-between mb-3 border-b border-cyan-500/20 pb-2">
+              <p className="text-cyan-300 font-bold tracking-wider text-[12px] uppercase">Match Info</p>
+              <span className={`text-[10px] tracking-widest px-2 py-0.5 rounded font-black ${
+                status === "live"      ? "bg-green-500 text-black animate-pulse" :
+                status === "completed" ? "bg-slate-700 text-slate-200" :
+                                         "bg-blue-900 text-cyan-300"
+              }`}>
                 {status === "live" ? "● LIVE" : status === "completed" ? "DONE" : "PENDING"}
               </span>
             </div>
 
             {/* Details */}
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">Mode</span>
-              <span className="text-sky-100">Ladder</span>
+            <div className="flex justify-between mb-1.5 text-slate-300">
+              <span className="text-slate-400">Game:</span>
+              <span className="text-white font-semibold">Clash Royale 1v1</span>
             </div>
-            <div className="flex justify-between mb-1">
-              <span className="text-slate-400">Score</span>
-              <span className="text-sky-100">
-                {team1Result ? (team1Result === "W" ? "W — L" : "L — W") : "— — —"}
+            <div className="flex justify-between mb-1.5 text-slate-300">
+              <span className="text-slate-400">Score:</span>
+              <span className="text-cyan-300 font-mono font-bold">
+                {team1Result ? (team1Result === "W" ? "2 — 1" : "1 — 2") : "— — —"}
               </span>
             </div>
-            <div className="flex justify-between mb-3">
-              <span className="text-slate-400">Result</span>
-              <span className={
-                team1Result === "W" ? "text-green-400" :
-                team2Result === "W" ? "text-green-400" : "text-slate-500"}>
-                {team1Result === "W" ? `${team1} wins` :
-                 team2Result === "W" ? `${team2} wins` : "Pending"}
+            <div className="flex justify-between mb-3 text-slate-300">
+              <span className="text-slate-400">Winner:</span>
+              <span className={`font-bold ${
+                team1Result === "W" ? "text-emerald-400" :
+                team2Result === "W" ? "text-emerald-400" : "text-slate-400"
+              }`}>
+                {team1Result === "W" ? `${team1}` :
+                 team2Result === "W" ? `${team2}` : "Pending"}
               </span>
             </div>
 

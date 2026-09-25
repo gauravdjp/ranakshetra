@@ -109,11 +109,11 @@ const STATUS_CFG = {
 ───────────────────────────────────────────────────────────── */
 function StatBox({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="flex flex-col gap-1 px-5 py-4 border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.03)]"
-      style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
-      <span className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.3em] uppercase text-white/25">{label}</span>
-      <span className="font-[Cinzel,serif] font-bold text-[1rem] leading-tight"
-        style={{ color: accent ? "#a78bfa" : "rgba(255,255,255,0.85)" }}>{value}</span>
+    <div className="flex flex-col gap-1.5 px-6 py-4 border-2 border-purple-500/35 bg-[#0e1226] shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+      style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
+      <span className="font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.25em] uppercase text-purple-300">{label}</span>
+      <span className="font-[Cinzel,serif] font-black text-[1.4rem] leading-tight"
+        style={{ color: accent ? "#c084fc" : "#ffffff", textShadow: accent ? "0 0 15px rgba(192,132,252,0.4)" : "none" }}>{value}</span>
     </div>
   );
 }
@@ -121,12 +121,12 @@ function StatBox({ label, value, accent }: { label: string; value: string; accen
 function Tab({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
   return (
     <button onClick={onClick}
-      className="relative font-[Rajdhani,sans-serif] font-bold text-[0.75rem] tracking-[0.2em] uppercase pb-3 px-1 transition-all duration-200 whitespace-nowrap"
-      style={{ color: active ? "#a78bfa" : "rgba(255,255,255,0.3)" }}>
+      className="relative font-[Rajdhani,sans-serif] font-black text-[0.95rem] tracking-[0.2em] uppercase pb-3.5 px-3 transition-all duration-200 whitespace-nowrap cursor-pointer"
+      style={{ color: active ? "#c084fc" : "#94a3b8" }}>
       {label}
       {active && (
-        <span className="absolute bottom-0 left-0 right-0 h-[2px]"
-          style={{ background: "linear-gradient(90deg, transparent, #8b5cf6, transparent)" }} />
+        <span className="absolute bottom-0 left-0 right-0 h-[3px] shadow-[0_0_12px_#a855f7]"
+          style={{ background: "linear-gradient(90deg, #a855f7, #c084fc, #a855f7)" }} />
       )}
     </button>
   );
@@ -169,18 +169,18 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
       <div className="lg:col-span-2 space-y-6">
 
         {t.description && (
-          <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
+          <div className="border-2 border-purple-500/30 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
             style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-            <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-3">About</p>
-            <p className="font-[Rajdhani,sans-serif] text-[0.85rem] text-white/50 leading-relaxed">{t.description}</p>
+            <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-2">About Tournament</p>
+            <p className="font-[Rajdhani,sans-serif] text-[0.98rem] text-slate-200 leading-relaxed font-medium">{t.description}</p>
           </div>
         )}
 
-        <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
+        <div className="border-2 border-purple-500/30 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Schedule</p>
-          <div className="relative pl-5">
-            <div className="absolute left-0 top-2 bottom-2 w-px bg-gradient-to-b from-[#8b5cf6] via-[rgba(139,92,246,0.3)] to-transparent" />
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-4">Official Schedule</p>
+          <div className="relative pl-6">
+            <div className="absolute left-0 top-2 bottom-2 w-0.5 bg-gradient-to-b from-[#a855f7] via-[rgba(168,85,247,0.5)] to-transparent" />
             {[
               { label: "Registration Opens",  date: t.created_at,            done: true },
               { label: "Registration Closes", date: t.registration_deadline, done: t.status !== "upcoming" && t.status !== "registration_open" },
@@ -188,120 +188,119 @@ function OverviewTab({ t, meta, registrations }: { t: Tournament; meta: typeof T
               { label: "Tournament Ends",     date: t.end_date,              done: t.status === "completed" },
             ].map((item, i) => (
               <div key={i} className="relative mb-5 last:mb-0">
-                <div className="absolute -left-5 top-1 w-2 h-2 border"
-                  style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)", borderColor: item.done ? "#8b5cf6" : "rgba(139,92,246,0.3)", background: item.done ? "rgba(139,92,246,0.4)" : "transparent" }} />
-                <p className="font-[Rajdhani,sans-serif] text-[0.62rem] tracking-[0.2em] uppercase text-white/30 mb-0.5">{item.label}</p>
-                <p className="font-[Rajdhani,sans-serif] font-semibold text-[0.95rem] text-white/80">{fmtTime(item.date)}</p>
+                <div className="absolute -left-6 top-1.5 w-2.5 h-2.5 border-2"
+                  style={{ clipPath: "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)", borderColor: item.done ? "#22c55e" : "#a855f7", background: item.done ? "#22c55e" : "#0e1226" }} />
+                <p className="font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.2em] uppercase text-purple-300 mb-0.5">{item.label}</p>
+                <p className="font-[Rajdhani,sans-serif] font-bold text-[1.05rem] text-white">{fmtTime(item.date)}</p>
               </div>
             ))}
           </div>
           {(t.status === "upcoming" || t.status === "registration_open") && (
-            <div className="mt-5 pt-4 border-t border-[rgba(139,92,246,0.1)] flex items-center gap-3">
-              <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.25em] uppercase text-white/25">Starts in</span>
+            <div className="mt-5 pt-4 border-t border-purple-500/25 flex items-center gap-3">
+              <span className="font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.25em] uppercase text-cyan-300">Countdown:</span>
               <Countdown target={t.start_date} />
             </div>
           )}
         </div>
 
-        <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
+        <div className="border-2 border-purple-500/30 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-3">Rules & Format</p>
-          <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-[rgba(139,92,246,0.6)] mb-4 tracking-wide">{t.format_rules}</p>
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-3">Rules & Format</p>
+          <p className="font-[Rajdhani,sans-serif] text-[0.88rem] font-bold text-purple-300 mb-4 tracking-wide">{t.format_rules}</p>
           <ul className="space-y-3">
             {meta.rules.map((rule, i) => (
               <li key={i} className="flex items-start gap-3">
-                <span className="mt-1.5 w-1.5 h-1.5 flex-shrink-0 rotate-45 bg-[rgba(139,92,246,0.5)]" />
-                <span className="font-[Rajdhani,sans-serif] text-[0.82rem] text-white/50 leading-relaxed">{rule}</span>
+                <span className="mt-1.5 w-2 h-2 flex-shrink-0 rotate-45 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                <span className="font-[Rajdhani,sans-serif] text-[0.95rem] text-slate-200 leading-relaxed font-medium">{rule}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-6"
+        <div className="border-2 border-purple-500/30 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Prize Pool</p>
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-4">Prize Pool Breakdown</p>
           {meta.prize_breakdown.map((p, i) => (
             <div key={i} className="flex items-center gap-4 mb-3 last:mb-0">
-              <div className="w-6 h-6 flex items-center justify-center border border-[rgba(139,92,246,0.3)] flex-shrink-0"
-                style={{ clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)", background: i === 0 ? "rgba(139,92,246,0.15)" : "transparent" }}>
-                <span className="font-[Rajdhani,sans-serif] text-[0.55rem] font-bold"
-                  style={{ color: i === 0 ? "#a78bfa" : "rgba(255,255,255,0.3)" }}>{i + 1}</span>
+              <div className="w-8 h-8 flex items-center justify-center border-2 border-purple-400/60 flex-shrink-0 shadow-[0_0_10px_rgba(168,85,247,0.3)]"
+                style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)", background: i === 0 ? "rgba(245,158,11,0.25)" : i === 1 ? "rgba(203,213,225,0.2)" : "rgba(251,146,60,0.2)" }}>
+                <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-black"
+                  style={{ color: i === 0 ? "#fbbf24" : i === 1 ? "#cbd5e1" : "#fb923c" }}>{i + 1}</span>
               </div>
-              <span className="font-[Rajdhani,sans-serif] text-[0.88rem]"
-                style={{ color: i === 0 ? "#a78bfa" : "rgba(255,255,255,0.5)" }}>{p}</span>
+              <span className="font-[Rajdhani,sans-serif] font-bold text-[1rem]"
+                style={{ color: i === 0 ? "#fbbf24" : i === 1 ? "#cbd5e1" : "#fb923c" }}>{p}</span>
             </div>
           ))}
         </div>
       </div>
 
       <div className="space-y-6">
-        <div className="border border-[rgba(139,92,246,0.15)] bg-[rgba(139,92,246,0.03)] p-5"
+        <div className="border-2 border-purple-500/35 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Organiser</p>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 border border-[rgba(139,92,246,0.3)] flex items-center justify-center bg-[rgba(139,92,246,0.08)] flex-shrink-0"
-              style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
-              <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
-                <path d="M2 14L4.5 6L8 10L10 4L12 10L15.5 6L18 14H2Z" stroke="#8b5cf6" strokeWidth="1.3" strokeLinejoin="round" />
-                <line x1="2" y1="16.5" x2="18" y2="16.5" stroke="#8b5cf6" strokeWidth="1.3" />
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-4">Host & Details</p>
+          <div className="flex items-center gap-3.5 mb-4">
+            <div className="w-11 h-11 border-2 border-purple-400 flex items-center justify-center bg-purple-900/40 flex-shrink-0 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+              style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
+              <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5">
+                <path d="M2 14L4.5 6L8 10L10 4L12 10L15.5 6L18 14H2Z" stroke="#c084fc" strokeWidth="1.5" strokeLinejoin="round" />
+                <line x1="2" y1="16.5" x2="18" y2="16.5" stroke="#c084fc" strokeWidth="1.5" />
               </svg>
             </div>
             <div>
-              <p className="font-[Cinzel,serif] font-bold text-white text-[0.9rem]">{meta.organiser_name}</p>
-              <p className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/30">{meta.organiser_contact}</p>
+              <p className="font-[Cinzel,serif] font-bold text-white text-[1.05rem] leading-tight">{meta.organiser_name}</p>
+              <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-cyan-300 font-mono mt-0.5">{meta.organiser_contact}</p>
             </div>
           </div>
-          <div className="section-divide my-3" />
-          <div className="space-y-2">
+          <div className="section-divide my-4" />
+          <div className="space-y-2.5">
             {[
               { label: "Arena",    val: meta.arena },
               { label: "Game",     val: t.game_id.replace("_", " ") },
               { label: "Mode",     val: t.single_player ? "1v1 Solo" : "Team" },
               { label: "Region",   val: t.region },
               { label: "Min Rank", val: meta.rank },
-              { label: "Entry",    val: t.entry_fee > 0 ? `₹${t.entry_fee}` : "Free" },
+              { label: "Entry",    val: t.entry_fee > 0 ? `₹${t.entry_fee}` : "Free Entry" },
             ].map(({ label, val }) => (
-              <div key={label} className="flex justify-between items-center">
-                <span className="font-[Rajdhani,sans-serif] text-[0.62rem] tracking-[0.15em] uppercase text-white/25">{label}</span>
-                <span className="font-[Rajdhani,sans-serif] text-[0.78rem] text-white/60">{val}</span>
+              <div key={label} className="flex justify-between items-center py-1 border-b border-purple-500/15 last:border-0">
+                <span className="font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.18em] uppercase text-purple-300">{label}</span>
+                <span className="font-[Rajdhani,sans-serif] font-bold text-[0.95rem] text-white">{val}</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-5"
+        <div className="border-2 border-purple-500/35 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <div className="flex justify-between items-center mb-3">
-            <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6]">Participants</p>
-            <p className="font-[Rajdhani,sans-serif] font-bold text-white/70 text-[0.85rem]">
+            <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300">Player Slots</p>
+            <p className="font-[Rajdhani,sans-serif] font-black text-white text-[1rem]">
               {registrations.length}{!isUnlimited && ` / ${t.participants_limit}`}
             </p>
           </div>
-          <div className="h-2 w-full bg-[rgba(255,255,255,0.05)] mb-2"
-            style={{ clipPath: "polygon(2px 0%, 100% 0%, calc(100% - 2px) 100%, 0% 100%)" }}>
+          <div className="h-3 w-full bg-[#1e293b] mb-2.5 rounded-full overflow-hidden border border-purple-500/30">
             {!isUnlimited && (
-              <div className="h-full transition-all duration-700 bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa]"
+              <div className="h-full transition-all duration-700 bg-gradient-to-r from-purple-500 to-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
                 style={{ width: `${Math.min(100, Math.round((registrations.length / t.participants_limit) * 100))}%` }} />
             )}
           </div>
-          <p className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/25">
-            {isUnlimited ? "Unlimited slots" : `${t.participants_limit - registrations.length} slots remaining`}
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-slate-300 font-semibold">
+            {isUnlimited ? "Unlimited open slots" : `${t.participants_limit - registrations.length} slots remaining`}
           </p>
         </div>
 
-        <div className="border border-[rgba(139,92,246,0.12)] bg-[rgba(139,92,246,0.02)] p-5"
+        <div className="border-2 border-purple-500/35 bg-[#0e1226] p-6 shadow-[0_4px_16px_rgba(0,0,0,0.5)] rounded-sm"
           style={{ clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)" }}>
           <div className="flex items-center gap-2 mb-4">
-            {t.status === "ongoing" && <span className="live-dot w-1.5 h-1.5 rounded-full flex-shrink-0 bg-[#22c55e]" />}
-            <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6]">
-              {t.status === "ongoing" ? "Live Updates" : "Updates"}
+            {t.status === "ongoing" && <span className="live-dot w-2.5 h-2.5 rounded-full flex-shrink-0 bg-[#22c55e] animate-ping" />}
+            <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300">
+              {t.status === "ongoing" ? "● Live Updates Feed" : "Tournament Updates"}
             </p>
           </div>
           <div className="space-y-4 max-h-[280px] overflow-y-auto update-scroll pr-1">
             {meta.updates.map((u, i) => (
-              <div key={i} className="relative pl-4 border-l border-[rgba(139,92,246,0.15)]">
-                <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.15em] text-white/25 mb-1">{u.time}</p>
-                <p className="font-[Rajdhani,sans-serif] text-[0.78rem] text-white/55 leading-relaxed">{u.text}</p>
+              <div key={i} className="relative pl-4 border-l-2 border-cyan-400/50">
+                <p className="font-[Rajdhani,sans-serif] text-[0.72rem] font-bold tracking-[0.15em] text-purple-300 mb-1">{u.time}</p>
+                <p className="font-[Rajdhani,sans-serif] text-[0.92rem] text-slate-200 font-medium leading-relaxed">{u.text}</p>
               </div>
             ))}
           </div>
@@ -320,42 +319,43 @@ function ParticipantsTab({ t, registrations }: { t: Tournament; registrations: T
   return (
     <div className="tab-content">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6]">
-          Registered Players — {registrations.length}{!isUnlimited && ` / ${t.participants_limit}`}
+        <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300">
+          Enrolled Competitors — {registrations.length}{!isUnlimited && ` / ${t.participants_limit}`}
         </p>
       </div>
 
-      <div className="grid items-center gap-4 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
-        style={{ gridTemplateColumns: "40px 1fr 180px 140px" }}>
-        {["#", "Player", "Tag", "Registered"].map(h => (
-          <span key={h} className="font-[Rajdhani,sans-serif] text-[0.56rem] tracking-[0.25em] uppercase text-white/20">{h}</span>
+      <div className="grid items-center gap-4 px-4 py-3 border-b-2 border-purple-500/30 bg-[#0e1226]/80 mb-2 rounded-t-sm"
+        style={{ gridTemplateColumns: "50px 1fr 200px 160px" }}>
+        {["#", "Player", "In-Game Tag", "Registered"].map(h => (
+          <span key={h} className="font-[Rajdhani,sans-serif] text-[0.78rem] font-bold tracking-[0.2em] uppercase text-purple-300">{h}</span>
         ))}
       </div>
 
       {registrations.length === 0 ? (
         <div className="py-16 text-center">
-          <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] uppercase text-white/15">No players registered yet</p>
+          <p className="font-[Rajdhani,sans-serif] text-sm tracking-[0.2em] uppercase text-slate-400">No players registered yet</p>
         </div>
       ) : (
-        <div className="space-y-px">
+        <div className="space-y-1">
           {registrations.map((r, i) => (
             <div key={r.player_tag}
-              className="grid items-center gap-4 px-4 py-3 border-b border-[rgba(139,92,246,0.06)] hover:bg-[rgba(139,92,246,0.04)] transition-colors group"
-              style={{ gridTemplateColumns: "40px 1fr 180px 140px" }}>
-              <span className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25">
+              className="grid items-center gap-4 px-4 py-3.5 border border-purple-500/15 bg-[#0e1226]/50 hover:bg-purple-950/30 transition-colors group rounded-sm"
+              style={{ gridTemplateColumns: "50px 1fr 200px 160px" }}>
+              <span className="font-[Cinzel,serif] font-bold text-sm text-purple-300">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <div className="flex items-center gap-2">
-                <div className="w-0.5 h-5 flex-shrink-0 bg-[#8b5cf6]" />
-                <span className="font-[Cinzel,serif] font-bold text-[0.82rem] group-hover:text-[#a78bfa] transition-colors text-white/85">
+              <div className="flex items-center gap-2.5">
+                <div className="w-1 h-5 flex-shrink-0 bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                <span className="font-[Cinzel,serif] font-bold text-[1.05rem] text-white group-hover:text-cyan-300 transition-colors">
                   {r.username}
                 </span>
               </div>
-              <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] text-[rgba(167,139,250,0.7)]"
-                style={{ border: "1px solid rgba(139,92,246,0.25)", padding: "2px 8px", clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)", background: "rgba(139,92,246,0.06)", display: "inline-block" }}>
-                {r.player_tag}
-              </span>
-              <span className="font-[Rajdhani,sans-serif] text-[0.65rem] text-white/30">
+              <div>
+                <span className="font-mono text-xs font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/40 px-3 py-1 rounded inline-block shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+                  {r.player_tag}
+                </span>
+              </div>
+              <span className="font-[Rajdhani,sans-serif] text-xs font-semibold text-slate-300">
                 {fmtTime(r.joinedAt)}
               </span>
             </div>
@@ -412,14 +412,18 @@ function RankingsTab({ t, registrations, bracket }: {
 
   if (isLocked) {
     return (
-      <div className="tab-content py-20 text-center">
-        <div className="w-12 h-12 border border-[rgba(139,92,246,0.2)] mx-auto mb-4 flex items-center justify-center"
-          style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
-          <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-            <path d="M12 2L15 9H22L16.5 13.5L18.5 21L12 17L5.5 21L7.5 13.5L2 9H9L12 2Z" stroke="#8b5cf6" strokeWidth="1.3" strokeLinejoin="round" />
+      <div className="tab-content py-20 text-center border-2 border-purple-500/25 bg-[#0e1226]/50 p-8 max-w-lg mx-auto rounded-sm">
+        <div className="w-14 h-14 border-2 border-purple-400/60 mx-auto mb-4 flex items-center justify-center bg-purple-900/30 rounded-sm shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+          <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
+            <path d="M12 2L15 9H22L16.5 13.5L18.5 21L12 17L5.5 21L7.5 13.5L2 9H9L12 2Z" stroke="#c084fc" strokeWidth="1.5" strokeLinejoin="round" />
           </svg>
         </div>
-        <p className="font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.3em] uppercase text-white/20">Rankings will be available after the tournament</p>
+        <p className="font-[Rajdhani,sans-serif] text-[0.9rem] font-bold tracking-[0.2em] uppercase text-slate-300">
+          Rankings will unlock upon tournament completion
+        </p>
+        <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-purple-300 mt-1">
+          Complete matches in the Bracket tab to calculate final standings.
+        </p>
       </div>
     );
   }
@@ -429,27 +433,28 @@ function RankingsTab({ t, registrations, bracket }: {
 
   return (
     <div className="tab-content">
-      <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-6">Final Rankings</p>
+      <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300 mb-6">Tournament Standings</p>
 
       {/* Podium */}
-      <div className="flex items-end justify-center gap-3 mb-10 max-w-md mx-auto">
+      <div className="flex items-end justify-center gap-4 mb-10 max-w-lg mx-auto">
         {[1, 0, 2].map((rankIdx) => {
           const player = podium[rankIdx];
-          const heights = ["h-28", "h-36", "h-20"];
+          const heights = ["h-32", "h-44", "h-24"];
+          const colors = ["#cbd5e1", "#fbbf24", "#fb923c"];
+          const bgColors = ["bg-slate-900/80 border-slate-400", "bg-amber-950/60 border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.3)]", "bg-orange-950/60 border-orange-400"];
           return (
             <div key={rankIdx} className="flex flex-col items-center gap-2 flex-1">
-              <span className="font-[Cinzel,serif] text-[0.72rem] font-bold text-center truncate w-full text-center"
-                style={{ color: player ? RANK_COLORS[rankIdx] : "rgba(255,255,255,0.2)" }}>
+              <span className="font-[Cinzel,serif] text-[0.95rem] font-bold text-center truncate w-full text-white"
+                style={{ color: player ? colors[rankIdx] : "rgba(255,255,255,0.4)" }}>
                 {player?.username ?? "—"}
               </span>
-              <div className={`w-full ${heights[rankIdx]} flex flex-col items-center justify-end pb-3 border-t-2`}
-                style={{
-                  background: player ? `${RANK_COLORS[rankIdx]}11` : "rgba(255,255,255,0.02)",
-                  borderColor: player ? `${RANK_COLORS[rankIdx]}55` : "rgba(255,255,255,0.08)",
-                  clipPath: "polygon(4px 0%, 100% 0%, 100% 100%, 0% 100%)"
-                }}>
-                <span className="font-[Cinzel,serif] font-black text-2xl" style={{ color: RANK_COLORS[rankIdx] }}>
+              <div className={`w-full ${heights[rankIdx]} flex flex-col items-center justify-end pb-4 border-2 rounded-t-sm ${bgColors[rankIdx]}`}
+                style={{ clipPath: "polygon(6px 0%, 100% 0%, 100% 100%, 0% 100%)" }}>
+                <span className="font-[Cinzel,serif] font-black text-3xl" style={{ color: colors[rankIdx] }}>
                   {RANK_LABELS[rankIdx]}
+                </span>
+                <span className="font-[Rajdhani,sans-serif] text-[0.7rem] font-extrabold tracking-widest uppercase mt-1" style={{ color: colors[rankIdx] }}>
+                  {rankIdx === 0 ? "CHAMPION" : rankIdx === 1 ? "RUNNER-UP" : "3RD PLACE"}
                 </span>
               </div>
             </div>
@@ -458,28 +463,29 @@ function RankingsTab({ t, registrations, bracket }: {
       </div>
 
       {/* Table */}
-      <div className="grid items-center gap-4 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
-        style={{ gridTemplateColumns: "50px 1fr 180px 100px" }}>
-        {["Rank", "Player", "Tag", "Result"].map(h => (
-          <span key={h} className="font-[Rajdhani,sans-serif] text-[0.56rem] tracking-[0.25em] uppercase text-white/20">{h}</span>
+      <div className="grid items-center gap-4 px-4 py-3 border-b-2 border-purple-500/30 bg-[#0e1226]/80 mb-2 rounded-t-sm"
+        style={{ gridTemplateColumns: "60px 1fr 200px 140px" }}>
+        {["Rank", "Competitor", "Tag", "Result"].map(h => (
+          <span key={h} className="font-[Rajdhani,sans-serif] text-[0.78rem] font-bold tracking-[0.2em] uppercase text-purple-300">{h}</span>
         ))}
       </div>
       {ranked.map((r, i) => (
         <div key={r.player_tag}
-          className="grid items-center gap-4 px-4 py-3 border-b border-[rgba(139,92,246,0.06)] hover:bg-[rgba(139,92,246,0.04)] transition-colors"
-          style={{ gridTemplateColumns: "50px 1fr 180px 100px" }}>
-          <span className="font-[Cinzel,serif] font-bold text-[0.8rem]"
-            style={{ color: i < 3 ? RANK_COLORS[i] : "rgba(255,255,255,0.25)" }}>
+          className="grid items-center gap-4 px-4 py-3.5 border border-purple-500/15 bg-[#0e1226]/50 hover:bg-purple-950/30 transition-colors rounded-sm"
+          style={{ gridTemplateColumns: "60px 1fr 200px 140px" }}>
+          <span className="font-[Cinzel,serif] font-black text-base"
+            style={{ color: i === 0 ? "#fbbf24" : i === 1 ? "#cbd5e1" : i === 2 ? "#fb923c" : "#94a3b8" }}>
             {String(i + 1).padStart(2, "0")}
           </span>
-          <span className="font-[Cinzel,serif] font-bold text-[0.82rem] text-white/80">{r.username}</span>
-          <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] text-[rgba(167,139,250,0.7)]"
-            style={{ border: "1px solid rgba(139,92,246,0.25)", padding: "2px 8px", clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)", background: "rgba(139,92,246,0.06)", display: "inline-block" }}>
-            {r.player_tag}
-          </span>
-          <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.15em] uppercase"
-            style={{ color: i === 0 ? "#f59e0b" : i === 1 ? "#9ca3af" : i === 2 ? "#cd7c2f" : "rgba(255,255,255,0.2)" }}>
-            {i === 0 ? "Champion" : i === 1 ? "Runner-up" : i === 2 ? "3rd Place" : "—"}
+          <span className="font-[Cinzel,serif] font-bold text-[1.05rem] text-white">{r.username}</span>
+          <div>
+            <span className="font-mono text-xs font-bold text-cyan-300 bg-cyan-950/80 border border-cyan-500/40 px-3 py-1 rounded inline-block shadow-sm">
+              {r.player_tag}
+            </span>
+          </div>
+          <span className="font-[Rajdhani,sans-serif] text-xs font-bold tracking-[0.15em] uppercase"
+            style={{ color: i === 0 ? "#fbbf24" : i === 1 ? "#cbd5e1" : i === 2 ? "#fb923c" : "#94a3b8" }}>
+            {i === 0 ? "🏆 Champion" : i === 1 ? "🥈 Runner-up" : i === 2 ? "🥉 3rd Place" : "Participant"}
           </span>
         </div>
       ))}
@@ -553,33 +559,32 @@ function ResultsTab({ t, registrations, bracket, meta }: {
     prize: string;
     icon: React.ReactNode;
   }) => (
-    <div className="relative p-6 border flex flex-col items-center gap-3 text-center"
+    <div className="relative p-6 border-2 flex flex-col items-center gap-3 text-center bg-[#0e1226] shadow-[0_4px_25px_rgba(0,0,0,0.5)]"
       style={{
-        clipPath: "polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%)",
-        borderColor: `${color}33`,
-        background: `${color}07`,
+        clipPath: "polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%)",
+        borderColor: `${color}`,
       }}>
       {/* Rank badge */}
-      <div className="w-10 h-10 flex items-center justify-center border mb-1"
-        style={{ clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)", borderColor: `${color}55`, background: `${color}15` }}>
+      <div className="w-12 h-12 flex items-center justify-center border-2 mb-1 shadow-md"
+        style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)", borderColor: `${color}`, background: `${color}25` }}>
         {icon}
       </div>
-      <span className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.35em] uppercase" style={{ color }}>
+      <span className="font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-[0.25em] uppercase" style={{ color }}>
         {rank}
       </span>
       {player ? (
         <>
-          <p className="font-[Cinzel,serif] font-black text-white text-[1.05rem] leading-tight">{player.username}</p>
-          <span className="font-[Rajdhani,sans-serif] text-[0.63rem] tracking-[0.15em] px-2 py-0.5"
-            style={{ color: `${color}cc`, border: `1px solid ${color}33`, background: `${color}0a`, clipPath: "polygon(3px 0%, 100% 0%, calc(100% - 3px) 100%, 0% 100%)" }}>
+          <p className="font-[Cinzel,serif] font-black text-white text-[1.35rem] leading-tight drop-shadow-sm">{player.username}</p>
+          <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.15em] px-3 py-1 rounded"
+            style={{ color: `#ffffff`, border: `1.5px solid ${color}`, background: `${color}35` }}>
             {player.player_tag}
           </span>
-          <div className="mt-1 pt-3 border-t w-full" style={{ borderColor: `${color}22` }}>
-            <p className="font-[Rajdhani,sans-serif] text-[0.72rem] font-bold" style={{ color }}>{prize}</p>
+          <div className="mt-2 pt-3 border-t-2 w-full" style={{ borderColor: `${color}40` }}>
+            <p className="font-[Rajdhani,sans-serif] text-[1rem] font-black tracking-wider" style={{ color }}>{prize}</p>
           </div>
         </>
       ) : (
-        <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/20">TBD</p>
+        <p className="font-[Rajdhani,sans-serif] text-[0.95rem] font-bold text-white/30">TBD</p>
       )}
     </div>
   );
@@ -588,36 +593,34 @@ function ResultsTab({ t, registrations, bracket, meta }: {
     <div className="tab-content">
       {/* Header */}
       <div className="text-center mb-10">
-        <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-2">Tournament Complete</p>
-        <h2 className="font-[Cinzel,serif] font-black text-white text-2xl mb-1">{t.title}</h2>
-        <p className="font-[Rajdhani,sans-serif] text-[0.75rem] text-white/30">{fmt(t.end_date)} · {meta.arena}</p>
+        <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.35em] uppercase text-cyan-300 mb-2">Tournament Complete</p>
+        <h2 className="font-[Cinzel,serif] font-black text-white text-3xl mb-1">{t.title}</h2>
+        <p className="font-[Rajdhani,sans-serif] text-[0.9rem] font-semibold text-purple-200">{fmt(t.end_date)} · {meta.arena}</p>
       </div>
 
       {/* Congratulations banner for champion */}
       {first && (
-        <div className="relative mb-8 px-6 py-5 border border-[rgba(245,158,11,0.25)] bg-[rgba(245,158,11,0.05)] overflow-hidden"
-          style={{ clipPath: "polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%)" }}>
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse 60% 80% at 10% 50%, rgba(245,158,11,0.08), transparent)" }} />
-          <div className="relative flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 border-2 border-[rgba(245,158,11,0.5)] bg-[rgba(245,158,11,0.1)] flex items-center justify-center flex-shrink-0"
-                style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
-                <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-                  <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="rgba(245,158,11,0.4)" stroke="#f59e0b" strokeWidth="1.2" strokeLinejoin="round" />
+        <div className="relative mb-8 px-6 py-6 border-2 border-amber-400 bg-gradient-to-r from-amber-950/60 to-purple-950/40 rounded-sm shadow-[0_0_35px_rgba(245,158,11,0.25)] overflow-hidden"
+          style={{ clipPath: "polygon(14px 0%, 100% 0%, calc(100% - 14px) 100%, 0% 100%)" }}>
+          <div className="relative flex flex-col md:flex-row md:items-center gap-4 md:gap-8">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 border-2 border-amber-400 bg-amber-500/20 flex items-center justify-center flex-shrink-0 shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                style={{ clipPath: "polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)" }}>
+                <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8">
+                  <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1.2" strokeLinejoin="round" />
                 </svg>
               </div>
               <div>
-                <p className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.3em] uppercase text-[#f59e0b]/70 mb-0.5">Champion</p>
-                <p className="font-[Cinzel,serif] font-black text-[#f59e0b] text-xl leading-none">{first.username}</p>
+                <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-black tracking-[0.3em] uppercase text-amber-300 mb-0.5">CHAMPION</p>
+                <p className="font-[Cinzel,serif] font-black text-amber-300 text-2xl md:text-3xl leading-none">{first.username}</p>
               </div>
             </div>
             <div className="md:ml-auto">
-              <p className="font-[Rajdhani,sans-serif] text-[0.85rem] text-white/50">
-                Congratulations on winning the <span className="text-[#f59e0b]/80 font-bold">{t.title}</span>!
+              <p className="font-[Rajdhani,sans-serif] text-[1.05rem] font-bold text-white">
+                Congratulations on winning the <span className="text-amber-300 font-black">{t.title}</span>!
               </p>
-              <p className="font-[Rajdhani,sans-serif] text-[0.7rem] text-white/25 mt-0.5">
-                Your victory has been recorded. Well played.
+              <p className="font-[Rajdhani,sans-serif] text-[0.85rem] font-medium text-purple-200/80 mt-1">
+                Champion victory verified and registered on RoyaleAPI battlelog.
               </p>
             </div>
           </div>
@@ -625,39 +628,39 @@ function ResultsTab({ t, registrations, bracket, meta }: {
       )}
 
       {/* Top 3 Winner Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
         <WinnerCard
           player={first}
           rank="1st Place — Champion"
-          color="#f59e0b"
+          color="#fbbf24"
           prize={meta.prize_breakdown[0] ?? "—"}
           icon={
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-              <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="rgba(245,158,11,0.4)" stroke="#f59e0b" strokeWidth="1.2" />
+            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+              <path d="M12 2L14.5 9H22L16 13.5L18.5 21L12 16.5L5.5 21L8 13.5L2 9H9.5L12 2Z" fill="#fbbf24" stroke="#d97706" strokeWidth="1.5" />
             </svg>
           }
         />
         <WinnerCard
           player={second}
           rank="2nd Place — Runner-up"
-          color="#9ca3af"
+          color="#cbd5e1"
           prize={meta.prize_breakdown[1] ?? "—"}
           icon={
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-              <circle cx="12" cy="10" r="6" stroke="#9ca3af" strokeWidth="1.3" />
-              <path d="M8 16L6 22H18L16 16" stroke="#9ca3af" strokeWidth="1.3" strokeLinejoin="round" />
+            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+              <circle cx="12" cy="10" r="6" stroke="#cbd5e1" strokeWidth="1.8" />
+              <path d="M8 16L6 22H18L16 16" stroke="#cbd5e1" strokeWidth="1.8" strokeLinejoin="round" />
             </svg>
           }
         />
         <WinnerCard
           player={third}
           rank="3rd Place"
-          color="#cd7c2f"
+          color="#fb923c"
           prize={meta.prize_breakdown[2] ?? "—"}
           icon={
-            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
-              <circle cx="12" cy="10" r="6" stroke="#cd7c2f" strokeWidth="1.3" />
-              <path d="M8 16L6 22H18L16 16" stroke="#cd7c2f" strokeWidth="1.3" strokeLinejoin="round" />
+            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+              <circle cx="12" cy="10" r="6" stroke="#fb923c" strokeWidth="1.8" />
+              <path d="M8 16L6 22H18L16 16" stroke="#fb923c" strokeWidth="1.8" strokeLinejoin="round" />
             </svg>
           }
         />
@@ -665,15 +668,15 @@ function ResultsTab({ t, registrations, bracket, meta }: {
 
       {/* Match results table */}
       {bracket && (
-        <>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-4">Match Results</p>
-          <div className="grid items-center gap-3 px-4 py-2 border-b border-[rgba(139,92,246,0.1)] mb-1"
-            style={{ gridTemplateColumns: "60px 1fr auto 1fr 80px" }}>
+        <div className="bg-[#0e1226] border-2 border-purple-500/40 p-5 rounded shadow-lg">
+          <p className="font-[Rajdhani,sans-serif] text-[0.85rem] font-bold tracking-[0.3em] uppercase text-cyan-300 mb-4">Official Match Results</p>
+          <div className="grid items-center gap-3 px-4 py-2.5 border-b-2 border-purple-500/30 mb-2 bg-purple-950/40"
+            style={{ gridTemplateColumns: "80px 1fr auto 1fr 120px" }}>
             {["Round", "Player 1", "", "Player 2", "Winner"].map((h, i) => (
-              <span key={i} className={`font-[Rajdhani,sans-serif] text-[0.56rem] tracking-[0.25em] uppercase text-white/20 ${i === 2 || i === 3 ? "text-right" : ""}`}>{h}</span>
+              <span key={i} className={`font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.2em] uppercase text-purple-200 ${i === 2 || i === 3 ? "text-right" : ""}`}>{h}</span>
             ))}
           </div>
-          <div className="space-y-px">
+          <div className="space-y-1">
             {bracket.matches
               .filter(m => !m.isBye && m.status === "completed")
               .sort((a, b) => a.round - b.round || a.index - b.index)
@@ -682,21 +685,19 @@ function ResultsTab({ t, registrations, bracket, meta }: {
                 const p2Won = m.winner_tag === m.player2?.tag;
                 return (
                   <div key={m.matchId}
-                    className="grid items-center gap-3 px-4 py-3 border-b border-[rgba(139,92,246,0.06)] hover:bg-[rgba(139,92,246,0.04)] transition-colors"
-                    style={{ gridTemplateColumns: "60px 1fr auto 1fr 80px" }}>
-                    <span className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.15em] uppercase text-white/20">
-                      R{m.round + 1}·M{m.index + 1}
+                    className="grid items-center gap-3 px-4 py-3.5 border-b border-purple-500/20 hover:bg-purple-900/20 transition-colors"
+                    style={{ gridTemplateColumns: "80px 1fr auto 1fr 120px" }}>
+                    <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.15em] uppercase text-cyan-300">
+                      R{m.round + 1} · M{m.index + 1}
                     </span>
-                    <span className="font-[Cinzel,serif] text-[0.8rem]"
-                      style={{ color: p1Won ? "#a78bfa" : "rgba(255,255,255,0.35)" }}>
-                      {m.player1.name}{p1Won && " ✓"}
+                    <span className={`font-[Cinzel,serif] text-[0.95rem] font-bold ${p1Won ? "text-emerald-400 font-black drop-shadow" : "text-white/60"}`}>
+                      {m.player1.name}{p1Won && " 🏆"}
                     </span>
-                    <span className="font-[Rajdhani,sans-serif] text-[0.6rem] text-white/20">vs</span>
-                    <span className="font-[Cinzel,serif] text-[0.8rem] text-right"
-                      style={{ color: p2Won ? "#a78bfa" : "rgba(255,255,255,0.35)" }}>
-                      {p2Won && "✓ "}{m.player2?.name ?? "—"}
+                    <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold text-purple-300">VS</span>
+                    <span className={`font-[Cinzel,serif] text-[0.95rem] font-bold text-right ${p2Won ? "text-emerald-400 font-black drop-shadow" : "text-white/60"}`}>
+                      {p2Won && "🏆 "}{m.player2?.name ?? "—"}
                     </span>
-                    <span className="font-[Rajdhani,sans-serif] text-[0.62rem] tracking-[0.1em] text-[rgba(167,139,250,0.7)]">
+                    <span className="font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider text-emerald-300 bg-emerald-950/50 border border-emerald-500/40 px-2 py-0.5 text-center rounded">
                       {bracket.matches.find(x => x.matchId === m.matchId)?.winner_tag
                         ? (m.winner_tag === m.player1.tag ? m.player1.name : m.player2?.name)
                         : "—"}
@@ -705,7 +706,7 @@ function ResultsTab({ t, registrations, bracket, meta }: {
                 );
               })}
           </div>
-        </>
+        </div>
       )}
     </div>
   );
@@ -869,31 +870,31 @@ function BracketsTab({
 
   return (
     <div className="tab-content">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <p className="font-[Rajdhani,sans-serif] text-[0.6rem] tracking-[0.35em] uppercase text-[#8b5cf6] mb-1">
-            {t.format_rules}
+          <p className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.3em] uppercase text-cyan-300 mb-1">
+            {t.format_rules} · AUTOMATED BRACKET
           </p>
-          <h3 className="font-[Cinzel,serif] text-xl font-bold text-white">Tournament Bracket</h3>
+          <h3 className="font-[Cinzel,serif] text-2xl md:text-3xl font-black text-white">Tournament Bracket</h3>
         </div>
         <div className="flex items-center gap-4">
           {hasLive && (
             <>
-              <div className="flex items-center gap-2 text-[#22c55e] text-[0.65rem] tracking-widest font-[Rajdhani,sans-serif]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] animate-pulse" />
-                LIVE
+              <div className="flex items-center gap-2 px-3 py-1 bg-emerald-950/70 border border-emerald-500/50 rounded text-emerald-400 text-[0.8rem] tracking-widest font-black font-[Rajdhani,sans-serif]">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                LIVE MATCH IN PROGRESS
               </div>
               {pollingEnabled ? (
                 <button
                   onClick={() => setPollingEnabled(false)}
-                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase bg-[rgba(248,113,113,0.1)] border border-[rgba(248,113,113,0.3)] text-[#f87171] hover:bg-[rgba(248,113,113,0.2)] transition-colors"
+                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.2em] uppercase bg-rose-950/70 border-2 border-rose-500/50 text-rose-300 hover:bg-rose-900 transition-colors cursor-pointer"
                   style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
-                  Stop Polling
+                  Pause Live Polling
                 </button>
               ) : (
                 <button
                   onClick={() => setPollingEnabled(true)}
-                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase bg-[rgba(34,197,94,0.1)] border border-[rgba(34,197,94,0.3)] text-[#22c55e] hover:bg-[rgba(34,197,94,0.2)] transition-colors"
+                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.2em] uppercase bg-emerald-950/70 border-2 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900 transition-colors cursor-pointer"
                   style={{ clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
                   Resume Polling
                 </button>
@@ -1166,22 +1167,22 @@ export default function TournamentDetailPage() {
           {/* ══════════════════════════════════════════════════════════
               PITCH PRESENTATION DEMO CONTROLLER
           ══════════════════════════════════════════════════════════ */}
-          <div className="page-fade-1 mb-8 border border-purple-500/40 bg-[#0a0a1a]/95 backdrop-blur-md p-4 md:p-5 rounded-sm shadow-[0_0_35px_rgba(139,92,246,0.18)]">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3 border-b border-purple-500/20 pb-3">
-              <div className="flex items-center gap-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
-                <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-[0.25em] uppercase text-cyan-300">
+          <div className="page-fade-1 mb-8 border-2 border-purple-400/70 bg-[#0c0e24] backdrop-blur-md p-5 md:p-6 rounded-md shadow-[0_0_40px_rgba(139,92,246,0.3)]">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b-2 border-purple-500/30 pb-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                <span className="w-3 h-3 rounded-full bg-cyan-400 animate-ping" />
+                <span className="font-[Rajdhani,sans-serif] text-[0.95rem] font-black tracking-[0.25em] uppercase text-cyan-300">
                   🎮 PITCH DEMO CONTROLLER
                 </span>
-                <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-wider px-2 py-0.5 rounded bg-purple-900/50 text-purple-300 border border-purple-700/50">
-                  Phase: {computedStatus === "registration_open" ? "1. Registration Open" : !isAllCompleted ? "2. Tournament Live (Matches in progress)" : "3. Complete & Results Podium"}
+                <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-bold tracking-wider px-3 py-1 rounded bg-purple-900/80 text-purple-200 border-2 border-purple-400/50">
+                  Phase: {computedStatus === "registration_open" ? "1. Registration Open" : !isAllCompleted ? "2. Tournament Live (Matches in Progress)" : "3. Complete & Results Podium"}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleInspectApi}
-                  className="px-3.5 py-1.5 font-[Rajdhani,sans-serif] text-[0.72rem] font-bold tracking-widest uppercase bg-cyan-950/80 border border-cyan-500/60 text-cyan-300 hover:bg-cyan-900 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
-                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                  className="px-4 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-widest uppercase bg-cyan-600 hover:bg-cyan-500 text-white border-2 border-cyan-300 transition-all cursor-pointer flex items-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.4)]">
+                  <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
                     <path fillRule="evenodd" d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5zm3.293 1.293a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 01-1.414-1.414L7.586 10 5.293 7.707a1 1 0 010-1.414zM11 12a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
                   </svg>
                   Inspect Live RoyaleAPI Call
@@ -1190,112 +1191,112 @@ export default function TournamentDetailPage() {
             </div>
 
             {/* Quick Actions Workflow Buttons */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 disabled={demoLoading}
                 onClick={handleResetDemo}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-red-950/60 border border-red-500/40 text-red-300 hover:bg-red-900 transition-all cursor-pointer">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-rose-700 hover:bg-rose-600 border-2 border-rose-300 text-white transition-all cursor-pointer shadow-md disabled:opacity-50">
                 1. 🔄 Reset Demo
               </button>
               <button
                 disabled={demoLoading}
                 onClick={handleGenerateDemo}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-purple-950/80 border border-purple-500/60 text-purple-200 hover:bg-purple-800 transition-all cursor-pointer">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-purple-600 hover:bg-purple-500 border-2 border-purple-200 text-white transition-all cursor-pointer shadow-[0_0_15px_rgba(168,85,247,0.4)] disabled:opacity-50">
                 2. ⚡ Generate Bracket
               </button>
               <button
                 disabled={demoLoading}
                 onClick={() => handleStartMatchDemo("r0m0")}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-blue-950/80 border border-blue-500/60 text-blue-200 hover:bg-blue-800 transition-all cursor-pointer">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-blue-600 hover:bg-blue-500 border-2 border-blue-200 text-white transition-all cursor-pointer shadow-[0_0_15px_rgba(59,130,246,0.4)] disabled:opacity-50">
                 3. ▶ Start Semi 1
               </button>
               <button
                 disabled={demoLoading}
                 onClick={() => handleAdvanceWinnerDemo("r0m0", "#220RULVURY")}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-emerald-950/80 border border-emerald-500/60 text-emerald-200 hover:bg-emerald-800 transition-all cursor-pointer">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-200 text-white transition-all cursor-pointer shadow-md disabled:opacity-50">
                 4. ⚔️ Win Semi 1 (Odis)
               </button>
               <button
                 disabled={demoLoading}
                 onClick={() => handleAdvanceWinnerDemo("r0m1", "#VP920CGQQ")}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-emerald-950/80 border border-emerald-500/60 text-emerald-200 hover:bg-emerald-800 transition-all cursor-pointer">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-teal-600 hover:bg-teal-500 border-2 border-teal-200 text-white transition-all cursor-pointer shadow-md disabled:opacity-50">
                 5. ⚔️ Win Semi 2 (Vinay)
               </button>
               <button
                 disabled={demoLoading}
                 onClick={() => handleAdvanceWinnerDemo("r1m0", "#VP920CGQQ")}
-                className="px-3 py-1.5 font-[Rajdhani,sans-serif] text-[0.7rem] font-bold tracking-widest uppercase bg-amber-950/80 border border-amber-500/60 text-amber-200 hover:bg-amber-800 transition-all cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+                className="px-3.5 py-2 font-[Rajdhani,sans-serif] text-[0.82rem] font-black tracking-wider uppercase bg-amber-500 hover:bg-amber-400 border-2 border-amber-200 text-slate-950 transition-all cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.5)] disabled:opacity-50">
                 6. 🏆 Win Finals (Podium)
               </button>
             </div>
 
             {demoNotice && (
-              <div className="mt-2.5 pt-2 border-t border-purple-500/20 flex items-center justify-between text-[0.72rem] font-[Rajdhani,sans-serif] text-purple-200">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-cyan-400">⚡ Status:</span> {demoNotice}
+              <div className="mt-3 pt-2.5 border-t border-purple-500/30 flex items-center justify-between text-[0.85rem] font-[Rajdhani,sans-serif] font-bold text-cyan-200 bg-cyan-950/40 px-3 py-1.5 rounded border border-cyan-500/30">
+                <span className="flex items-center gap-2">
+                  <span className="text-cyan-400 font-black">⚡ STATUS:</span> {demoNotice}
                 </span>
-                <button onClick={() => setDemoNotice(null)} className="text-white/40 hover:text-white cursor-pointer">✕</button>
+                <button onClick={() => setDemoNotice(null)} className="text-white/60 hover:text-white cursor-pointer font-bold">✕</button>
               </div>
             )}
           </div>
 
           <div className="page-fade-1 mb-6">
             <Link href="/tournaments"
-              className="inline-flex items-center gap-2 font-[Rajdhani,sans-serif] text-[0.7rem] tracking-[0.2em] uppercase text-white/30 hover:text-[#a78bfa] transition-colors duration-200 no-underline">
-              <svg viewBox="0 0 16 16" fill="none" className="w-3 h-3">
-                <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+              className="inline-flex items-center gap-2 font-[Rajdhani,sans-serif] text-[0.85rem] font-bold tracking-[0.2em] uppercase text-purple-300 hover:text-white transition-colors duration-200 no-underline">
+              <svg viewBox="0 0 16 16" fill="none" className="w-4 h-4">
+                <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              Tournaments
+              ← Back to Tournaments
             </Link>
           </div>
 
           <div className="page-fade-2 mb-8">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
               <div>
-                <div className="flex items-center gap-2 mb-3 flex-wrap">
-                  <span className="font-[Rajdhani,sans-serif] text-[0.58rem] tracking-[0.3em] text-white/20">{meta.id}</span>
-                  <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.25em] uppercase px-2 py-0.5"
-                    style={{ color: t.visibility === "private" ? "#06b6d4" : "#a78bfa", border: `1px solid ${t.visibility === "private" ? "rgba(6,182,212,0.35)" : "rgba(167,139,250,0.3)"}`, background: t.visibility === "private" ? "rgba(6,182,212,0.07)" : "rgba(139,92,246,0.07)", clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
+                <div className="flex items-center gap-2.5 mb-3 flex-wrap">
+                  <span className="font-[Rajdhani,sans-serif] text-[0.75rem] font-bold tracking-[0.2em] text-cyan-300 bg-cyan-950/60 px-2.5 py-1 border border-cyan-500/40 rounded">{meta.id}</span>
+                  <span className="font-[Rajdhani,sans-serif] text-[0.72rem] font-black tracking-[0.2em] uppercase px-3 py-1"
+                    style={{ color: t.visibility === "private" ? "#22d3ee" : "#c084fc", border: `2px solid ${t.visibility === "private" ? "rgba(6,182,212,0.6)" : "rgba(168,85,247,0.6)"}`, background: t.visibility === "private" ? "rgba(6,182,212,0.15)" : "rgba(168,85,247,0.15)", clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
                     {t.visibility === "private" ? "PRIVATE" : "PUBLIC"} TOURNAMENT
                   </span>
-                  <span className="font-[Rajdhani,sans-serif] text-[0.55rem] tracking-[0.25em] uppercase px-2 py-0.5 flex items-center gap-1.5"
-                    style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}`, clipPath: "polygon(4px 0%, 100% 0%, calc(100% - 4px) 100%, 0% 100%)" }}>
-                    {sk === "ongoing" && <span className="live-dot w-1.5 h-1.5 rounded-full" style={{ background: st.color }} />}
+                  <span className="font-[Rajdhani,sans-serif] text-[0.72rem] font-black tracking-[0.2em] uppercase px-3 py-1 flex items-center gap-2"
+                    style={{ color: st.color, background: st.bg, border: `2px solid ${st.border}`, clipPath: "polygon(5px 0%, 100% 0%, calc(100% - 5px) 100%, 0% 100%)" }}>
+                    {sk === "ongoing" && <span className="live-dot w-2 h-2 rounded-full" style={{ background: st.color }} />}
                     {st.label}
                   </span>
                 </div>
-                <h1 className="font-[Cinzel,serif] font-black text-white tracking-[0.04em] mb-1"
-                  style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)" }}>{t.title}</h1>
-                <p className="font-[Rajdhani,sans-serif] text-[0.8rem] text-white/30 tracking-wide">
+                <h1 className="font-[Cinzel,serif] font-black text-white tracking-[0.04em] mb-1.5 drop-shadow-md"
+                  style={{ fontSize: "clamp(1.8rem, 4vw, 3rem)" }}>{t.title}</h1>
+                <p className="font-[Rajdhani,sans-serif] text-[1rem] font-bold text-purple-200 tracking-wide">
                   {t.game_id.replace("_", " ")} · {t.single_player ? "1v1 Solo" : "Team"} · {t.format_rules}
                 </p>
-                <p className="font-[Rajdhani,sans-serif] text-[0.72rem] text-white/20 tracking-wide mt-0.5">
-                  {meta.arena}
+                <p className="font-[Rajdhani,sans-serif] text-[0.88rem] font-semibold text-cyan-300 tracking-wide mt-0.5">
+                  📍 {meta.arena}
                 </p>
               </div>
 
               <div className="flex flex-col items-start md:items-end gap-2">
                 {checkingJoin ? (
-                  <button disabled className="join-btn px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.88rem] tracking-[0.2em] uppercase text-white">...</button>
+                  <button disabled className="join-btn px-8 py-3.5 font-[Rajdhani,sans-serif] font-bold text-[0.88rem] tracking-[0.2em] uppercase text-white">...</button>
                 ) : isJoined ? (
-                  <div className="flex flex-col items-start md:items-end gap-1">
-                    <div className="flex items-center gap-2 px-4 py-1.5 border border-[#22c55e]/30 bg-[rgba(34,197,94,0.05)]"
+                  <div className="flex flex-col items-start md:items-end gap-1.5">
+                    <div className="flex items-center gap-2.5 px-4 py-2 border-2 border-emerald-400 bg-emerald-950/40"
                       style={{ clipPath: "polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)" }}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" />
-                      <span className="font-[Rajdhani,sans-serif] text-[0.65rem] tracking-[0.2em] uppercase text-[#22c55e]">Registered</span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                      <span className="font-[Rajdhani,sans-serif] text-[0.8rem] font-black tracking-[0.2em] uppercase text-emerald-300">Registered</span>
                     </div>
-                    <p className="font-[Rajdhani,sans-serif] text-[0.62rem] text-white/20 tracking-wide">
-                      You're in! See you on {fmt(t.start_date)}.
+                    <p className="font-[Rajdhani,sans-serif] text-[0.78rem] font-medium text-emerald-300/80 tracking-wide">
+                      You're in! Starts {fmt(t.start_date)}.
                     </p>
                   </div>
                 ) : (
                   <>
                     <button onClick={handleJoin} disabled={joining || isFull}
-                      className="join-btn px-8 py-3 font-[Rajdhani,sans-serif] font-bold text-[0.88rem] tracking-[0.2em] uppercase text-white">
+                      className="join-btn px-8 py-3.5 font-[Rajdhani,sans-serif] font-black text-[0.95rem] tracking-[0.2em] uppercase text-white shadow-[0_0_25px_rgba(139,92,246,0.5)] cursor-pointer">
                       {joining ? "Registering..." : isFull ? "Slots Full" : "Register Now"}
                     </button>
                     {(t.status === "upcoming" || t.status === "registration_open") && (
-                      <p className="font-[Rajdhani,sans-serif] text-[0.62rem] text-white/20 tracking-wide">
+                      <p className="font-[Rajdhani,sans-serif] text-[0.75rem] font-medium text-purple-300 tracking-wide">
                         Registration closes {fmtTime(t.registration_deadline)}
                       </p>
                     )}
@@ -1347,46 +1348,46 @@ export default function TournamentDetailPage() {
             </div>
 
             <div className="space-y-4 font-[Rajdhani,sans-serif]">
-              <div className="bg-[#050512] border border-cyan-500/20 p-3.5 rounded text-xs space-y-1.5">
-                <div className="flex justify-between text-white/50">
-                  <span>ENDPOINT:</span>
-                  <span className="text-cyan-300 font-mono text-[0.75rem]">https://proxy.royaleapi.dev/v1/players/%23VP920CGQQ/battlelog</span>
+              <div className="bg-[#050512] border-2 border-cyan-500/40 p-4 rounded text-sm space-y-2">
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="font-bold text-purple-300">ENDPOINT:</span>
+                  <span className="text-cyan-300 font-mono text-[0.82rem] font-bold">https://proxy.royaleapi.dev/v1/players/%23VP920CGQQ/battlelog</span>
                 </div>
-                <div className="flex justify-between text-white/50">
-                  <span>AUTHENTICATION:</span>
-                  <span className="text-emerald-400 font-mono text-[0.75rem]">Bearer eyJ0eXAi... (Supercell Secret Verified)</span>
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="font-bold text-purple-300">AUTHENTICATION:</span>
+                  <span className="text-emerald-400 font-mono text-[0.82rem] font-bold">Bearer eyJ0eXAi... (Supercell Secret Verified ✓)</span>
                 </div>
-                <div className="flex justify-between text-white/50">
-                  <span>HTTP STATUS:</span>
-                  <span className="text-emerald-400 font-bold">{apiLoading ? "PINGING..." : `${apiData?.status || 200} OK`}</span>
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="font-bold text-purple-300">HTTP STATUS:</span>
+                  <span className="text-emerald-400 font-black text-sm bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-500/50">{apiLoading ? "PINGING..." : `${apiData?.status || 200} OK`}</span>
                 </div>
-                <div className="flex justify-between text-white/50">
-                  <span>RESPONSE TIME:</span>
-                  <span className="text-cyan-300">{apiLoading ? "..." : `${apiData?.latencyMs || 142} ms`}</span>
+                <div className="flex justify-between items-center text-slate-300">
+                  <span className="font-bold text-purple-300">RESPONSE TIME:</span>
+                  <span className="text-cyan-300 font-bold">{apiLoading ? "..." : `${apiData?.latencyMs || 142} ms`}</span>
                 </div>
               </div>
 
-              <div className="border border-purple-500/20 bg-purple-950/20 p-3.5 rounded text-[0.82rem] text-purple-200 leading-relaxed">
-                <p className="font-bold text-purple-300 mb-1">🎮 How Ranakshetra Automates Tournament Progression:</p>
+              <div className="border-2 border-purple-500/40 bg-purple-950/40 p-4 rounded text-[0.92rem] text-slate-100 leading-relaxed font-semibold">
+                <p className="font-black text-cyan-300 mb-1.5 text-base">🎮 How Ranakshetra Automates Tournament Progression:</p>
                 <p>1. When two players launch an in-game match, Ranakshetra polls official game server battlelogs.</p>
                 <p>2. Battle results, crown counts, game modes, and timestamps are parsed directly from Supercell servers.</p>
                 <p>3. The verified winner is automatically advanced through bracket trees in real-time with zero manual organizer input or disputes.</p>
               </div>
 
               {apiLoading ? (
-                <div className="py-6 text-center text-cyan-400 animate-pulse text-xs tracking-widest uppercase">
+                <div className="py-6 text-center text-cyan-400 animate-pulse text-sm font-bold tracking-widest uppercase">
                   Fetching live battlelog from game servers...
                 </div>
               ) : apiData?.sample ? (
                 <div>
-                  <p className="text-[0.68rem] tracking-wider uppercase text-white/40 mb-1">Live Parsed Sample Battle:</p>
-                  <pre className="bg-[#050512] border border-white/10 p-3 rounded text-[0.7rem] text-cyan-200 overflow-x-auto max-h-48 font-mono">
+                  <p className="text-[0.78rem] tracking-wider uppercase text-cyan-300 font-bold mb-1">Live Parsed Sample Battle:</p>
+                  <pre className="bg-[#050512] border-2 border-cyan-500/30 p-3.5 rounded text-[0.78rem] text-cyan-200 overflow-x-auto max-h-48 font-mono">
                     {JSON.stringify(apiData.sample, null, 2)}
                   </pre>
                 </div>
               ) : (
-                <div className="text-[0.75rem] text-emerald-400/90 bg-emerald-950/30 border border-emerald-500/30 p-3 rounded flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <div className="text-[0.88rem] font-bold text-emerald-300 bg-emerald-950/50 border-2 border-emerald-500/50 p-3 rounded flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Connection to Official Game API Proxy is active and verified. Live polling ready for in-game matches.</span>
                 </div>
               )}
