@@ -54,12 +54,12 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag, on
               position: "absolute", left: x, top: 0, width: CARD_W,
               textAlign: "center", fontFamily: "Rajdhani, sans-serif",
               fontSize: 13, fontWeight: "bold", letterSpacing: "0.22em", textTransform: "uppercase",
-              color: "#e9d5ff",
-              background: "rgba(139,92,246,0.18)",
-              border: "1px solid rgba(139,92,246,0.45)",
+              color: "#0f766e",
+              background: "#f0fdfa",
+              border: "1.5px solid #2dd4bf",
               borderRadius: "4px",
               padding: "5px 0",
-              boxShadow: "0 0 15px rgba(139,92,246,0.2)",
+              boxShadow: "0 2px 8px rgba(13,148,136,0.12)",
             }}>
               {getRoundLabel(round)}
             </div>
@@ -102,8 +102,8 @@ export default function StandardBracket({ matches, onStart, currentPlayerTag, on
             key={`${from}-${to}`}
             start={from}
             end={to}
-            color="rgba(168,85,247,0.75)"
-            strokeWidth={2.2}
+            color="#0d9488"
+            strokeWidth={2.5}
             headSize={0}
             path="grid"
             gridBreak="50%"
